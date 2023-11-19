@@ -1,0 +1,40 @@
+<html>
+<head>
+
+</script>
+<script>
+
+function send(ws, obj)
+{
+  ws.send(JSON.stringify(obj));
+}
+
+function sockopen()
+{
+  console.log("open");
+  send(sock, {_mt:"Msg1"});
+}
+
+function sockmsg(evt)
+{
+  let msg = evt.data;
+  console.log("msg");
+  console.log(msg);
+}
+
+function sockclose()
+{
+  console.log("close");
+}
+
+const sock = new WebSocket("ws://localhost:8888/");
+sock.onopen = sockopen;
+sock.onmessage = sockmsg;
+sock.onclose = sockclose;
+
+</script>
+</head>
+<body>
+    hi?
+</body>
+</html>
