@@ -1,3 +1,4 @@
+// eventually move this to js folder?
 
 function handleSomeMsg(/**@type {SomeMsg}*/ msg)
 {
