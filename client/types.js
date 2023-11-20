@@ -11,3 +11,6 @@
  @property {string} _mt
 
 */
+
+
+export {};  // we just use this is a module for type checking

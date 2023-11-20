@@ -1,12 +1,20 @@
 import * as THREE from '../three/Three.js';
-
-let scene = new THREE.Scene();
-scene.add(new THREE.Object3D());
+import * as t from "../types.js";
+import {g, ui} from "./game.js"
 
 function setup()
 {
-  document.getElementById("msg").innerText += "\nModules Loaded";
+  let scene = new THREE.Scene();
+  g.me.name = "New Player";
+
+  ui.msg.innerText += "\nModules Loaded";
 }
 
+
+function handleMsg(/** @type {t.Msg} */ msg)
+{
+  if (msg._mt = "") return;
+  g.me.money -= 6;
+}
 
 setup();
