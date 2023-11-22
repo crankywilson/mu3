@@ -13,6 +13,7 @@ enum ResourceType { FOOD, ENERGY, SMITHORE, CRYSTITE }
 class Player
 {
   [JsonInclude] public string       name    = "";
+  [JsonInclude] public string       ip      = "?";
   [JsonInclude] public int          money   = 1000;
   [JsonInclude] public int[]        res     = new int[4] { 5, 2, 0, 0 };
   [JsonInclude] public PlayerColor  color   = PlayerColor.NONE;
@@ -36,6 +37,23 @@ class Player
   public override string ToString()
   {
     return color.ToString();
+  }
+
+  public bool RejoinStartedGame() 
+  {
+    if (game != null && game.active && game.started)
+    {
+      send(new CurrentGameState(game));
+      game.send(new PlayerRejoined(this));
+      return true;
+    }
+    return false;
+  }
+      
+  public bool JoinUnstartedGame(string? gameName, out string denailReason)
+  {
+    denailReason = "?";
+    return false;
   }
 }
 

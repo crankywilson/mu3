@@ -32,7 +32,7 @@ static class WSockHandler
       var ws = await hc.AcceptWebSocketAsync(null).ConfigureAwait(false);
       if (ws != null)
       {
-        _ = Task.Run(() => HandleConnectionAsync(ws.WebSocket, hc.Request.QueryString, hc.Request.RemoteEndPoint.ToString()));
+        _ = Task.Run(() => HandleConnectionAsync(ws.WebSocket, hc.Request.QueryString, hc.Request.Headers["X-Remote-IP"]??"?"));
       }
     }
   }
@@ -49,6 +49,12 @@ static class WSockHandler
         p = new Player();
 
       p.ws = ws;
+      p.ip = ip;
+
+      if (p.RejoinStartedGame()) {}
+      else if (p.JoinUnstartedGame(qs["game"], out string _)) {}
+      else
+        p.send(new AvailableGames());
 
       while (ws.State == WebSocketState.Open)
       {

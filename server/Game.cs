@@ -3,21 +3,36 @@ using System.Collections.Concurrent;
 using System.Text.Json.Serialization;
 using System.Threading.Channels;
 
-enum GameState { blah }
+[JsonConverter(typeof(JsonStringEnumConverter))]  // use string for JSON Serialization
+enum GameState {  
+  /*GS*/ WAITINGFORALLJOIN      ,
+  /*GS*/ SCORE                  ,
+  /*GS*/ WAITFORLANDGRANT       ,
+  /*GS*/ LANDGRANT              ,
+  /*GS*/ WAITINGFORLANDAUCTION  ,
+  /*GS*/ LANDAUCTION            ,
+  /*GS*/ WAITINGTOSTARTIMPROVE  ,
+  /*GS*/ IMPROVE                ,
+  /*GS*/ PROD                   ,
+  /*GS*/ AUCTIONPREP            ,
+  /*GS*/ AUCTION                
+}
 
 class Game
 {
-  [JsonInclude] public Dictionary<PropID, Prop> props = new();
-  [JsonInclude] public int                      month;
-  [JsonInclude] public string                   name = "(Unnamed)";
-  [JsonInclude] public List<Player>             players = new List<Player>();
-  [JsonInclude] public Player                   colony = new Player();
-  [JsonInclude] public GameState                state;
+  [JsonInclude] public LandLotDict              landlots = new();
+  [JsonInclude] public int                      month    = 0;
+  [JsonInclude] public string                   name     = "(Unnamed)";
+  [JsonInclude] public List<Player>             players  = new List<Player>();
+  [JsonInclude] public Player                   colony   = new Player();
+  [JsonInclude] public GameState                state    = GameState.WAITINGFORALLJOIN;
 
   public bool started = true;     // this gets set to false when created on web, but is true by default for deserialization
   public Player? starter = null;
   public bool active = true;
 
+  // each game having its own channel allows sychronicity within a game, but multiple games
+  //  to be processed concurrently in parallel
   public Channel<ReceivedMsg> channel = 
     Channel.CreateUnbounded<ReceivedMsg>(
       new UnboundedChannelOptions
@@ -55,6 +70,19 @@ class Game
 
   public static ConcurrentDictionary<string, Game> Map = new();
 
+  public static List<string> GetJoinableGameNames()
+  {
+    List<string> l = new();
+
+    foreach (var kvp in Map)
+    {
+      if (!kvp.Value.started && kvp.Value.players.Count < 4)
+        l.Add(kvp.Key);
+    }
+
+    return l;
+  }
+
   public static Player? GetInactivePlayer(string? name, string? color)
   {
     if (!Enum.TryParse<PlayerColor>(color, true, out PlayerColor pc))
@@ -75,6 +103,15 @@ class Game
      */
 
     return null;
+  }
+
+  public void send(Msg m)
+  {
+    foreach (Player p in players)
+    {
+      if (p.ws == null) continue;
+        p.send(m);
+    }
   }
 
 }
