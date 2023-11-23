@@ -150,7 +150,6 @@ try:
         f.write(' ' + gs + ': "' + gs + '",\n')
       f.write(' UNKNOWN: "?"\n}\n')
 
-    print( len(recvtypes))
     for m in recvtypes:
       f.write("/**@returns {" + m + "}*/ export function " + m + "(\n")
       for fld in types[m]:

@@ -55,11 +55,12 @@ record GameNameExists () : Msg;
 
 record JoinedGameStats (
   string gameName,
+  string ownerName,
   Player[] players,
   bool youAreOwner,
-  string ownerName
+  PlayerColor currentColor
 ) : Msg
 {
   public JoinedGameStats(Game g, Player p) 
-  : this(g.name, g.players.ToArray(), g.starter == p, g.starter?.name ?? "") {}
+  : this(g.name, g.starter?.name ?? "?", g.players.ToArray(), g.starter == p, p.color) {}
 }

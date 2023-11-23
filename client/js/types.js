@@ -35,9 +35,10 @@
 
 @typedef JoinedGameStats
  @property {string} gameName
+ @property {string} ownerName
  @property {Player[]} players
  @property {boolean} youAreOwner
- @property {string} ownerName
+ @property {string} currentColor
  @property {string} _mt
 
 @typedef Player

@@ -58,7 +58,7 @@ static class WSockHandler
 
       while (ws.State == WebSocketState.Open)
       {
-        Msg msg = await GetMsg(ws);
+        Msg msg = await GetMsg(ws, p);
 
         if (msg == SockCloseMsg) break;
 
@@ -145,7 +145,7 @@ static class WSockHandler
 
   static Msg SockCloseMsg = new();
 
-  static async Task<Msg> GetMsg(WebSocket ws)
+  static async Task<Msg> GetMsg(WebSocket ws, Player p)
   {
     var buf = new byte[1000];
     var read = await ws.ReceiveAsync(buf, CancellationToken.None);
@@ -163,6 +163,8 @@ static class WSockHandler
 
     if (len == 0) return SockCloseMsg;
     
+    Console.WriteLine($"{DateTime.Now:h:mm:ss} Recv {p.color.ToString()[0]} {Encoding.UTF8.GetString(buf, 0, len)}");
+
     var t = GetTypeForMsg(buf);
     return GetMsg(buf, len, t);
   }

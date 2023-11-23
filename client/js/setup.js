@@ -240,7 +240,9 @@ function joinGameClick()
 
 function createGameClick()
 {
-  // need to add a text box for this
+  let gameName = prompt('Enter unique game name');
+  if (gameName != null)
+    g.send(t.CreateGame(gameName, 'R'));
 }
 
 function setup()

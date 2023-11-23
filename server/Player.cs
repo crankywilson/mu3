@@ -31,7 +31,12 @@ class Player
   public void send(Msg m)
   {
     if (ws == null) return;
-    _ = ws.SendAsync(JsonSerializer.SerializeToUtf8Bytes(m), WebSocketMessageType.Text, true, CancellationToken.None);
+
+    byte[] buf = JsonSerializer.SerializeToUtf8Bytes(m, m.GetType());
+
+    Console.WriteLine($"{DateTime.Now:h:mm:ss} Send {color.ToString()[0]} {Encoding.UTF8.GetString(buf)}");
+
+    _ = ws.SendAsync(buf, WebSocketMessageType.Text, true, CancellationToken.None);
   }
 
   public override string ToString()
