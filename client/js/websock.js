@@ -17,7 +17,10 @@ function handlerWSError(/** @type {Event} */ ev)
 /** @return {WebSocket}  */
 export function initWS()
 {
-    let ws = new WebSocket("wss://" + window.location.hostname + "/wss/");
+    let prot = "wss://";
+    if (window.location.hostname == "localhost")
+        prot = "ws://";
+    let ws = new WebSocket(prot + window.location.hostname + "/wss/");
     ws.onmessage = handleWSMsg;
     ws.onerror = handlerWSError;
     return ws;
