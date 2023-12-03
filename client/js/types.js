@@ -41,6 +41,25 @@
  @property {string} currentColor
  @property {string} _mt
 
+@typedef NameChange
+ @property {string} name
+ @property {string} _mt
+
+@typedef ColorReq
+ @property {string} colorStr
+ @property {string} _mt
+
+@typedef SetColor
+ @property {string} colorStr
+ @property {string} _mt
+
+@typedef Kick
+ @property {string} colorStr
+ @property {string} _mt
+
+@typedef StartGame
+ @property {string} _mt
+
 @typedef Player
  @property {string} name
  @property {string} ip
@@ -106,4 +125,27 @@ export let GAMESTATE = {
  /**@type {string}*/ name,
 ) { return { _mt: 'JoinGameRequest' , name: name
 };}
+
+/**@returns {NameChange}*/ export function NameChange(
+ /**@type {string}*/ name,
+) { return { _mt: 'NameChange' , name: name
+};}
+
+/**@returns {ColorReq}*/ export function ColorReq(
+ /**@type {string}*/ colorStr,
+) { return { _mt: 'ColorReq' , colorStr: colorStr
+};}
+
+/**@returns {SetColor}*/ export function SetColor(
+ /**@type {string}*/ colorStr,
+) { return { _mt: 'SetColor' , colorStr: colorStr
+};}
+
+/**@returns {Kick}*/ export function Kick(
+ /**@type {string}*/ colorStr,
+) { return { _mt: 'Kick' , colorStr: colorStr
+};}
+
+/**@returns {StartGame}*/ export function StartGame(
+) { return { _mt: 'StartGame'};}
 

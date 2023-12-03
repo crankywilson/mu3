@@ -87,7 +87,7 @@ function mountainsLoaded(/**@type {Texture}*/ mt)
   g.scene.add(gmo);
 }
 
-function setBldngTexture(/**@type{}*/ x, n)
+function setBldngTexture(/**@type {Number}*/ x, /**@type {Number}*/ n)
 {
   let texture = g.textures.buldingResTexture[n];
   let pg = new THREE.PlaneGeometry( .2, .4 );
@@ -210,7 +210,6 @@ async function setup3d()
   brlm.rotation.x = Math.PI * - 0.5;
   g.scene.add(brlm);
 
-  const brrg = new THREE.PlaneGeometry( .5, 1.3 );
   const brrm = new THREE.Mesh( brlg, new THREE.MeshBasicMaterial( {color: '#663311'} ));
   brrm.position.x = 1.77;
   brrm.position.y = 0.01;
@@ -245,13 +244,43 @@ function createGameClick()
     g.send(t.CreateGame(gameName, 'R'));
 }
 
+/**@returns {HTMLInputElement} */
+function inputTarget(/**@type {Event}*/ e)
+{
+  if (e.target instanceof HTMLInputElement) return e.target;
+  return new HTMLInputElement();
+}
+
+/**@returns {HTMLButtonElement} */
+function btnTarget(/**@type {Event}*/ e)
+{
+  if (e.target instanceof HTMLButtonElement) return e.target;
+  return new HTMLButtonElement();
+}
+
+
+
+function setupPending()
+{
+  ui.joingame.onclick = joinGameClick;
+  ui.creategame.onclick = createGameClick;
+  for (let ed of Object.values(ui.pending.nameEdit))
+  {
+    ed.onfocus = (e) => { inputTarget(e).select(); };
+    ed.onchange = (e) => { g.send(t.NameChange(inputTarget(e).value)); };
+  }
+  for (let b of Object.values(ui.pending.desiredColorBtn))
+    b.onclick = (e) => { g.send(t.ColorReq(btnTarget(e).name[0].toUpperCase())); };
+
+}
+
+
 function setup()
 {
   ui.boardview.style.visibility = "hidden";
   ui.msg.innerText = "";
   setup3d();
-  ui.joingame.onclick = joinGameClick;
-  ui.creategame.onclick = createGameClick;
+  setupPending();
 }
 /*
 function animate() 

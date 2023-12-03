@@ -48,6 +48,7 @@ function get3DInitResolver(/** @type { function } */ resolve, /** @type { functi
 
 export let g = 
 {
+  /** @type {Object.<string, Player>} */ 
   players: 
   {
      /** @type {Player} */ 
@@ -66,7 +67,9 @@ export let g =
   /** @returns {Player} */ // the function is typed, unlike g.players[colorStr] 
   pl: function(/**@type {string}*/ colorStr)
   {
-    return this.players[colorStr]; 
+    let retVal = this.players[colorStr]; 
+    if (retVal == undefined) return DefaultPlayer("?");
+    return retVal;
   },
   
   models: {
@@ -91,6 +94,9 @@ export let g =
   },
 
   animations: {},
+
+  /** @type {Group} */ //@ts-ignore
+  buildingsGroup: null,
 
   /** @type {Camera} */ // @ts-ignore
   camera: null,
@@ -129,6 +135,10 @@ function e(/** @type { string } */ id)
 function div(id) { return e(id); }
 /**@returns {HTMLSelectElement} */ // @ts-ignore  
 function sel(id) { return e(id); }
+/**@returns {HTMLInputElement} */ // @ts-ignore  
+function inp(id) { return e(id); }
+/**@returns {HTMLButtonElement} */ // @ts-ignore  
+function btn(id) { return e(id); }
 
 export let ui =
 {
@@ -139,6 +149,40 @@ export let ui =
     pendinggame: div("pendinggame"),
     joingame: e("joingame"),
     creategame: e("creategame"),
+    pending:
+    {
+      nameEdit: { R: inp("rnameinput"),
+                  Y: inp("ynameinput"),
+                  G: inp("gnameinput"),
+                  B: inp("bnameinput")  },
+      desiredColorBtn: {  R: btn("rdesiredbtn"),
+                          Y: btn("ydesiredbtn"),
+                          G: btn("gdesiredbtn"),
+                          B: btn("bdesiredbtn")  },
+      setColor: { R: sel("rchangecolor"),
+                  Y: sel("ychangecolor"),
+                  G: sel("gchangecolor"),
+                  B: sel("bchangecolor")  },
+      kick: { R: btn("rkick"),
+              Y: btn("ykick"),
+              G: btn("gkick"),
+              B: btn("bkick") },
+      nameSpan: { R: e("rnamespan"),
+                  Y: e("ynamespan"),
+                  G: e("gnamespan"),
+                  B: e("bnamespan") },
+      desiredColor: { R: e("rdesiredclr"),
+                      Y: e("ydesiredclr"),
+                      G: e("gdesiredclr"),
+                      B: e("bdesiredclr") },
+      ip: { R: e("rip"),
+            Y: e("yip"),
+            G: e("gip"),
+            B: e("bip") },
+
+
+    }
+    
 };
 
 

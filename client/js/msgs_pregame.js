@@ -1,6 +1,3 @@
-
-
-import {g} from './game.js';
 import * as t from "./types.js";
 
 export function AvailableGames(/**@type {t.AvailableGames}*/ msg)

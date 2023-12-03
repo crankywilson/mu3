@@ -53,6 +53,7 @@ record JoinGameDenial (
 
 record GameNameExists () : Msg;
 
+
 record JoinedGameStats (
   string gameName,
   string ownerName,
@@ -64,3 +65,56 @@ record JoinedGameStats (
   public JoinedGameStats(Game g, Player p) 
   : this(g.name, g.starter?.name ?? "?", g.players.ToArray(), g.starter == p, p.color) {}
 }
+
+record NameChange (
+  string name
+) : Msg
+{
+  public override void OnPreGameRecv(Player p)
+  {
+    p.name = name;
+    p.game?.send(new JoinedGameStats(p.game, p));
+  }
+}
+
+record ColorReq (
+  string colorStr
+) : Msg
+{
+  public override void OnPreGameRecv(Player p)
+  {
+
+  }
+}
+
+record SetColor (
+  string colorStr
+) : Msg
+{
+  public override void OnPreGameRecv(Player p)
+  {
+
+  }
+}
+
+
+record Kick (
+  string colorStr
+) : Msg
+{
+  public override void OnPreGameRecv(Player p)
+  {
+
+  }
+}
+
+
+record StartGame (
+) : Msg
+{
+  public override void OnPreGameRecv(Player p)
+  {
+  }
+}
+
+

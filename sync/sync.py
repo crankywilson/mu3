@@ -61,6 +61,7 @@ try:
   os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
   for inputFile in glob.glob(msgs):
     with open(inputFile) as f:
+      linenum = 0
       for lin in f.readlines():
         linenum += 1
         toks = lin.split()
