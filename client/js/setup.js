@@ -258,20 +258,52 @@ function btnTarget(/**@type {Event}*/ e)
   return new HTMLButtonElement();
 }
 
+function sync_rygb()
+{
+  for (let en in ui)
+  {
+    if (!en.startsWith('r'))
+      continue;
+    if (!('y' + en.substring(1) in ui))
+      continue;
+    if (!('g' + en.substring(1) in ui))
+      continue;
+    if (!('b' + en.substring(1) in ui))
+      continue;
 
+    // @ts-ignore
+    let e = ui[en];
+
+    for (let prop in e) 
+    { 
+      if (prop.startsWith('on'))
+      {
+        // @ts-ignore
+        let val = e[prop]; 
+        if (val != null)
+        {
+          for (let c of ['y', 'g', 'b'])
+          {
+            let o = document.getElementById(c + e.id.substring(1));
+            if (o != null)
+            {
+              // @ts-ignore
+              o[prop] = val;
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
 function setupPending()
 {
   ui.joingame.onclick = joinGameClick;
   ui.creategame.onclick = createGameClick;
-  for (let ed of Object.values(ui.pending.nameEdit))
-  {
-    ed.onfocus = (e) => { inputTarget(e).select(); };
-    ed.onchange = (e) => { g.send(t.NameChange(inputTarget(e).value)); };
-  }
-  for (let b of Object.values(ui.pending.desiredColorBtn))
-    b.onclick = (e) => { g.send(t.ColorReq(btnTarget(e).name[0].toUpperCase())); };
-
+  ui.rnameinput.onfocus = (e) => { inputTarget(e).select(); };
+  ui.rnameinput.onchange = (e) => { g.send(t.NameChange(inputTarget(e).value)); };
+  ui.rdesiredbtn.onclick = (e) => { g.send(t.ColorReq(btnTarget(e).id[0].toUpperCase())); };
 }
 
 
@@ -281,6 +313,7 @@ function setup()
   ui.msg.innerText = "";
   setup3d();
   setupPending();
+  sync_rygb();
 }
 /*
 function animate() 
