@@ -2,7 +2,7 @@ import * as t from "./types.js";
 import { ui, send } from "./game.js"
 
 const hidden = "hidden";
-const visible = "visible";
+const visible = "inherit";
 
 export function AvailableGames(/**@type {t.AvailableGames}*/ msg)
 {
@@ -68,4 +68,3 @@ export function JoinedGameStats(/**@type {t.JoinedGameStats}*/ msg)
   let nameedit = ui.nameinput(msg.currentColor);
   if (nameedit.value[0] == '(') nameedit.select();
 }
-

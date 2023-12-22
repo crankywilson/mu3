@@ -327,17 +327,5 @@ function setup()
   setupPending();
   sync_rygb();
 }
-/*
-function animate() 
-{
-  requestAnimationFrame( animate );
-  render();
-}
-
-function render()
-{
-  g.renderer.render( g.scene, g.camera );
-}
-*/
 
 setup();

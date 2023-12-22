@@ -139,8 +139,11 @@ record Kick (
 record StartGame (
 ) : Msg
 {
-  public override void OnPreGameRecv(Player p)
+  public override void OnRecv(Player p, Game g)
   {
+    g.started = true;
+    g.state = GameState.SCORE;
+    g.send(new CurrentGameState(g));
   }
 }
 
