@@ -86,6 +86,18 @@ static class WSockHandler
     finally
     {
       ws.Dispose();
+      if (p != null)
+      {
+        p.ws = null;
+        if (p.game?.started == false)
+        {
+          if (p.game.starter != p)
+          {
+            p.game.players.Remove(p);
+            p.game = null;
+          }
+        }
+      }
     }
   }
 

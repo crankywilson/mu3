@@ -1,5 +1,5 @@
 
-import { g, ui, mark3DInitialized } from "./game.js"
+import { g, ui, mark3DInitialized, send } from "./game.js"
 import * as t from "./types.js"
 
 /** @type {import('../three/Three.js')} */ //@ts-ignore
@@ -232,7 +232,7 @@ async function setup3d()
 
 function joinGameClick()
 {
-  g.send(
+  send(
     t.JoinGameRequest(
       ui.gamelist.options[ui.gamelist.selectedIndex].text));
 }
@@ -241,7 +241,7 @@ function createGameClick()
 {
   let gameName = prompt('Enter unique game name');
   if (gameName != null)
-    g.send(t.CreateGame(gameName, 'R'));
+    send(t.CreateGame(gameName, 'R'));
 }
 
 /**@returns {HTMLInputElement} */
@@ -301,11 +301,13 @@ function setupPending()
 {
   ui.joingame.onclick = joinGameClick;
   ui.creategame.onclick = createGameClick;
-  ui.rnameinput.onfocus = (e) => { inputTarget(e).select(); };
-  ui.rnameinput.onchange = (e) => { g.send(t.NameChange(inputTarget(e).value)); };
-  ui.rdesiredbtn.onclick = (e) => { g.send(t.ColorReq(btnTarget(e).id[0].toUpperCase())); };
-}
+  
+  // note that y/g/b controls should get sync'ed with r via sync_rygb() at end of setup()
 
+  ui.rnameinput.onfocus  = (e)=>{ inputTarget(e).select(); };
+  ui.rnameinput.onchange = (e)=>{ send(t.NameChange(inputTarget(e).value)); };
+  ui.rdesiredbtn.onclick = (e)=>{ send(t.ColorReq(btnTarget(e).id[0].toUpperCase())); };
+}
 
 function setup()
 {

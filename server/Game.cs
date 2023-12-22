@@ -31,7 +31,7 @@ class Game
   public Player? starter = null;
   public bool active = true;
 
-  // each game having its own channel allows sychronicity within a game, but multiple games
+  // each game having its own channel allows synchronicity within a game, but multiple games
   //  to be processed concurrently in parallel
   public Channel<ReceivedMsg> channel = 
     Channel.CreateUnbounded<ReceivedMsg>(
@@ -42,7 +42,7 @@ class Game
         AllowSynchronousContinuations = true
       });
 
-  async Task RunMessageLoop()
+  public async Task RunMessageLoop()
   {
     while (active)
     {
@@ -110,7 +110,8 @@ class Game
     foreach (Player p in players)
     {
       if (p.ws == null) continue;
-        p.send(m);
+      if (m is JoinedGameStats) m = new JoinedGameStats(p.game ?? new(), p);
+      p.send(m);
     }
   }
 

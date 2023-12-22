@@ -230,7 +230,7 @@ onmouseenter="this.style.opacity=.5" onmouseleave="this.style.opacity=1"></div>
   <table style="height: 5%;"></table>
   <h3>
     Game name: <span id="gamename" style="color:black">Gamename</span><BR>
-    Owner is: <span id="gamename" style="color:black">Owner</span><BR>
+    Owner is: <span id="gameowner" style="color:black">Owner</span><BR>
   </h3>
   <table style="margin-left: auto; margin-right: auto;"><tr>
     <td id="rcol" style="background-color: white; padding: 10px;">
@@ -239,8 +239,8 @@ onmouseenter="this.style.opacity=.5" onmouseleave="this.style.opacity=1"></div>
       <span id="rip" style="color: #5f4c28;">255.255.255.255</span><br>
       <img src="img/red.png" style="position:relative"><br>
       <button id="rdesiredbtn" style="position: relative;">Desired Character</button><P>
-      (Desired color is <span id="rdesiredclr" style="color:black">R</span>)<BR>
-      Character color: <select id="rchangecolor" style="color:red"><option selected style="color: red;">R</option><option style="color:gold">Y</option><option style="color: green;">G</option><option style="color:blue">B</option></select>
+      <span id="rdcspan" style="color:black">(Desired color is <span id="rdesiredclr" style="color:black">R</span>)</span><BR>
+      <span id="rccspan" style="color:black">Character color: <select id="rchangecolor" style="color:red"><option selected style="color: red;">R</option><option style="color:gold">Y</option><option style="color: green;">G</option><option style="color:blue">B</option></select></span>
       <P><button id="rkick" style="position: relative;">Kick Out</button><P>
     </td>
     <td id="ycol" style="background-color: beige; padding: 10px;">
@@ -249,8 +249,8 @@ onmouseenter="this.style.opacity=.5" onmouseleave="this.style.opacity=1"></div>
       <span id="yip" style="color: #5f4c28;">255.255.255.255</span><br>
       <img src="img/yellow.png" style="position:relative"><br>
       <button id="ydesiredbtn" style="position: relative;">Desired Character</button><P>
-      (Desired color is <span id="ydesiredclr" style="color:black">Y</span>)<BR>
-      Character color: <select id="ychangecolor" style="color:gold"><option selected style="color: red;">R</option><option style="color:gold" selected>Y</option><option style="color: green;">G</option><option style="color:blue">B</option></select>
+      <span id="ydcspan" style="color:black">(Desired color is <span id="ydesiredclr" style="color:black">Y</span>)</span><BR>
+      <span id="yccspan" style="color:black">Character color: <select id="ychangecolor" style="color:gold"><option selected style="color: red;">R</option><option style="color:gold" selected>Y</option><option style="color: green;">G</option><option style="color:blue">B</option></select></span>
       <P><button id="ykick" style="position: relative;">Kick Out</button><P>
     </td>
     <td id="gcol" style="background-color: beige; padding: 10px;">
@@ -259,8 +259,8 @@ onmouseenter="this.style.opacity=.5" onmouseleave="this.style.opacity=1"></div>
       <span id="gip" style="color: #5f4c28;">255.255.255.255</span><br>
       <img src="img/green.png" style="position:relative"><br>
       <button id="gdesiredbtn" style="position: relative;">Desired Character</button><P>
-      (Desired color is <span id="gdesiredclr" style="color:black">G</span>)<BR>
-      Character color: <select id="gchangecolor" style="color:green"><option selected style="color: red;">R</option><option style="color:gold">Y</option><option style="color: green;" selected>G</option><option style="color:blue">B</option></select>
+      <span id="gdcspan" style="color:black">(Desired color is <span id="gdesiredclr" style="color:black">G</span>)</span><BR>
+      <span id="gccspan" style="color:black">Character color: <select id="gchangecolor" style="color:green"><option selected style="color: red;">R</option><option style="color:gold">Y</option><option style="color: green;" selected>G</option><option style="color:blue">B</option></select></span>
       <P><button id="gkick" style="position: relative;">Kick Out</button><P>
     </td>
     <td id="bcol" style="background-color: beige; padding: 10px;">
@@ -269,8 +269,8 @@ onmouseenter="this.style.opacity=.5" onmouseleave="this.style.opacity=1"></div>
       <span id="bip" style="color: #5f4c28;">255.255.255.255</span><br>
       <img src="img/blue.png" style="position:relative"><br>
       <button id="bdesiredbtn" style="position: relative;">Desired Character</button><P>
-      (Desired color is <span id="bdesiredclr" style="color:black">B</span>)<BR>
-      Character color: <select id="bchangecolor" style="color:blue"><option style="color: red;">R</option><option style="color:gold">Y</option><option style="color: green;">G</option><option style="color:blue" selected>B</option></select> 
+      <span id="bdcspan" style="color:black">(Desired color is <span id="bdesiredclr" style="color:black">B</span>)</span><BR>
+      <span id="bccspan" style="color:black">Character color: <select id="bchangecolor" style="color:blue"><option style="color: red;">R</option><option style="color:gold">Y</option><option style="color: green;">G</option><option style="color:blue" selected>B</option></select></span>
       <P><button id="bkick" style="position: relative;">Kick Out</button><P>
     </td>
   </tr></table>

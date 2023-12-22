@@ -18,6 +18,7 @@ class Player
   [JsonInclude] public int[]        res     = new int[4] { 5, 2, 0, 0 };
   [JsonInclude] public PlayerColor  color   = PlayerColor.NONE;
   [JsonInclude] public bool         isBot   = false;
+  [JsonInclude] public PlayerColor  colrReq = PlayerColor.NONE;
 
   public WebSocket? ws = null;
 
@@ -55,10 +56,54 @@ class Player
     return false;
   }
       
-  public bool JoinUnstartedGame(string? gameName, out string denailReason)
+  public bool JoinUnstartedGame(string? gameName, out string denialReason)
   {
-    denailReason = "?";
-    return false;
+    denialReason = "?";
+
+    if (gameName is null)
+    {
+      denialReason = "didn't provide a game name";
+      return false;
+    }
+
+    if (!Game.Map.ContainsKey(gameName))
+    {
+      denialReason = "game doesn't exist";
+      return false;
+    }
+
+    Game g = Game.Map[gameName];
+    if (g.players.Count > 3)
+    {
+      denialReason = "game is full";
+      return false;
+    }
+
+    if (g.started)
+    {
+      denialReason = "game has already started";
+      return false;
+    }
+
+    g.players.Add(this);
+
+    if (g.starter?.ws is null && g.starter?.ip == this.ip)
+    {
+      // reconnect starter
+      this.color = g.starter.color;
+      g.players.Remove(g.starter);
+      g.starter = this;
+    }
+    else
+    {
+      if (g.Get(PlayerColor.R) is null) color = PlayerColor.R;
+      else if (g.Get(PlayerColor.Y) is null) color = PlayerColor.Y;
+      else if (g.Get(PlayerColor.G) is null) color = PlayerColor.G;
+      else color = PlayerColor.B;
+    }
+
+    this.game = g;
+    return true;
   }
 }
 

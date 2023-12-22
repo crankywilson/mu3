@@ -29,6 +29,8 @@ record CreateGame (
     g.players.Add(p);
     g.SetPlayerColor(p, preferredColor);
     
+    Task.Run(g.RunMessageLoop);
+
     p.game = g;
     p.send(new JoinedGameStats(g,p));
   }
@@ -63,17 +65,22 @@ record JoinedGameStats (
 ) : Msg
 {
   public JoinedGameStats(Game g, Player p) 
-  : this(g.name, g.starter?.name ?? "?", g.players.ToArray(), g.starter == p, p.color) {}
+  : this(g.name, g.starter?.name ?? "?", g.players.ToArray(), g.starter == p, p.color) 
+  {
+    foreach (var pl in g.players)
+      if (pl.name.StartsWith('(') || pl.name.Length == 0)
+        pl.name = "(" + pl.color + " Player)";
+  }
 }
 
 record NameChange (
   string name
 ) : Msg
 {
-  public override void OnPreGameRecv(Player p)
+  public override void OnRecv(Player p, Game g)
   {
     p.name = name;
-    p.game?.send(new JoinedGameStats(p.game, p));
+    g.send(new JoinedGameStats(g, p));
   }
 }
 
@@ -81,9 +88,16 @@ record ColorReq (
   string colorStr
 ) : Msg
 {
-  public override void OnPreGameRecv(Player p)
+  public override void OnRecv(Player p, Game g)
   {
-
+    if (Enum.TryParse<PlayerColor>(colorStr, out PlayerColor color))
+    {
+      if (p.game?.Get(color) is null)
+        p.color = color;
+      else
+        p.colrReq = color;
+      p.game?.send(new JoinedGameStats(p.game, p));
+    }
   }
 }
 
