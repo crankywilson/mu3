@@ -67,6 +67,7 @@
  @property {number[]} res
  @property {string} color
  @property {boolean} isBot
+ @property {string} colrReq
 
 @typedef LandLot
  @property {Player} owner

@@ -258,6 +258,13 @@ function btnTarget(/**@type {Event}*/ e)
   return new HTMLButtonElement();
 }
 
+/**@returns {HTMLSelectElement} */
+function selTarget(/**@type {Event}*/ e)
+{
+  if (e.target instanceof HTMLSelectElement) return e.target;
+  return new HTMLSelectElement();
+}
+
 function sync_rygb()
 {
   for (let en in ui)
@@ -304,9 +311,12 @@ function setupPending()
   
   // note that y/g/b controls should get sync'ed with r via sync_rygb() at end of setup()
 
-  ui.rnameinput.onfocus  = (e)=>{ inputTarget(e).select(); };
-  ui.rnameinput.onchange = (e)=>{ send(t.NameChange(inputTarget(e).value)); };
-  ui.rdesiredbtn.onclick = (e)=>{ send(t.ColorReq(btnTarget(e).id[0].toUpperCase())); };
+  ui.rnameinput.onfocus    = (e)=>{ inputTarget(e).select(); };
+  ui.rnameinput.oninput    = (e)=>{ send(t.NameChange(inputTarget(e).value)); };
+  ui.rdesiredbtn.onclick   = (e)=>{ send(t.ColorReq(btnTarget(e).id[0].toUpperCase())); };
+  ui.rchangecolor.onchange = (e)=>{ send(t.SetColor(selTarget(e).value)); selTarget(e).value = selTarget(e).id[0].toUpperCase(); };
+  ui.rkick.onclick         = (e)=>{ send(t.Kick(btnTarget(e).id[0].toUpperCase())); };
+  ui.startgame.onclick     = (e)=>{ send(t.StartGame()); };
 }
 
 function setup()

@@ -91,6 +91,7 @@ class Player
     {
       // reconnect starter
       this.color = g.starter.color;
+      this.name = g.starter.name;
       g.players.Remove(g.starter);
       g.starter = this;
     }

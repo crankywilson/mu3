@@ -4,7 +4,8 @@ import * as m from "./msgs.js";
 function handleWSMsg(/** @type {MessageEvent} */ ev)
 {
     /** @type {t.Msg} */ let msg = JSON.parse(ev.data);
-    return m[msg._mt](msg);
+    // @ts-ignore
+    return m[msg._mt](msg); 
 }
 
 function handlerWSError(/** @type {Event} */ ev)
@@ -18,7 +19,8 @@ function handlerWSError(/** @type {Event} */ ev)
 export function initWS()
 {
     let prot = "wss://";
-    if (window.location.hostname == "localhost")
+    let host = window.location.hostname;
+    if (host == "localhost" || host.startsWith("192") || host.startsWith("127"))
         prot = "ws://";
     let ws = new WebSocket(prot + window.location.hostname + "/wss/");
     ws.onmessage = handleWSMsg;
