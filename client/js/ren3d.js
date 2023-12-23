@@ -26,8 +26,6 @@ let cpfar     = null; //Vector3(0, 32.7, 23)
 let crxfar    = -.935;
 let cptarget  = cpfar;
 let crxtarget = crxfar;
-/**@type {Clock}*/ //@ts-ignore
-let clock     = null;
 let readyToRender = false;
 /**@type {MoveQ}*/
 let movingObjs = new Set();
@@ -38,13 +36,11 @@ export function initTHREERef(/** @type {import('../three/Three.js')} */r)
   cpset = new THREE.Vector3(0, 1.8, 4);
   cpfar = new THREE.Vector3(0, 32.7, 23);
   cptarget = cpfar;
-  clock = new THREE.Clock();
   readyToRender = true;
 }
 
 export function switchCamView()
 {
-  console.log("switchCamView");
   camTargetIsSettlement = !camTargetIsSettlement;
   cptarget = camTargetIsSettlement ? cpset : cpfar;
   crxtarget = camTargetIsSettlement ? crxset : crxfar;
@@ -61,14 +57,12 @@ function animate()
 
 export function startAnimating()
 {
-  console.log("startAnimating");
   animating = true;
   animate();
 }
 
 export function stopAnimating()
 {
-  console.log("stopAnimating");
   animating = false;
 }
 
@@ -115,7 +109,7 @@ function rotateCameraX()
 function render()
 {
   if (!readyToRender) return;
-  const delta = clock.getDelta();
+  const delta = g.clock.getDelta();
 
   moveTowards(g.camera, cptarget, delta * 60);
   rotateCameraX();
@@ -129,7 +123,6 @@ function render()
       movingObjs.delete(i);  // internet tells me this is safe
     }
   }
-
 
   g.renderer.render( g.scene, g.camera );
 }

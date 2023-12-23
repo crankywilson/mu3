@@ -109,10 +109,13 @@ async function setup3d()
 {
   THREE = await import('../three/Three.js');
   r.initTHREERef(THREE);
+
   g.scene = new THREE.Scene();
-  g.camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.1, 200 );
+  g.camera = new THREE.PerspectiveCamera( 30, ui.boardview.clientWidth / ui.boardview.clientHeight, 0.1, 200 );
   g.camera.position.set( 0, 32.7, 23 );
   g.camera.rotation.set(-.935, 0, 0);
+  g.camera.aspect = 2;
+  g.camera.updateProjectionMatrix();
   g.clock = new THREE.Clock();
   g.renderer = new THREE.WebGLRenderer( { antialias: true } );
   g.renderer.setSize( ui.boardview.clientWidth, ui.boardview.clientHeight );
@@ -234,7 +237,7 @@ async function setup3d()
   if (mark3DInitialized != null)
     mark3DInitialized();  // causes awaiting on g.init3DComplete to proceed
 
-  //requestAnimationFrame(animate);
+  onWindowResize();
 }
 
 function joinGameClick()
@@ -326,11 +329,22 @@ function setupPending()
   ui.startgame.onclick     = (_)=>{ send(t.StartGame()); };
 }
 
+function onWindowResize() 
+{
+	g.camera.aspect = 2;
+  g.camera.updateProjectionMatrix();
+  g.renderer.setSize( ui.boardview.clientWidth, ui.boardview.clientHeight );
+}
+
 function setup()
 {
   g.ws = initWS();
   ui.boardview.style.visibility = "hidden";
   ui.msg.innerText = "";
+  
+  window.addEventListener( 'resize', onWindowResize );
+  window.addEventListener('contextmenu', (e) => {e.preventDefault();}, false);
+
   setup3d();
   setupPending();
   sync_rygb();

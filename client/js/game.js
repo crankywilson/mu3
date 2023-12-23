@@ -1,7 +1,7 @@
 /**
 @typedef {import('../three/Three.js').Object3D} Object3D 
 @typedef {import('../three/Three.js').Scene} Scene 
-@typedef {import('../three/Three.js').Camera} Camera 
+@typedef {import('../three/Three.js').PerspectiveCamera} Camera 
 @typedef {import('../three/Three.js').AnimationClip} AnimationClip 
 @typedef {import('../three/Three.js').Texture} Texture 
 @typedef {import('../three/Three.js').Material} Material 
