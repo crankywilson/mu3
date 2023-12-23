@@ -2,6 +2,7 @@
 import { g, ui, mark3DInitialized, send } from "./game.js"
 import * as t from "./types.js"
 import { initWS } from "./websock.js";
+import * as r from "./ren3d.js";
 
 /** @type {import('../three/Three.js')} */ //@ts-ignore
 let THREE = null;
@@ -107,6 +108,7 @@ function setBldngTexture(/**@type {Number}*/ x, /**@type {Number}*/ n)
 async function setup3d()
 {
   THREE = await import('../three/Three.js');
+  r.initTHREERef(THREE);
   g.scene = new THREE.Scene();
   g.camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.1, 200 );
   g.camera.position.set( 0, 32.7, 23 );
@@ -321,7 +323,7 @@ function setupPending()
   ui.rdesiredbtn.onclick   = (e)=>{ send(t.ColorReq(btnTarget(e).id[0].toUpperCase())); };
   ui.rchangecolor.onchange = (e)=>{ send(t.SetColor(selTarget(e).value)); selTarget(e).value = selTarget(e).id[0].toUpperCase(); };
   ui.rkick.onclick         = (e)=>{ send(t.Kick(btnTarget(e).id[0].toUpperCase())); };
-  ui.startgame.onclick     = (e)=>{ send(t.StartGame()); };
+  ui.startgame.onclick     = (_)=>{ send(t.StartGame()); };
 }
 
 function setup()
@@ -332,6 +334,8 @@ function setup()
   setup3d();
   setupPending();
   sync_rygb();
+
+  document.onkeydown = (e)=>{ if (e.key == 'z') r.switchCamView(); };
 }
 
 setup();

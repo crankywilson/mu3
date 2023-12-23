@@ -1,5 +1,3 @@
-import * as ws from "./websock.js";
-
 /**
 @typedef {import('../three/Three.js').Object3D} Object3D 
 @typedef {import('../three/Three.js').Scene} Scene 
