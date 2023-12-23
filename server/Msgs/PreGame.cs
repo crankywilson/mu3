@@ -22,13 +22,13 @@ record CreateGame (
 
     Game g = new Game();
     Game.Map[name] = g;
-    
+
     g.starter = p;
     g.started = false;
     g.name = name;
     g.players.Add(p);
     g.SetPlayerColor(p, preferredColor);
-    
+
     Task.Run(g.RunMessageLoop);
 
     p.game = g;
@@ -55,7 +55,6 @@ record JoinGameDenial (
 
 record GameNameExists () : Msg;
 
-
 record JoinedGameStats (
   string gameName,
   string ownerName,
@@ -64,14 +63,14 @@ record JoinedGameStats (
   PlayerColor currentColor
 ) : Msg
 {
-  public JoinedGameStats(Game g, Player p) 
+  public JoinedGameStats(Game g, Player p)
   : this(g.name, g.starter?.name ?? "?", g.players.ToArray(), g.starter == p, p.color) 
   {
     foreach (var pl in g.players)
       if (pl.name.StartsWith('(') || pl.name.Length == 0)
         pl.name = "(" + pl.color + " Player)";
   }
-  public JoinedGameStats() : this("", "", [], false, PlayerColor.NONE) {}
+  public JoinedGameStats() : this("", "", Array.Empty<Player>(), false, PlayerColor.NONE) {}
     // ^ this is a place holder for game sending where each player gets their own message
 }
 
