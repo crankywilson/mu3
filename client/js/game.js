@@ -11,30 +11,8 @@ import * as ws from "./websock.js";
 @typedef {import('../three/Three.js').WebGLRenderer} WebGLRenderer 
 @typedef {import('../three/Three.js').Group} Group 
 @typedef {import('./types.js').Msg} Msg 
+@typedef {import('./types.js').Player} Player 
 **/
-
-/**
-@typedef Player
- @property {boolean} gameMember
- @property {string} name
- @property {number} money
- @property {string} colorStr
- @property {boolean} hasMule
- @property {Material?} plotBoundsMaterial
- @property {Texture?} flagTexture
-**/
-function DefaultPlayer(/** @type { string } */strColor)
-{
-  return {
-    gameMember: false,
-    name: "",
-    money: 1000,
-    colorStr: strColor,
-    hasMule: false,
-    plotBoundsMaterial: null,
-    flagTexture: null
-  };
-}
 
 /** @type { function? } */
 export let mark3DInitialized = null;  // this immediately get overwitten by Promise constructor
@@ -48,29 +26,22 @@ function get3DInitResolver(/** @type { function } */ resolve, /** @type { functi
 
 export let g = 
 {
-  /** @type {Object.<string, Player>} */ 
+  /** @type {Object.<string, Player?>} */ 
   players: 
   {
-     /** @type {Player} */ 
-     R: DefaultPlayer("R"),
-     /** @type {Player} */ 
-     Y: DefaultPlayer("Y"),
-     /** @type {Player} */ 
-     G: DefaultPlayer("G"),
-     /** @type {Player} */ 
-     B: DefaultPlayer("B")
+     /** @type {Player?} */ 
+     R: null,
+     /** @type {Player?} */ 
+     Y: null,
+     /** @type {Player?} */ 
+     G: null,
+     /** @type {Player?} */ 
+     B: null
   },
   
-  /** @type {Player} */ //@ts-ignore
-  me: null,
-  
-  /** @returns {Player} */ // the function is typed, unlike g.players[colorStr] 
-  pl: function(/**@type {string}*/ colorStr)
-  {
-    let retVal = this.players[colorStr]; 
-    if (retVal == undefined) return DefaultPlayer("?");
-    return retVal;
-  },
+  myColor: "?",
+
+  me: function() { return this.players[this.myColor]; }, 
   
   models: {
     /** @type {Object3D} */ //@ts-ignore
@@ -117,7 +88,8 @@ export let g =
   muleStartX: 0,
 
   /** @type {WebSocket} */
-  ws: ws.initWS(),
+  // @ts-ignore
+  ws: null,
 
   init3DComplete: new Promise(get3DInitResolver)
 };

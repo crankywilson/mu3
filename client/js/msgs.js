@@ -24,8 +24,18 @@ export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
   hide(ui.pendinggame);
   hide(ui.availgamesdiv);
   
+  document.cookie = "?g=" + encodeURIComponent(msg.g.name) + 
+                    "&c=" + g.myColor + "; max-age=3600";
+
   if (msg.g.state.indexOf("AUCTION") > 0)
     r.stopAnimating();
   else
     r.startAnimating();
+
+  for (let p of msg.g.players)
+    g.players[p.color] = p;
+}
+
+export function PlayerRejoined(/**@type {t.PlayerRejoined}*/ msg)
+{
 }

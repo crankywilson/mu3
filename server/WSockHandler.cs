@@ -44,7 +44,7 @@ static class WSockHandler
 
     try
     {
-      p = Game.GetInactivePlayer(qs["game"], qs["color"]);
+      p = Game.GetInactivePlayer(qs["g"], qs["c"]);
       if (p == null)
         p = new Player();
 

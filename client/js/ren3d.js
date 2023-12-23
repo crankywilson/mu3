@@ -20,7 +20,8 @@ export function stopAnimating()
   animating = false;
 }
 
-function render()
+async function render()
 {
+  await g.init3DComplete;
   g.renderer.render( g.scene, g.camera );
 }

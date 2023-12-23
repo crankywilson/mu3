@@ -1,5 +1,6 @@
 import * as t from "./types.js";
 import * as m from "./msgs.js";
+import {g} from "./game.js";
 
 function handleWSMsg(/** @type {MessageEvent} */ ev)
 {
@@ -14,6 +15,11 @@ function handlerWSError(/** @type {Event} */ ev)
         ui.msg.innerText = "error on websocket connecting to " + ev.target.url;
 }
 
+function handleClose(/** @type {Event} */ ev)
+{
+    alert("websocket disconnected");
+}
+
 
 /** @return {WebSocket}  */
 export function initWS()
@@ -22,8 +28,23 @@ export function initWS()
     let host = window.location.hostname;
     if (host == "localhost" || host.startsWith("192") || host.startsWith("127"))
         prot = "ws://";
-    let ws = new WebSocket(prot + window.location.hostname + "/wss/");
+    
+    let qstring = "";
+    
+    if (document.location.search.length > 1)
+        qstring = document.location.search;
+    else if (document.cookie.length > 1)
+        qstring = document.cookie;
+    
+    let c = new URLSearchParams(qstring).get("c");
+    if (c != null)
+        g.myColor = c;
+    
+    let ws = new WebSocket(prot + window.location.hostname + "/wss/" + qstring);
+    
     ws.onmessage = handleWSMsg;
     ws.onerror = handlerWSError;
+    ws.onclose = handleClose;
+    
     return ws;
 }

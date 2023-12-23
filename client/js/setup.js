@@ -1,6 +1,7 @@
 
 import { g, ui, mark3DInitialized, send } from "./game.js"
 import * as t from "./types.js"
+import { initWS } from "./websock.js";
 
 /** @type {import('../three/Three.js')} */ //@ts-ignore
 let THREE = null;
@@ -14,6 +15,7 @@ function sandLoaded(/**@type {Texture}*/ sandtexture)
   sandtexture.wrapT = THREE.RepeatWrapping;
   sandtexture.anisotropy = 16;
   sandtexture.repeat.set( 6, 6 );
+  sandtexture.encoding = THREE.sRGBEncoding;
   groundMaterial.map = sandtexture;
   groundMaterial.needsUpdate = true;
 
@@ -50,6 +52,7 @@ async function riverbedLoaded(/**@type {Texture}*/ rbtext)
   rbtext.wrapT = THREE.RepeatWrapping;
   rbtext.anisotropy = 16;
   rbtext.repeat.set( 5, 1 );
+  rbtext.encoding = THREE.sRGBEncoding;
   groundMaterial4.map = rbtext;
   groundMaterial4.needsUpdate = true;
 
@@ -81,6 +84,7 @@ function mountainsLoaded(/**@type {Texture}*/ mt)
   mt.wrapT = THREE.RepeatWrapping;
   mt.anisotropy = 16;
   mt.repeat.set( 1, 1 );
+  mt.encoding = THREE.sRGBEncoding;
   mm.map = mt;
   let gmo = new THREE.Mesh( mp, mm );
   gmo.position.set(0,4,-11);
@@ -111,12 +115,13 @@ async function setup3d()
   g.renderer = new THREE.WebGLRenderer( { antialias: true } );
   g.renderer.setSize( ui.boardview.clientWidth, ui.boardview.clientHeight );
 	g.renderer.setPixelRatio( window.devicePixelRatio );
+  g.renderer.useLegacyLights = true;
 	ui.boardview.appendChild( g.renderer.domElement );
 
-	let ambientLight = new THREE.AmbientLight( 0xdddddd, 3.7 );
+	const ambientLight = new THREE.AmbientLight( 0xcccccc, 1.8 );
 	g.scene.add( ambientLight );
 
-	let directionalLight = new THREE.DirectionalLight( 0xccaa88, 7.5 );
+	const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.3 );
 	directionalLight.position.set( - 1, 1, -1 );
 	g.scene.add( directionalLight );
 
@@ -321,6 +326,7 @@ function setupPending()
 
 function setup()
 {
+  g.ws = initWS();
   ui.boardview.style.visibility = "hidden";
   ui.msg.innerText = "";
   setup3d();

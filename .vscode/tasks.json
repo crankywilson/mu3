@@ -9,7 +9,7 @@
                 "build",
                 "${workspaceFolder}/server/serv.csproj",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+                "--no-restore"
             ],
             "problemMatcher": "$msCompile"
         },

@@ -38,6 +38,8 @@ export function JoinedGameStats(/**@type {t.JoinedGameStats}*/ msg)
   ui.availgamesdiv.style.visibility = hidden;
   ui.startgame.style.visibility = msg.youAreOwner ? visible : hidden;
 
+  g.myColor = msg.currentColor;
+  
   for (let c of ['R','Y','G','B'])
   {
     ui.namespan(c).innerText = "";
