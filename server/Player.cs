@@ -19,6 +19,7 @@ class Player
   [JsonInclude] public PlayerColor  color   = PlayerColor.NONE;
   [JsonInclude] public bool         isBot   = false;
   [JsonInclude] public PlayerColor  colrReq = PlayerColor.NONE;
+  [JsonInclude] public int          score   = 1500;
 
   public WebSocket? ws = null;
 

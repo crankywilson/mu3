@@ -68,6 +68,7 @@
  @property {string} color
  @property {boolean} isBot
  @property {string} colrReq
+ @property {number} score
 
 @typedef LandLot
  @property {Player} owner

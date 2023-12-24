@@ -17,7 +17,7 @@ function handlerWSError(/** @type {Event} */ ev)
 
 function handleClose(/** @type {Event} */ ev)
 {
-    alert("websocket disconnected");
+    //alert("websocket disconnected");
 }
 
 

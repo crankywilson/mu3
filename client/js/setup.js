@@ -67,7 +67,7 @@ async function riverbedLoaded(/**@type {Texture}*/ rbtext)
   let water = new WaterMod.Water( new THREE.PlaneGeometry( 10, 23 ), {
     color: '#ffffff',
     scale: 6.8,
-    flowDirection: new THREE.Vector2( 0, 2.25 ),
+    flowDirection: new THREE.Vector2( 0, 1.25 ),
     textureWidth: 1024,
     textureHeight: 1024
   } );
@@ -144,6 +144,7 @@ async function setup3d()
   g.textures.buldingResTexture[0] = await textureLoader.loadAsync('img/food.png');
   g.textures.buldingResTexture[1] = await textureLoader.loadAsync('img/energy.png'); 
   g.textures.buldingResTexture[2] = await textureLoader.loadAsync('img/smithore.png');
+  g.textures.buldingResTexture[2].encoding = THREE.sRGBEncoding;
   g.textures.buldingResTexture[3] = await textureLoader.loadAsync('img/crystite.png');
   setBldngTexture( 1.11,  0);
   setBldngTexture(  .37,  1);
@@ -230,14 +231,34 @@ async function setup3d()
 
   /* GLTF */
   let GLTFLoader = await import('../three/addons/GLTFLoader.js');
-  let l = new GLTFLoader.GLTFLoader()
+  let l = new GLTFLoader.GLTFLoader();
   g.models.mule = await l.loadAsync('models/atat/scene.gltf');
-  
+ 
+  let FBXLoader = await import('../three/addons/FBXLoader.js');
+  let fbxLoader = new FBXLoader.FBXLoader();
+
+  fbxloaded(await fbxLoader.loadAsync('./models/red.fbx'), 'R');
+  fbxloaded(await fbxLoader.loadAsync('./models/yellow.fbx'), 'Y');
+  fbxloaded(await fbxLoader.loadAsync('./models/green.fbx'), 'G');
+  fbxloaded(await fbxLoader.loadAsync('./models/blue.fbx'), 'B');
 
   if (mark3DInitialized != null)
     mark3DInitialized();  // causes awaiting on g.init3DComplete to proceed
 
   onWindowResize();
+}
+
+function fbxloaded(/**@type {Object3D}*/ model, /**@type {string}*/ color)
+{
+  model.scale.set(.004,.0025,.004);
+  model.position.x = 0;
+  model.position.z = 0;
+
+  g.models.player[color] = model;
+  g.mixer[color] = new THREE.AnimationMixer(model);
+  let action = g.mixer[color].clipAction( model.animations[0] );
+  action.play();
+  g.mixer[color].setTime(.55);
 }
 
 function joinGameClick()

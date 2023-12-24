@@ -52,7 +52,7 @@ static class WSockHandler
       p.ip = ip;
 
       if (p.RejoinStartedGame()) {}
-      else if (p.JoinUnstartedGame(qs["game"], out string _)) {}
+      //else if (p.JoinUnstartedGame(qs["game"], out string _)) {}
       else
         p.send(new AvailableGames());
 

@@ -8,6 +8,7 @@
 @typedef {import('../three/Three.js').Clock} Clock 
 @typedef {import('../three/Three.js').WebGLRenderer} WebGLRenderer 
 @typedef {import('../three/Three.js').Group} Group 
+@typedef {import('../three/Three.js').AnimationMixer} Mixer 
 @typedef {import('./types.js').Msg} Msg 
 @typedef {import('./types.js').Player} Player 
 **/
@@ -47,7 +48,24 @@ export let g =
     /** @type {Object3D} */ //@ts-ignore
     flag: null,
     /** @type {Object3D[]} */ //@ts-ignore
-    prod: [null, null, null, null]
+    prod: [null, null, null, null],
+    /** @type {Object.<string, Object3D>} */ //@ts-ignore
+    player:
+    {
+      R: null,
+      Y: null,
+      G: null,
+      B: null
+    }
+  },
+
+  /** @type {Object.<string, Mixer>} */ //@ts-ignore
+  mixer:
+  {
+    R: null,
+    Y: null,
+    G: null,
+    B: null
   },
 
   textures: {
@@ -193,10 +211,10 @@ export let ui =
   targetline: div('targetline'),
   target: div('target'),
   targetval: div('targetval'),
-  p1: div('p1'),
-  p2: div('p2'),
-  p3: div('p3'),
-  p4: div('p4'),
+  rplbox: div('rplbox'),
+  yplbox: div('yplbox'),
+  gplbox: div('gplbox'),
+  bplbox: div('bplbox'),
   msg: e('msg'),
   msg2: e('msg2'),
   availgamesdiv: div('availgamesdiv'),
@@ -247,6 +265,7 @@ export let ui =
   bchangecolor: sel('bchangecolor'),
   bkick: btn('bkick'),
   startgame: btn('startgame'),
+  plbox: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rplbox; if (clr == 'Y') return ui.yplbox; if (clr == 'G') return ui.gplbox; return ui.bplbox; },
   col: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rcol; if (clr == 'Y') return ui.ycol; if (clr == 'G') return ui.gcol; return ui.bcol; },
   namespan: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rnamespan; if (clr == 'Y') return ui.ynamespan; if (clr == 'G') return ui.gnamespan; return ui.bnamespan; },
   nameinput: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rnameinput; if (clr == 'Y') return ui.ynameinput; if (clr == 'G') return ui.gnameinput; return ui.bnameinput; },
