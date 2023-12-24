@@ -1,6 +1,8 @@
 
-import { g, ui, mark3DInitialized, send } from "./game.js"
-import * as t from "./types.js"
+import { g, ui, mark3DInitialized, send,
+         mouseMove, mouseClick, doubleClick 
+       } from "./game.js";
+import * as t from "./types.js";
 import { initWS } from "./websock.js";
 import * as r from "./ren3d.js";
 
@@ -8,6 +10,7 @@ import * as r from "./ren3d.js";
 let THREE = null;
 
 /** @typedef {import('../three/Three.js').Texture} Texture */
+/** @typedef {import('../three/Three.js').Object3D} Object3D */
 
 function sandLoaded(/**@type {Texture}*/ sandtexture)
 {
@@ -363,8 +366,11 @@ function setup()
   ui.boardview.style.visibility = "hidden";
   ui.msg.innerText = "";
   
-  window.addEventListener( 'resize', onWindowResize );
+  window.addEventListener('resize', onWindowResize );
   window.addEventListener('contextmenu', (e) => {e.preventDefault();}, false);
+  ui.boardview.onpointermove = mouseMove;
+  ui.boardview.onpointerdown = mouseClick;
+  ui.boardview.ondblclick    = doubleClick;
 
   setup3d();
   setupPending();

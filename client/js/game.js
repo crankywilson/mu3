@@ -1,3 +1,4 @@
+import * as t from "./types.js";
 /**
 @typedef {import('../three/Three.js').Object3D} Object3D 
 @typedef {import('../three/Three.js').Scene} Scene 
@@ -9,8 +10,6 @@
 @typedef {import('../three/Three.js').WebGLRenderer} WebGLRenderer 
 @typedef {import('../three/Three.js').Group} Group 
 @typedef {import('../three/Three.js').AnimationMixer} Mixer 
-@typedef {import('./types.js').Msg} Msg 
-@typedef {import('./types.js').Player} Player 
 **/
 
 /** @type { function? } */
@@ -25,16 +24,16 @@ function get3DInitResolver(/** @type { function } */ resolve, /** @type { functi
 
 export let g = 
 {
-  /** @type {Object.<string, Player?>} */ 
+  /** @type {Object.<string, t.Player?>} */ 
   players: 
   {
-     /** @type {Player?} */ 
+     /** @type {t.Player?} */ 
      R: null,
-     /** @type {Player?} */ 
+     /** @type {t.Player?} */ 
      Y: null,
-     /** @type {Player?} */ 
+     /** @type {t.Player?} */ 
      G: null,
-     /** @type {Player?} */ 
+     /** @type {t.Player?} */ 
      B: null
   },
   
@@ -103,6 +102,19 @@ export let g =
   buildingColor: 0x666666,
   muleStartX: 0,
 
+  prepSound: new Audio("/sound/prep.wav"),
+  notSound:  new Audio("/sound/not.wav"),
+  stepSound: new Audio("/sound/step.mp3"),
+  beepSound: new Audio("/sound/beep.wav"),
+
+  /** @type {t.LandLotDict} */
+  landlots: {},
+  moundGeomPlaced: false,
+
+  /** @type {t.GameState} */
+  state: "?",
+
+
   /** @type {WebSocket} */
   // @ts-ignore
   ws: null,
@@ -110,7 +122,7 @@ export let g =
   init3DComplete: new Promise(get3DInitResolver)
 };
 
-export function send(/**@type {Msg}*/ msg)
+export function send(/**@type {t.Msg}*/ msg)
 {
   g.ws.send(JSON.stringify(msg));
 }
@@ -216,7 +228,7 @@ export let ui =
   gplbox: div('gplbox'),
   bplbox: div('bplbox'),
   msg: e('msg'),
-  msg2: e('msg2'),
+  msgblink: e('msgblink'),
   availgamesdiv: div('availgamesdiv'),
   gamelist: sel('gamelist'),
   joingame: btn('joingame'),
@@ -284,3 +296,86 @@ export let ui =
 globalThis.g = g;
 globalThis.ui = ui;  
 
+export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
+{
+}
+
+export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
+{
+  let x = mouseEvent.pageX;
+  let y = mouseEvent.pageY;
+
+  x *= window.devicePixelRatio;
+  y *= window.devicePixelRatio;
+
+  if (g.state == "SCORE")
+  {
+    ui.msgblink.innerText = "";
+    send(t.Continue());
+  }
+/*
+  if (g.state == st.SCORE || g.state == st.PRODUCTION_DONE ||
+      g.state == st.LANDAUCTION_SHOW) {
+    hmAcknowledge({char:g.myChar});
+    send("Acknowledge");
+    if (g.blinkPlotOverlay)
+    {
+      g.blinkPlotOverlay = false;
+      g.plotOverlay.material.opacity = .5;
+      if (g.plotOverlay.parent != null)
+        scene.remove(g.plotOverlay);
+    }
+    if (g.state == st.PRODUCTION_DONE)
+    {
+      for (var i=g.prodGroup.children.length-1; i >= 0; --i)            
+      g.prodGroup.remove(g.prodGroup.children[i]);
+      if (g.plotOverlay.parent != null)
+        scene.remove(g.plotOverlay);
+    }
+    return;
+  }
+  if (g.state == st.MOVEPLAYER) {
+    if (!g.awaiting.includes(g.myID)) return;
+    if (!plotOverlayIsWhite()) return;
+    let plot = getPlotForMouse(x, y);
+    checkForCharMovePlots(plot.x, plot.y);
+    return;
+  }
+  if (g.state == st.SETTLEMENT) {
+    if (g.waitingForMule || g.selectedBuilding) return;
+    let plot = getPlotForMouse(x, y);
+    checkForCharMoveSet(plot.x);
+    return;
+  }
+  if (g.state == st.LANDGRANT) {
+    if (!plotOverlayIsWhite()) return;
+    let plot = getPlotForMouse(x, y);
+    if (validForLandGrant(plot.x, plot.y)) {
+      g.plotOverlay.material.color.set(colorStr[g.myChar]);
+      send("PlotRequest", {x: plot.x, y: -plot.y});
+    }
+    return;
+  }
+  if (g.state == st.WAITINGTOSTARTIMPROVE)
+  {
+    if (y > e("msg2").getBoundingClientRect().bottom)
+    {
+      // @ts-ignore
+      if (e("AUTOMULE").checked)
+      {
+        g.waitingForMule = true;
+        send("AutoMule");
+      }
+      e("msg").innerText = "Waiting for other players.";
+      e("msg2").innerText = "";
+      e("msg2").style.visibility = "hidden";
+      send("Acknowledge");
+    }
+    return;
+  }
+  */
+}
+
+export function doubleClick(/**@type {MouseEvent}*/ ev)
+{
+}

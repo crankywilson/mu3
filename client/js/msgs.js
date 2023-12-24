@@ -1,8 +1,7 @@
 export * from './msgs_pregame.js';
 import * as t from "./types.js";
 import * as r from "./ren3d.js";
-
-import { ui } from "./game.js"
+import { g, ui } from "./game.js";
 
 function show(/**@type {HTMLElement}*/e)
 {
@@ -29,7 +28,8 @@ function setPlboxSpanText(/**@type {string}*/ clr, /**@type {number}*/ i, /**@ty
   spans[i].innerText = str;
 }
 
-function showScores(/**@type {{s: number, c: string}[]}*/ scores, /**@type {number}*/ numPlayers)
+function showScores(/**@type {{s: number, c: string}[]}*/ scores, 
+                    /**@type {number}*/ numPlayers, /**@type {number}*/ month)
 {
   const leftPositions = [[],[42.5],[30,55],[10,42.5,75],[5,30,55,80]];
   let lpi = 0;
@@ -43,6 +43,18 @@ function showScores(/**@type {{s: number, c: string}[]}*/ scores, /**@type {numb
     lpi++;
     setPlboxSpanText(ci.c, BOTTOMSPAN, "Score: " + ci.s + "  (#" + lpi + ")");
   }
+
+  if (month == 1)
+    ui.msg.innerText = 'All planeteers have arrived to Irata.  You have 12 months to colonize this area.';
+  else
+    ui.msg.innerText = 'Beginning of month ' + month + '. ';  /* colony msg will have to come in separate msg */
+
+  ui.msgblink.innerText = 'Click anywhere to continue.';
+
+  ui.aucbg.style.left = "-100%";
+  ui.boardview.style.left = "0px";
+
+  g.prepSound.play();
 }
 
 async function AddModelIfNeeded(/**@type {string}*/ color)
@@ -62,11 +74,6 @@ export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
   document.cookie = "?g=" + encodeURIComponent(msg.g.name) + 
                     "&c=" + g.myColor + "; max-age=3600";
 
-  if (msg.g.state.indexOf("AUCTION") > 0)
-    r.stopAnimating();
-  else
-    r.startAnimating();
-
   let scores = [];
   
   for (let p of msg.g.players) 
@@ -79,9 +86,21 @@ export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
 
     AddModelIfNeeded(p.color);
   }
+
+  g.landlots = msg.g.landlots;
+  g.state = msg.g.state;
+
+  if (!g.moundGeomPlaced)
+    r.SetupMounds();
+  r.SyncLandGeom();
+
+  if (g.state.indexOf("AUCTION") > 0)
+    r.stopAnimating();
+  else
+    r.startAnimating();
   
-  if (msg.g.state == "SCORE")
-    showScores(scores, msg.g.players.length);
+  if (g.state == "SCORE")
+    showScores(scores, msg.g.players.length, msg.g.month);
 }
 
 export function PlayerRejoined(/**@type {t.PlayerRejoined}*/ msg)

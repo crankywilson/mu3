@@ -140,9 +140,7 @@ record StartGame (
 {
   public override void OnRecv(Player p, Game g)
   {
-    g.started = true;
-    g.state = GameState.SCORE;
-    g.send(new CurrentGameState(g));
+    g.Start();
   }
 }
 

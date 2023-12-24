@@ -5,6 +5,9 @@
 @typedef Msg
  @property {string} _mt
 
+@typedef Continue
+ @property {string} _mt
+
 @typedef CurrentGameState
  @property {Game} g
  @property {string} _mt
@@ -72,7 +75,8 @@
 
 @typedef LandLot
  @property {Player} owner
- @property {number} mts
+ @property {number} numMounds
+ @property {number[]} moundGeom
  @property {number} crys
  @property {number} res
  @property {number} resprod
@@ -116,6 +120,9 @@ export let GAMESTATE = {
  AUCTION: "AUCTION",
  UNKNOWN: "?"
 }
+/**@returns {Continue}*/ export function Continue(
+) { return { _mt: 'Continue'};}
+
 /**@returns {CreateGame}*/ export function CreateGame(
  /**@type {string}*/ name,
  /**@type {string}*/ preferredColor,

@@ -106,6 +106,32 @@ function rotateCameraX()
   }
 }
 
+export async function SetupMounds()
+{
+  await g.init3DComplete;
+  const moundMat = new THREE.MeshBasicMaterial( { color: 0x847463 } );
+  for (let k in g.landlots)
+  {
+    let ldata = g.landlots[k];
+    let d = ldata.moundGeom;
+    for (let i=0; i<ldata.numMounds; i++)
+    {
+      const geometry = new THREE.SphereGeometry( 1 );
+      const sphere = new THREE.Mesh( geometry, moundMat );
+      g.scene.add( sphere );
+      sphere.position.set(d[0],0,d[2]);
+      sphere.scale.set(d[3], d[4], d[5]);
+      sphere.rotation.y = d[1];
+      d.splice(0,6);
+    }
+  }
+  g.moundGeomPlaced = true;
+}
+
+export function SyncLandGeom()
+{
+}
+
 function render()
 {
   if (!readyToRender) return;

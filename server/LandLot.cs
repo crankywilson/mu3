@@ -45,12 +45,12 @@ class LandLotIDJsonConverter : JsonConverter<LandLotID>
 
 class LandLot
 {
-  [JsonInclude] public Player?  owner;
-  [JsonInclude] public int      mts;
-  [JsonInclude] public int      crys;
-  [JsonInclude] public int      res = -1;
-  [JsonInclude] public int      resprod;
-  public void shutupwarnings() { owner = new(); mts = 3; crys = 5; resprod = 7; }  // delete this
+  [JsonInclude] public Player?      owner     = null;
+  [JsonInclude] public int          numMounds = 0;
+  [JsonInclude] public List<double> moundGeom = new();    
+  [JsonInclude] public int          crys      = 0;
+  [JsonInclude] public int          res       = -1;
+  [JsonInclude] public int          resprod   = 0;
 }
 
 class LandLotDict : Dictionary<LandLotID, LandLot> {}

@@ -12,6 +12,14 @@ record Msg (
   public Msg() : this("") { _mt = GetType().Name; }
 }
 
+record Continue (
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+  }
+}
+
 record CurrentGameState (
   Game g
 ) : Msg;
