@@ -245,6 +245,9 @@ async function setup3d()
   fbxloaded(await fbxLoader.loadAsync('./models/green.fbx'), 'G');
   fbxloaded(await fbxLoader.loadAsync('./models/blue.fbx'), 'B');
 
+  g.landlotOverlay = new THREE.Mesh(new THREE.PlaneGeometry(4, 4, 1, 1), new THREE.MeshPhongMaterial({ color: 0xFFFFFF, transparent: true, opacity: .5 }));
+  g.landlotOverlay.rotation.x = -90 * Math.PI / 180;
+
   if (mark3DInitialized != null)
     mark3DInitialized();  // causes awaiting on g.init3DComplete to proceed
 

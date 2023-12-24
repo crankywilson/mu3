@@ -19,7 +19,7 @@ record struct LandLotID(int e, int n)
    int e = Convert.ToInt32(s[1]);
    int n = Convert.ToInt32(s[3]);
    if (s[0] == 'W') e = -e;
-   if (s[0] == 'S') n = -n;
+   if (s[2] == 'S') n = -n;
    return new LandLotID(e, n);
  }
  public static string Str(int e, int n)

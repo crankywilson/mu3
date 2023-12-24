@@ -1,4 +1,9 @@
 import * as t from "./types.js";
+import {
+  camShowingSettlement,
+  getLandLotObjForMouse
+} from "./ren3d.js";
+
 /**
 @typedef {import('../three/Three.js').Object3D} Object3D 
 @typedef {import('../three/Three.js').Scene} Scene 
@@ -110,6 +115,9 @@ export let g =
   /** @type {t.LandLotDict} */
   landlots: {},
   moundGeomPlaced: false,
+  doLandLotOverlay: true,
+  /** @type {Object3D?} */ 
+  landlotOverlay: null,
 
   /** @type {t.GameState} */
   state: "?",
@@ -296,9 +304,96 @@ export let ui =
 globalThis.g = g;
 globalThis.ui = ui;  
 
-export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
+function LandLotStr(/**@type {number}*/e, /**@type {number}*/n)
+{
+  let ret="";
+  if (e < 0) ret += "W" + (-e).toString();
+  else if (e == 0) ret += "R" + e.toString();
+  else ret += "E" + e.toString();
+  if (n < 0) ret += "S" + (-n).toString();
+  else ret += "N" + n.toString();
+  return ret;
+}
+
+function getE(/**@type {string}*/k)
+{
+  let e = parseInt(k[1]);
+  if (k[0] == 'W') e = -e;
+  return e;
+}
+
+function getN(/**@type {string}*/k)
+{
+  let n = parseInt(k[3]);
+  if (k[2] == 'S') n = -n;
+  return n;
+}
+
+function settlementMouseMove(/**@type {number}*/x, /**@type {number}*/y)
 {
 }
+
+function validForLandGrant(/**@type {string}*/k)
+{
+  return true;
+}
+
+function highlightPlot(/**@type {string}*/k)
+{
+  if (g.landlotOverlay == null) return;  // not initalized yet...
+
+  let e = getE(k);
+  let n = getN(k);
+  if (e > -5 && e < 5 && n > -3 && n < 3) {
+    if (g.landlotOverlay.parent == null)
+      g.scene.add(g.landlotOverlay);
+    g.landlotOverlay.position.set(e * 4, .01, n * -4);
+  }
+  else {
+    if (g.landlotOverlay.parent != null)
+      g.scene.remove(g.landlotOverlay);
+  }
+}
+
+let _lastX = 0;
+let _lastY = 0;
+export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
+{
+  let x = 0;
+  let y = 0;
+
+  if (mouseEvent == null) {
+    x = _lastX;
+    y = _lastY;
+  }
+  else {
+    x = mouseEvent.pageX;
+    y = mouseEvent.pageY;
+    _lastX = x;
+    _lastY = y;
+  }
+
+  x *= window.devicePixelRatio;
+  y *= window.devicePixelRatio;
+
+  if (camShowingSettlement()) 
+  {
+    settlementMouseMove(x, y);
+    return;
+  }
+
+  if (g.doLandLotOverlay && g.landlotOverlay != null)
+  {
+    let o = getLandLotObjForMouse(x, y);
+    let k = LandLotStr(o.e, o.n);
+    if (g.state == "LANDGRANT" && !validForLandGrant(k))
+      g.scene.remove(g.landlotOverlay);
+    else 
+      highlightPlot(k);
+  }
+}
+  
+
 
 export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
 {

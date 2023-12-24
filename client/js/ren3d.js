@@ -1,13 +1,10 @@
+import { Vector3, Object3D, Camera } from "../three/Three.js";
 import { g } from "./game.js"
 
 /** @type {import('../three/Three.js')} */ //@ts-ignore
 let THREE = null;  // initialized in setup.js
 
 /** 
-@typedef {import('../three/Three.js').Vector3} Vector3 
-@typedef {import('../three/Three.js').Clock} Clock 
-@typedef {import('../three/Three.js').Object3D} Object3D 
-
 @typedef MoveQItem
  @property {Object3D} obj
  @property {Vector3} dest
@@ -25,6 +22,7 @@ let crxset    = -.4;
 let cpfar     = null; //Vector3(0, 32.7, 23)
 let crxfar    = -.935;
 let cptarget  = cpfar;
+//@ts-ignore
 let crxtarget = crxfar;
 let readyToRender = false;
 /**@type {MoveQ}*/
@@ -92,7 +90,9 @@ function rotateCameraX()
   if (g.camera.position.equals(cpset)) 
   {
     g.camera.rotation.x = crxset;
-    //e("sett").style.visibility = "visible";
+    ui.sett.style.visibility = "visible";
+    if (g.landlotOverlay != null && g.landlotOverlay.parent == g.scene)
+      g.scene.remove(g.landlotOverlay);
   }
   else 
   {
@@ -103,7 +103,44 @@ function rotateCameraX()
       pct *= 4;
       g.camera.rotation.x = crxfar + (pct * (crxset - crxfar));
     }
+    ui.sett.style.visibility = "hidden";
   }
+}
+
+function unprojectVector(/**@type {Vector3}*/vector, /**@type {Camera}*/ camera) 
+{
+  let viewProjectionMatrix = new THREE.Matrix4();
+  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+  viewProjectionMatrix.multiplyMatrices(camera.matrixWorld, camera.projectionMatrixInverse);
+  return vector.applyMatrix4(viewProjectionMatrix);
+}
+
+export function getLandLotObjForMouse(/**@type {number}*/x, /**@type {number}*/y)
+{
+  if (!g.camera.position.equals(cpfar)) return {e:999,n:-999}; // don't allow selecting unless in 'far' view
+
+  let pos = new THREE.Vector3(0, 0, 0);
+  var pMouse = new THREE.Vector3(
+    (x / g.renderer.domElement.width) * 2 - 1,
+    -(y / g.renderer.domElement.height) * 2 + 1,
+    1
+  );
+
+  unprojectVector(pMouse, g.camera);
+
+  var cam = g.camera.position;
+  var m = pMouse.y / (pMouse.y - cam.y);
+
+  pos.x = pMouse.x + (cam.x - pMouse.x) * m;
+  pos.z = pMouse.z + (cam.z - pMouse.z) * m;
+
+  return {e:(Math.floor((pos.x + 18) / 4) - 4),
+          n:-(Math.floor((pos.z + 18) / 4) - 4)};
+}
+
+export function camShowingSettlement()
+{
+  return g.camera.position.equals(cpset);
 }
 
 export async function SetupMounds()
