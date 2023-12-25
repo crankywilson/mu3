@@ -3,10 +3,10 @@ output = '../client/js/types.js'
 uioutput = '../client/js/game.js'
 uiinput = '../client/index.htm'
 
-classes = [
-  ('Player',  '../server/Player.cs' ),
-  ('LandLot', '../server/LandLot.cs'),
-  ('Game',    '../server/Game.cs'   )
+classFiles = [ 
+  '../server/Player.cs',
+  '../server/LandLot.cs',
+  '../server/Game.cs'
 ]
 
 typemappings = {
@@ -136,14 +136,19 @@ try:
       bad(f'Encountered end of file without finding end of {currec} in {inputFile}')
 
   # Now define classes according to different rules
-  classNames = [i[0] for i in classes]
-  for classEntry in classes:
-    className = classEntry[0]
-    inputfile = classEntry[1]
+  classNames = []
+  for inputfile in classFiles:
     curfields = []
+    className = "?"
     with open(inputfile) as f:
       for lin in f.readlines():
         toks = lin.split()
+        if len(toks) == 2 and toks[0] == 'class':
+          if len(curfields) > 0:
+            types[className] = curfields
+            curfields = []
+          className = toks[1]
+          classNames.append(className)
         if len(toks) > 1 and toks[0] == '/*GS*/':
           gamestates.append(toks[1])
         if len(toks) > 3 and toks[0] == '[JsonInclude]' and toks[1] == 'public':

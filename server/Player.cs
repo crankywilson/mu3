@@ -10,17 +10,38 @@ using System.Text.Json.Serialization;
 enum PlayerColor { R, Y, G, B, NONE }
 enum ResourceType { FOOD, ENERGY, SMITHORE, CRYSTITE }
 
+
+class Dest
+{
+  [JsonInclude] public double x;
+  [JsonInclude] public double z;
+  [JsonInclude] public double yrot;
+}
+
+class MuleData
+{
+  [JsonInclude] public int     resOutfit = -1;
+  [JsonInclude] public double  x         = 0.0;
+  [JsonInclude] public double  z         = 0.0;
+  [JsonInclude] public Dest?   dest      = null;
+}
+
 class Player
 {
   [JsonInclude] public string       name    = "";
   [JsonInclude] public string       ip      = "?";
   [JsonInclude] public int          money   = 1000;
-  [JsonInclude] public int[]        res     = new int[4] { 5, 2, 0, 0 };
+  [JsonInclude] public int[]        res     = new[]{ 5, 2, 0, 0 };
   [JsonInclude] public PlayerColor  color   = PlayerColor.NONE;
   [JsonInclude] public bool         isBot   = false;
   [JsonInclude] public PlayerColor  colrReq = PlayerColor.NONE;
   [JsonInclude] public int          score   = 1500;
 
+  [JsonInclude] public double       x       = 0.0;
+  [JsonInclude] public double       z       = 0.0;
+  [JsonInclude] public Dest?        dest    = null;
+  [JsonInclude] public MuleData?    mule    = null;
+  
   public WebSocket? ws = null;
 
   public Game? game = null;

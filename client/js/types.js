@@ -63,6 +63,17 @@
 @typedef StartGame
  @property {string} _mt
 
+@typedef Dest
+ @property {number} x
+ @property {number} z
+ @property {number} yrot
+
+@typedef MuleData
+ @property {number} resOutfit
+ @property {number} x
+ @property {number} z
+ @property {Dest} dest
+
 @typedef Player
  @property {string} name
  @property {string} ip
@@ -72,6 +83,10 @@
  @property {boolean} isBot
  @property {string} colrReq
  @property {number} score
+ @property {number} x
+ @property {number} z
+ @property {Dest} dest
+ @property {MuleData} mule
 
 @typedef LandLot
  @property {Player} owner
