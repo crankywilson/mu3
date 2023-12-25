@@ -160,6 +160,55 @@ export function SyncLandGeom()
 {
 }
 
+function AnimatePlayerAndMule(
+/**@type {import("./types.js").Player}*/ p, 
+/**@type {string}*/ c,
+/**@type {number}*/ delta)
+{
+  if (p.dest != null)
+  {
+    let playerModel = g.models.player[c];
+
+    /* should we rotate models to face dest? */
+    /* think we need to do mixer stuff here */
+
+    if (p.mule != null)
+      moveTowards(g.models.playerMule[c], 
+        new Vector3(p.dest.x, 0, p.dest.z), delta * 60);
+        
+    if (moveTowards(playerModel, 
+          new Vector3(p.dest.x, 0, p.dest.z), delta * 60))
+    {
+      p.dest = null;
+      if (g.myColor == c && g.destCallback != null)
+      {
+        let cb = g.destCallback;
+        g.destCallback = null;
+        cb();
+      }
+    }
+  }
+  else if (p.mule != null && p.mule.dest != null)
+  {
+    let muleModel = g.models.playerMule[c];
+
+    /* should we rotate model to face dest? */
+    /* think we need to do mixer stuff here */
+
+    if (moveTowards(muleModel,
+      new Vector3(p.mule.dest.x, 0, p.mule.dest.z), delta * 60))
+    {
+      p.mule.dest = null;
+      if (g.myColor == c && g.destCallback != null)
+      {
+        let cb = g.destCallback;
+        g.destCallback = null;
+        cb();
+      }
+    }
+  }
+}
+
 function render()
 {
   if (!readyToRender) return;
@@ -172,28 +221,7 @@ function render()
   {
     let p = g.players[c];
     if (p == null) continue;
-    if (p.dest != null)
-    {
-      let playerModel = g.models.player[c];
-
-      if (moveTowards(playerModel, 
-           new Vector3(p.dest.x, 0, p.dest.z), delta * 60))
-      {
-        p.dest = null;
-        if (g.myColor == c && g.destCallback != null)
-        {
-          let cb = g.destCallback;
-          g.destCallback = null;
-          cb();
-        }
-      }
-    }
-    else if (p.mule != null && p.mule.dest != null)
-    {
-      let muleModel = g.models.playerMule[c];
-
-      if (
-    }
+    AnimatePlayerAndMule(p, c, delta);
   }
 
   g.renderer.render( g.scene, g.camera );
