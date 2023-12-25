@@ -46,8 +46,11 @@ def lf(t):
 def typemapping(cstype : str):
   retVal = None
   useArray = False
-  
-  cstype = cstype.replace('?', '')
+  useNullable = False
+
+  if cstype.endswith('?'):
+    useNullable = True
+    cstype = cstype.replace('?', '')
   if cstype.endswith('[]'):
     useArray = True
     cstype = cstype.replace('[]', '')
@@ -61,6 +64,8 @@ def typemapping(cstype : str):
     retVal = cstype
   else:
     retVal = typemappings[cstype]
+  if useNullable:
+    retVal += '?'
   if useArray:
     retVal += '[]'
   return retVal

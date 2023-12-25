@@ -60,11 +60,31 @@ export let g =
       Y: null,
       G: null,
       B: null
+    },
+    /** @type {Object.<string, Object3D>} */ //@ts-ignore
+    playerMule:
+    {
+      R: null,
+      Y: null,
+      G: null,
+      B: null
     }
   },
 
+  /** @type {function?} */ 
+  destCallback: null,
+
   /** @type {Object.<string, Mixer>} */ //@ts-ignore
   mixer:
+  {
+    R: null,
+    Y: null,
+    G: null,
+    B: null
+  },
+
+  /** @type {Object.<string, Mixer>} */ //@ts-ignore
+  mixerMule:
   {
     R: null,
     Y: null,

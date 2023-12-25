@@ -235,8 +235,31 @@ async function setup3d()
   /* GLTF */
   let GLTFLoader = await import('../three/addons/GLTFLoader.js');
   let l = new GLTFLoader.GLTFLoader();
-  g.models.mule = await l.loadAsync('models/atat/scene.gltf');
- 
+
+  /* mule */
+  let mule = await l.loadAsync('models/atat/scene.gltf');
+  g.models.mule = mule.scene;
+  g.models.mule.scale.set(.06,.05,.06);
+  g.models.mule.rotation.y = Math.PI;
+  g.models.mule.position.set(1.1,0,1.1);
+  let mixer = new THREE.AnimationMixer(g.models.mule);
+  let action = mixer.clipAction( mule.animations[ 0 ] );
+  let muleAnim = mule.animations[ 0 ];
+  action.play();
+  mixer.setTime(7);
+  let SkeletonUtils = await import('../three/addons/SkeletonUtils.js');
+
+  for (let c in g.models.playerMule)
+  {
+    g.models.playerMule[c] = SkeletonUtils.clone(g.models.mule);
+    g.mixerMule[c] = new THREE.AnimationMixer(g.models.playerMule[c]);
+    let action = g.mixerMule[c].clipAction(muleAnim);
+    action.play();
+  }
+
+  /* land models */
+  // fill in
+
   let FBXLoader = await import('../three/addons/FBXLoader.js');
   let fbxLoader = new FBXLoader.FBXLoader();
 

@@ -72,7 +72,7 @@
  @property {number} resOutfit
  @property {number} x
  @property {number} z
- @property {Dest} dest
+ @property {Dest?} dest
 
 @typedef Player
  @property {string} name
@@ -85,11 +85,11 @@
  @property {number} score
  @property {number} x
  @property {number} z
- @property {Dest} dest
- @property {MuleData} mule
+ @property {Dest?} dest
+ @property {MuleData?} mule
 
 @typedef LandLot
- @property {Player} owner
+ @property {Player?} owner
  @property {number} numMounds
  @property {number[]} moundGeom
  @property {number} crys

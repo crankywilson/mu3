@@ -4,14 +4,6 @@ import { g } from "./game.js"
 /** @type {import('../three/Three.js')} */ //@ts-ignore
 let THREE = null;  // initialized in setup.js
 
-/** 
-@typedef MoveQItem
- @property {Object3D} obj
- @property {Vector3} dest
- @property {function} cbArrived
-
-@typedef {Set<MoveQItem>} MoveQ
- */
 
 let animating = false;
 let camTargetIsSettlement = false;
@@ -25,8 +17,7 @@ let cptarget  = cpfar;
 //@ts-ignore
 let crxtarget = crxfar;
 let readyToRender = false;
-/**@type {MoveQ}*/
-let movingObjs = new Set();
+
 
 export function initTHREERef(/** @type {import('../three/Three.js')} */r)
 {
@@ -177,13 +168,31 @@ function render()
   moveTowards(g.camera, cptarget, delta * 60);
   rotateCameraX();
 
-  for (let i of movingObjs)
+  for (let c in g.players)
   {
-    // I think we need to do a model anim here
-    if (moveTowards(i.obj, i.dest, delta * 60))
+    let p = g.players[c];
+    if (p == null) continue;
+    if (p.dest != null)
     {
-      i.cbArrived(i.obj);
-      movingObjs.delete(i);  // internet tells me this is safe
+      let playerModel = g.models.player[c];
+
+      if (moveTowards(playerModel, 
+           new Vector3(p.dest.x, 0, p.dest.z), delta * 60))
+      {
+        p.dest = null;
+        if (g.myColor == c && g.destCallback != null)
+        {
+          let cb = g.destCallback;
+          g.destCallback = null;
+          cb();
+        }
+      }
+    }
+    else if (p.mule != null && p.mule.dest != null)
+    {
+      let muleModel = g.models.playerMule[c];
+
+      if (
     }
   }
 
