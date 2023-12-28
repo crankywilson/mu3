@@ -108,8 +108,8 @@
 
 @typedef LandLot
  @property {Player?} owner
- @property {number} numMounds
- @property {float[]} moundGeom
+ @property {number} mNum
+ @property {float[]} mg
  @property {number} res
 
 @typedef Game

@@ -139,6 +139,11 @@ class Game
     }
   }
 
+  float r(float f)
+  {
+    return (float) Math.Round((double)f, 2);
+  }
+
   public void Start()
   {
     List<LandLotID> availMoundPlots = new();
@@ -163,18 +168,18 @@ class Game
       int ri = rand.Next(availMoundPlots.Count);
       LandLotID k = availMoundPlots[ri];
       availMoundPlots.Remove(k);
-      landlots[k].numMounds = (i % 3) + 1;
+      landlots[k].mNum = (i % 3) + 1;
       int x = k.e;
       int z = k.n;
-      var g = landlots[k].moundGeom;
-      for (int j=0; j<landlots[k].numMounds; j++)
+      var g = landlots[k].mg;
+      for (int j=0; j<landlots[k].mNum; j++)
       {
-        g.Add(x * 4f - 1.6f + rand.NextSingle()*3.2f);
-        g.Add(rand.NextSingle()*6.28f);
-        g.Add(z * 4f - 1.6f + rand.NextSingle()*3.2f);
-        g.Add(.2f + (rand.NextSingle() - .2f) / 4f);
-        g.Add(.2f + (rand.NextSingle() / 3));
-        g.Add(.2f + (rand.NextSingle()- .2f) / 4f);
+        g.Add(r(x * 4f - 1.6f + rand.NextSingle()*3.2f));
+        g.Add(r(rand.NextSingle()*6.28f));
+        g.Add(r(z * 4f - 1.6f + rand.NextSingle()*3.2f));
+        g.Add(r(.2f + (rand.NextSingle() - .2f) / 4f));
+        g.Add(r(.2f + (rand.NextSingle() / 3)));
+        g.Add(r(.2f + (rand.NextSingle()- .2f) / 4f));
       }
     }
 

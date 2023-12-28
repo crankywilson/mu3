@@ -46,11 +46,11 @@ class LandLotIDJsonConverter : JsonConverter<LandLotID>
 class LandLot
 {
   [JsonInclude] public Player?      owner     = null;
-  [JsonInclude] public int          numMounds = 0;
-  [JsonInclude] public List<float>  moundGeom = new();    
-                public int          crys      = 0;
-  [JsonInclude] public int          res       = -1;
-                public int          resprod   = 0;
+  [JsonInclude] public int          mNum      = 0;        // number of mounds
+  [JsonInclude] public List<float>  mg        = new();    // mound Geometry
+                public int          crys      = 0;        // crystite level
+  [JsonInclude] public int          res       = -1;       // resource being produced
+                public int          resprod   = 0;        // production amount for this month
 }
 
 class LandLotDict : Dictionary<LandLotID, LandLot> {}

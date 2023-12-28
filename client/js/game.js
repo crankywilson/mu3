@@ -1,7 +1,9 @@
 import * as t from "./types.js";
 import {
   camShowingSettlement,
-  getLandLotObjForMouse
+  getLandLotObjForMouse,
+  settlementMouseMove,
+  settlementClick
 } from "./ren3d.js";
 
 /**
@@ -10,7 +12,7 @@ import {
 @typedef {import('../three/Three.js').PerspectiveCamera} Camera 
 @typedef {import('../three/Three.js').AnimationClip} AnimationClip 
 @typedef {import('../three/Three.js').Texture} Texture 
-@typedef {import('../three/Three.js').Material} Material 
+@typedef {import('../three/Three.js').MeshLambertMaterial} Material 
 @typedef {import('../three/Three.js').Clock} Clock 
 @typedef {import('../three/Three.js').WebGLRenderer} WebGLRenderer 
 @typedef {import('../three/Three.js').Group} Group 
@@ -102,7 +104,9 @@ export let g =
 
   materials: {
     /** @type {Material[]} */ //@ts-ignore
-    building: []
+    building: [],
+    /** @type {Object.<string, Material>} */
+    buildingByName: {}
   },
 
   animations: {},
@@ -135,17 +139,15 @@ export let g =
 
   /** @type {t.LandLotDict} */
   landlots: {},
-  moundGeomPlaced: false,
-  doLandLotOverlay: true,
-  /** @type {Object3D?} */ 
+  mgPlaced: false,
+
+  /** @type {Object3D} */ // @ts-ignore
   landlotOverlay: null,
 
   /** @type {t.GameState} */
   state: "?",
 
-
-  /** @type {WebSocket} */
-  // @ts-ignore
+  /** @type {WebSocket} */ // @ts-ignore
   ws: null,
 
   init3DComplete: new Promise(get3DInitResolver)
@@ -350,10 +352,6 @@ function getN(/**@type {string}*/k)
   return n;
 }
 
-function settlementMouseMove(/**@type {number}*/x, /**@type {number}*/y)
-{
-}
-
 function validForLandGrant(/**@type {string}*/k)
 {
   return true;
@@ -403,7 +401,7 @@ export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
     return;
   }
 
-  if (g.doLandLotOverlay && g.landlotOverlay != null)
+  if (g.state == "IMPROVE" || g.state == "LANDGRANT")
   {
     let o = getLandLotObjForMouse(x, y);
     let k = LandLotStr(o.e, o.n);
@@ -431,7 +429,15 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
   }
   else if (g.state == "IMPROVE")
   {
+    if (camShowingSettlement())
+    {
+      settlementClick(x, y);
+      return;
+    }
+
     let o = getLandLotObjForMouse(x, y);
+
+    g.destCallback = null;
     g.me().dest = {x: o.e * 4, z: o.n * -4, spd: 2.5};
   }
 /*

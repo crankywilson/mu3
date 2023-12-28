@@ -28,11 +28,20 @@ export function initTHREERef(/** @type {import('../three/Three.js')} */r)
   readyToRender = true;
 }
 
-export function switchCamView()
+export async function switchCamView(/** @type {boolean?}*/ showSettlement=null)
 {
-  camTargetIsSettlement = !camTargetIsSettlement;
+  await g.init3DComplete;
+
+  if (showSettlement == undefined)
+    camTargetIsSettlement = !camTargetIsSettlement;
+  else
+    camTargetIsSettlement = showSettlement;
+
   cptarget = camTargetIsSettlement ? cpset : cpfar;
   crxtarget = camTargetIsSettlement ? crxset : crxfar;
+
+  if (!camTargetIsSettlement)
+    settlementClearOperation();  // just in case operation was canceled externally
 }
 
 function animate() 
@@ -108,7 +117,7 @@ function unprojectVector(/**@type {Vector3}*/vector, /**@type {Camera}*/ camera)
 
 export function getLandLotObjForMouse(/**@type {number}*/x, /**@type {number}*/y)
 {
-  if (!g.camera.position.equals(cpfar)) return {e:999,n:-999}; // don't allow selecting unless in 'far' view
+  //if (!g.camera.position.equals(cpfar)) return {e:999,n:-999}; // don't allow selecting unless in 'far' view
 
   let pos = new THREE.Vector3(0, 0, 0);
   var pMouse = new THREE.Vector3(
@@ -141,8 +150,8 @@ export async function SetupMounds()
   for (let k in g.landlots)
   {
     let ldata = g.landlots[k];
-    let d = ldata.moundGeom;
-    for (let i=0; i<ldata.numMounds; i++)
+    let d = ldata.mg;
+    for (let i=0; i<ldata.mNum; i++)
     {
       const geometry = new THREE.SphereGeometry( 1 );
       const sphere = new THREE.Mesh( geometry, moundMat );
@@ -153,7 +162,7 @@ export async function SetupMounds()
       d.splice(0,6);
     }
   }
-  g.moundGeomPlaced = true;
+  g.mgPlaced = true;
 }
 
 export function SyncLandGeom()
@@ -239,5 +248,133 @@ function render()
 }
 
 
+export function settlementMouseMove(/**@type {number}*/x, /**@type {number}*/y)
+{
+  if (!readyToRender) return null;
+  if (currentOp != "") return null;
+
+  let raycaster = new THREE.Raycaster();
+  let pointer = new THREE.Vector2();
+
+  pointer.x = (x / window.devicePixelRatio / window.innerWidth) * 2 - 1;
+  pointer.y = - (y / window.devicePixelRatio / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, g.camera);
+  const intersects = raycaster.intersectObjects(g.buildingsGroup.children);
+  for (let i = 0; i < g.buildingsGroup.children.length; i++)
+  {
+    // @ts-ignore
+    g.buildingsGroup.children[i].material.color.set(g.buildingColor);
+  }
+  ui.msg.innerText = "";
+  ui.msg.style.backgroundColor = "";
+  if (intersects.length > 0) {
+    //  @ts-ignore
+    let mat = intersects[0].object.material;
+    mat.color.set(0xcccccc);
+    ui.msg.innerText = mat.name;
+    ui.msg.style.backgroundColor = "rgba(255,255,255,.4)";
+    if (intersects[0].object.position.z > 0)
+      ui.msgblink.innerText = "";
+    return mat.name;
+  }
+  else {
+    let o =getLandLotObjForMouse(x, y);
+    console.log(o);
+    if (o.e != 0) {
+      ui.msg.innerText = "Leave Settlement";
+      ui.msg.style.backgroundColor = "rgba(255,255,255,.4)";
+      return o.e;
+    }
+  }
+
+  return null;
+}
+
+const firstBuyMule = "You must first buy a M.U.L.E. to outfit";
+function clearBuyMuleMsg()
+{
+  if (ui.msgblink.innerText == firstBuyMule)
+    ui.msgblink.innerText = "";
+}
+
+const noMulesAllowed = "Sorry, no M.U.L.E.'s allowed";
+function clearNoMuleMsg()
+{
+  if (ui.msgblink.innerText == noMulesAllowed)
+    ui.msgblink.innerText = "";
+}
+
+/** @type {Object.<string, number>} */
+const opColors =
+{
+  R: 0xdd0000,
+  Y: 0xdddd00,
+  G: 0x00dd00,
+  B: 0x0000dd
+};
+
+let currentOp = "";
+
+function settlementStartOperation(/**@type {string}*/op)
+{
+  g.materials.buildingByName[op].color.set(opColors[g.myColor]);
+  currentOp = op;
+}
+
+function settlementClearOperation()
+{
+  for (let i = 0; i < g.buildingsGroup.children.length; i++)
+  {
+    // @ts-ignore
+    g.buildingsGroup.children[i].material.color.set(g.buildingColor);
+  }
+  currentOp = "";
+}
+
+
+export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
+{
+  let sel = settlementMouseMove(x,y);
+  if (typeof sel == "number")
+  {
+  }
+  else if (typeof sel == "string")
+  {
+    settlementStartOperation(sel);
+    let muleOutfit = -1;
+    switch (sel) {
+      case "Cantina":
+      case "Assay":
+      case "Land":
+        if (g.me().mule != null)
+        {
+          ui.msgblink.innerText = noMulesAllowed;
+          setTimeout(clearNoMuleMsg, 7500);
+          settlementClearOperation();
+          return;
+        }
+        break;
+      case "Food":
+        muleOutfit = 0; break;
+      case "Energy":
+        muleOutfit = 1; break;
+      case "Smithore":
+        muleOutfit = 2; break;
+      case "Crystite":
+        muleOutfit = 3; break;
+    }
+    if (muleOutfit >= 0)
+    {
+      if (g.me().mule == null)
+      {
+        ui.msgblink.innerText = firstBuyMule;
+        setTimeout(clearBuyMuleMsg, 7500);
+        settlementClearOperation();
+        return;
+      }
+    }
+  }
+
+}
 
 

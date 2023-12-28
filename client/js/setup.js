@@ -170,6 +170,8 @@ async function setup3d()
   bm[6].name = 'Cantina';
   bm[7].name = 'Mule';
 
+  for (let m of bm) g.materials.buildingByName[m.name] = m;
+
 	for (let i=0; i<4; i++)
 	{
 		let b1g = new THREE.BoxGeometry( .5, .4, .1 );
@@ -263,10 +265,14 @@ async function setup3d()
   let FBXLoader = await import('../three/addons/FBXLoader.js');
   let fbxLoader = new FBXLoader.FBXLoader();
 
-  fbxloaded(await fbxLoader.loadAsync('./models/red.fbx'), 'R');
-  fbxloaded(await fbxLoader.loadAsync('./models/yellow.fbx'), 'Y');
-  fbxloaded(await fbxLoader.loadAsync('./models/green.fbx'), 'G');
-  fbxloaded(await fbxLoader.loadAsync('./models/blue.fbx'), 'B');
+  if (g.state == "?" || g.players["R"] != null)
+    fbxloaded(await fbxLoader.loadAsync('./models/red.fbx'), 'R');
+  if (g.state == "?" || g.players["Y"] != null)
+    fbxloaded(await fbxLoader.loadAsync('./models/yellow.fbx'), 'Y');
+  if (g.state == "?" || g.players["G"] != null)
+    fbxloaded(await fbxLoader.loadAsync('./models/green.fbx'), 'G');
+  if (g.state == "?" || g.players["B"] != null)
+    fbxloaded(await fbxLoader.loadAsync('./models/blue.fbx'), 'B');
 
   g.landlotOverlay = new THREE.Mesh(new THREE.PlaneGeometry(4, 4, 1, 1), new THREE.MeshPhongMaterial({ color: 0xFFFFFF, transparent: true, opacity: .5 }));
   g.landlotOverlay.rotation.x = -90 * Math.PI / 180;

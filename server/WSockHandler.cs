@@ -69,7 +69,7 @@ static class WSockHandler
       }
 
       p.ws = null;
-      Console.WriteLine($"Connection closed normally...");
+      Console.WriteLine($"Connection closed normally: {p.name} {p.game?.name} {p.color} {p.ip}");
       await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Done", CancellationToken.None);
     }
     catch (Exception e)

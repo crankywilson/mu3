@@ -92,7 +92,7 @@ export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
   g.landlots = msg.g.landlots;
   g.state = msg.g.state;
 
-  if (!g.moundGeomPlaced)
+  if (!g.mgPlaced)
     r.SetupMounds();
   r.SyncLandGeom();
 
@@ -101,7 +101,12 @@ export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
   else
     r.startAnimating();
   
+  UpdateGameState({gs:g.state, _mt:""});
   showScores(scores, msg.g.players.length, msg.g.month);
+}
+
+function UpdateLandLotOverlayState()
+{
 }
 
 export function PlayerRejoined(/**@type {t.PlayerRejoined}*/ msg)
@@ -110,5 +115,13 @@ export function PlayerRejoined(/**@type {t.PlayerRejoined}*/ msg)
 
 export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
 {
+  ui.msg.innerText = "";
   g.state = msg.gs;
+
+  if (g.state == "IMPROVE")
+  {
+    let my = g.me();
+    if (my.x > -2 && my.x < 2 && my.z > -2 && my.z < 2)
+      r.switchCamView(true);
+  }
 }
