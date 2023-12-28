@@ -32,7 +32,22 @@ class Game
   public bool active = true;
 
   public Random rand = new Random();
+  public HashSet<PlayerColor> continueRecvd = new();
 
+  public bool AllActivePlayersInSet(HashSet<PlayerColor> set)
+  {
+    foreach (var p in players)
+      if (p.ws != null && !set.Contains(p.color)) return false;
+    
+    return true;
+  }
+
+  public void UpdateGameState(GameState gs)
+  {
+    state = gs;
+    send(new UpdateGameState(gs));
+  }
+  
   // each game having its own channel allows synchronicity within a game, but multiple games
   //  to be processed concurrently in parallel
   public Channel<ReceivedMsg> channel = 
@@ -154,12 +169,12 @@ class Game
       var g = landlots[k].moundGeom;
       for (int j=0; j<landlots[k].numMounds; j++)
       {
-        g.Add(x * 4 - 1.6 + rand.NextDouble()*3.2);
-        g.Add(rand.NextDouble()*6.28);
-        g.Add(z * 4 - 1.6 + rand.NextDouble()*3.2);
-        g.Add(.2 + (rand.NextDouble() - .2) / 4);
-        g.Add(.2 + (rand.NextDouble() / 3));
-        g.Add(.2 + (rand.NextDouble()- .2) / 4);
+        g.Add(x * 4f - 1.6f + rand.NextSingle()*3.2f);
+        g.Add(rand.NextSingle()*6.28f);
+        g.Add(z * 4f - 1.6f + rand.NextSingle()*3.2f);
+        g.Add(.2f + (rand.NextSingle() - .2f) / 4f);
+        g.Add(.2f + (rand.NextSingle() / 3));
+        g.Add(.2f + (rand.NextSingle()- .2f) / 4f);
       }
     }
 

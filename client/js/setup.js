@@ -220,13 +220,13 @@ async function setup3d()
   const brlg = new THREE.PlaneGeometry( .5, 1.3 );
   const brlm = new THREE.Mesh( brlg, new THREE.MeshBasicMaterial( {color: '#663311'} ));
   brlm.position.x = -1.77;
-  brlm.position.y = 0.01;
+  brlm.position.y = 0.02;
   brlm.rotation.x = Math.PI * - 0.5;
   g.scene.add(brlm);
 
   const brrm = new THREE.Mesh( brlg, new THREE.MeshBasicMaterial( {color: '#663311'} ));
   brrm.position.x = 1.77;
-  brrm.position.y = 0.01;
+  brrm.position.y = 0.02;
   brrm.rotation.x = Math.PI * - 0.5;
   g.scene.add(brrm);
 

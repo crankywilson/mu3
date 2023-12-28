@@ -44,6 +44,8 @@ function showScores(/**@type {{s: number, c: string}[]}*/ scores,
     setPlboxSpanText(ci.c, BOTTOMSPAN, "Score: " + ci.s + "  (#" + lpi + ")");
   }
 
+  if (g.state != "SCORE") return;
+  
   if (month == 1)
     ui.msg.innerText = 'All planeteers have arrived to Irata.  You have 12 months to colonize this area.';
   else
@@ -99,10 +101,14 @@ export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
   else
     r.startAnimating();
   
-  if (g.state == "SCORE")
-    showScores(scores, msg.g.players.length, msg.g.month);
+  showScores(scores, msg.g.players.length, msg.g.month);
 }
 
 export function PlayerRejoined(/**@type {t.PlayerRejoined}*/ msg)
 {
+}
+
+export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
+{
+  g.state = msg.gs;
 }

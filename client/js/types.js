@@ -8,6 +8,24 @@
 @typedef Continue
  @property {string} _mt
 
+@typedef DestReached
+ @property {string} pc
+ @property {number} x
+ @property {number} z
+ @property {string} _mt
+
+@typedef NewDest
+ @property {string} pc
+ @property {number} x
+ @property {number} z
+ @property {number} destx
+ @property {number} destz
+ @property {string} _mt
+
+@typedef UpdateGameState
+ @property {GameState} gs
+ @property {string} _mt
+
 @typedef CurrentGameState
  @property {Game} g
  @property {string} _mt
@@ -66,7 +84,7 @@
 @typedef Dest
  @property {number} x
  @property {number} z
- @property {number} yrot
+ @property {number} spd
 
 @typedef MuleData
  @property {number} resOutfit
@@ -91,10 +109,8 @@
 @typedef LandLot
  @property {Player?} owner
  @property {number} numMounds
- @property {number[]} moundGeom
- @property {number} crys
+ @property {float[]} moundGeom
  @property {number} res
- @property {number} resprod
 
 @typedef Game
  @property {LandLotDict} landlots
@@ -137,6 +153,28 @@ export let GAMESTATE = {
 }
 /**@returns {Continue}*/ export function Continue(
 ) { return { _mt: 'Continue'};}
+
+/**@returns {DestReached}*/ export function DestReached(
+ /**@type {string}*/ pc,
+ /**@type {number}*/ x,
+ /**@type {number}*/ z,
+) { return { _mt: 'DestReached' , pc: pc
+ , x: x
+ , z: z
+};}
+
+/**@returns {NewDest}*/ export function NewDest(
+ /**@type {string}*/ pc,
+ /**@type {number}*/ x,
+ /**@type {number}*/ z,
+ /**@type {number}*/ destx,
+ /**@type {number}*/ destz,
+) { return { _mt: 'NewDest' , pc: pc
+ , x: x
+ , z: z
+ , destx: destx
+ , destz: destz
+};}
 
 /**@returns {CreateGame}*/ export function CreateGame(
  /**@type {string}*/ name,

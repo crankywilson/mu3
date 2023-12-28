@@ -1,6 +1,6 @@
 import { Vector3, Object3D, Camera } from "../three/Three.js";
-import { g } from "./game.js"
-
+import { g, send } from "./game.js";
+import * as t from './types.js';
 /** @type {import('../three/Three.js')} */ //@ts-ignore
 let THREE = null;  // initialized in setup.js
 
@@ -160,6 +160,9 @@ export function SyncLandGeom()
 {
 }
 
+const playerstilltime = .55;
+const mulestilltime = 7;
+
 function AnimatePlayerAndMule(
 /**@type {import("./types.js").Player}*/ p, 
 /**@type {string}*/ c,
@@ -169,17 +172,25 @@ function AnimatePlayerAndMule(
   {
     let playerModel = g.models.player[c];
 
-    /* should we rotate models to face dest? */
-    /* think we need to do mixer stuff here */
+    playerModel.rotation.y = Math.atan2(
+      p.dest.x - playerModel.position.x,
+      p.dest.z - playerModel.position.z);
+
+    g.mixer[c].update(delta * p.dest.spd);
 
     if (p.mule != null)
       moveTowards(g.models.playerMule[c], 
-        new Vector3(p.dest.x, 0, p.dest.z), delta * 60);
+        new Vector3(p.dest.x, 0, p.dest.z), delta * p.dest.spd);
         
     if (moveTowards(playerModel, 
-          new Vector3(p.dest.x, 0, p.dest.z), delta * 60))
+          new Vector3(p.dest.x, 0, p.dest.z), delta * p.dest.spd))
     {
+      if (c == g.myColor)
+        send(t.DestReached(c, p.x, p.z));
+
       p.dest = null;
+      playerModel.rotation.y = 0;
+      g.mixer[p.color].setTime(playerstilltime);
       if (g.myColor == c && g.destCallback != null)
       {
         let cb = g.destCallback;
@@ -196,7 +207,7 @@ function AnimatePlayerAndMule(
     /* think we need to do mixer stuff here */
 
     if (moveTowards(muleModel,
-      new Vector3(p.mule.dest.x, 0, p.mule.dest.z), delta * 60))
+      new Vector3(p.mule.dest.x, 0, p.mule.dest.z), delta * p.mule.dest.spd))
     {
       p.mule.dest = null;
       if (g.myColor == c && g.destCallback != null)

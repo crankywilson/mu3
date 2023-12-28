@@ -44,6 +44,7 @@ export let g =
   
   myColor: "?",
 
+  /** @returns {t.Player} */ //@ts-ignore
   me: function() { return this.players[this.myColor]; }, 
   
   models: {
@@ -124,7 +125,7 @@ export let g =
   /** @type {Group} */ //@ts-ignore
   prodGroup: null,
 
-  buildingColor: 0x666666,
+  buildingColor: 0x888888,
   muleStartX: 0,
 
   prepSound: new Audio("/sound/prep.wav"),
@@ -427,6 +428,11 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
   {
     ui.msgblink.innerText = "";
     send(t.Continue());
+  }
+  else if (g.state == "IMPROVE")
+  {
+    let o = getLandLotObjForMouse(x, y);
+    g.me().dest = {x: o.e * 4, z: o.n * -4, spd: 2.5};
   }
 /*
   if (g.state == st.SCORE || g.state == st.PRODUCTION_DONE ||

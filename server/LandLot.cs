@@ -47,10 +47,10 @@ class LandLot
 {
   [JsonInclude] public Player?      owner     = null;
   [JsonInclude] public int          numMounds = 0;
-  [JsonInclude] public List<double> moundGeom = new();    
-  [JsonInclude] public int          crys      = 0;
+  [JsonInclude] public List<float>  moundGeom = new();    
+                public int          crys      = 0;
   [JsonInclude] public int          res       = -1;
-  [JsonInclude] public int          resprod   = 0;
+                public int          resprod   = 0;
 }
 
 class LandLotDict : Dictionary<LandLotID, LandLot> {}

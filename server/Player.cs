@@ -13,9 +13,10 @@ enum ResourceType { FOOD, ENERGY, SMITHORE, CRYSTITE }
 
 class Dest
 {
-  [JsonInclude] public double x;
-  [JsonInclude] public double z;
-  [JsonInclude] public double yrot;
+  [JsonInclude] public double x = 0.0;
+  [JsonInclude] public double z = 0.0;
+  [JsonInclude] public double spd = 0.0;
+
 }
 
 class MuleData
