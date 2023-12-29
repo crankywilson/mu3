@@ -36,6 +36,31 @@ function headToBottomBuilding()
 {
 }
 
+function requestMuleOutfit()
+{
+  send(t.RequestMuleOutfit(currentOp));
+}
+
+export function outfitmule()
+{
+  tempBlink("Outfitting MULE for " + currentOp);
+  g.models.player[g.myColor].rotation.y = 3.14;
+  setMyMuleDest(g.models.playerMule[g.myColor].position.x, zlocs[0], 1.5);
+  g.destCallback = returnOutfittedMule;
+}
+
+function returnOutfittedMule()
+{
+  setMyMuleDest(g.models.playerMule[g.myColor].position.x,
+                g.models.player[g.myColor].position.z, 1.5);
+  g.destCallback = outfittedMuleReturned;
+}
+
+function outfittedMuleReturned()
+{
+  g.models.player[g.myColor].rotation.y = 0;
+  settlementClearOperation();
+}
 
 let animating = false;
 let camTargetIsSettlement = false;
@@ -220,25 +245,17 @@ function AnimatePlayerAndMule(
   if (p.dest != null)
   {
     let playerModel = g.models.player[c];
+    if (playerModel == null) return;
 
+    let spd = p.dest.spd;
+    let dest = new Vector3(p.dest.x, 0, p.dest.z);
     playerModel.rotation.y = Math.atan2(
       p.dest.x - playerModel.position.x,
       p.dest.z - playerModel.position.z);
 
     g.mixer[c].update(delta * p.dest.spd);
-
-    if (p.mule != null && p.mule.dest == null)
-    {
-      let newTime = g.mixerMule[c].time + (delta * p.dest.spd * 12);
-      if (newTime > 20.5)
-        newTime -= 16.5;
-      g.mixerMule[c].setTime(newTime);
-      moveTowards(g.models.playerMule[c], 
-        new Vector3(p.dest.x, 0, p.dest.z), delta * p.dest.spd);
-    }   
     
-    if (moveTowards(playerModel, 
-          new Vector3(p.dest.x, 0, p.dest.z), delta * p.dest.spd))
+    if (moveTowards(playerModel, dest, delta * spd))
     {
       if (c == g.myColor)
         send(t.DestReached(c, p.x, p.z));
@@ -257,8 +274,28 @@ function AnimatePlayerAndMule(
         cb();
       }
     }
+    // this moves the mule with the player
+    if (p.mule != null && p.mule.dest == null)
+    {
+      let newTime = g.mixerMule[c].time + (delta * spd * 12);
+      if (newTime > 20.5)
+        newTime -= 16.5;
+      g.mixerMule[c].setTime(newTime);
+      let muleModel = g.models.playerMule[c];
+
+      let d = muleModel.position.sub(dest).normalize().multiplyScalar(muleoffset);
+      if (d.length() > 0)
+      {
+        muleModel.position.x = playerModel.position.x + d.x;  // add() method seemed to not work?
+        muleModel.position.z = playerModel.position.z + d.z;
+      }
+
+      muleModel.rotation.y = Math.atan2(
+        dest.x - muleModel.position.x,
+        muleModel.position.z - dest.z);
+    }   
   }
-  // this is for independent mule movement
+  // this is for mule movement independent of the player
   if (p.mule != null && p.mule.dest != null)
   {
     let muleModel = g.models.playerMule[c];
@@ -359,7 +396,7 @@ async function sleep(/**@type {number}*/msdur)
   return new Promise((r)=>setTimeout(r, msdur));
 }
 
-async function tempBlink(/**@type {string}*/msg, /**@type {number}*/msdur=5000)
+export async function tempBlink(/**@type {string}*/msg, /**@type {number}*/msdur=5000)
 {
   ui.msgblink.innerText = msg;
   await sleep(msdur);
@@ -384,7 +421,7 @@ function settlementStartOperation(/**@type {string}*/op)
   currentOp = op;
 }
 
-function settlementClearOperation()
+export function settlementClearOperation()
 {
   for (let i = 0; i < g.buildingsGroup.children.length; i++)
   {
@@ -449,7 +486,8 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
       let delta = muleoffset;
       if (xlocs[muleOutfit] < g.models.player[g.myColor].position.x)
         delta = -delta;
-      g.me().dest = {x: xlocs[muleOutfit] + delta, z: g.me().z, spd:1.5};
+        setMyDest(xlocs[muleOutfit] + delta, g.me().z, 1.5);
+      g.destCallback = requestMuleOutfit;
     }
   }
 }
@@ -458,7 +496,6 @@ export function buymule()
 {
   let modelm = g.models.playerMule[g.myColor];
   let modelp = g.models.player[g.myColor];
-  let my = g.me();
 
   modelm.position.x = xlocs[0];
   modelm.position.z = zlocs[1];

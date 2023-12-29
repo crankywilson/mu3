@@ -5,8 +5,11 @@ import {g} from "./game.js";
 function handleWSMsg(/** @type {MessageEvent} */ ev)
 {
     /** @type {t.Msg} */ let msg = JSON.parse(ev.data);
-    // @ts-ignore
-    return m[msg._mt](msg); 
+    if (msg._mt in m)
+        // @ts-ignore
+        return m[msg._mt](msg);
+        
+    else console.log("unimplemented msg: " + msg._mt);
 }
 
 function handlerWSError(/** @type {Event} */ ev)

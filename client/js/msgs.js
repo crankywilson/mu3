@@ -135,7 +135,21 @@ export function MuleObtained(/**@type {t.MuleObtained}*/ msg)
   r.buymule();  
 }
 
+export function NewDest(/**@type {t.NewDest}*/msg)
+{
+  if (msg.pc != g.myColor)
+  {
+  }
+}
+
 export function DestReached(/**@type {t.DestReached}*/msg)
+{
+  if (msg.pc != g.myColor)
+  {
+  }
+}
+
+export function NewMuleDest(/**@type {t.NewMuleDest}*/msg)
 {
   if (msg.pc != g.myColor)
   {
@@ -147,4 +161,23 @@ export function MuleDestReached(/**@type {t.MuleDestReached}*/msg)
   if (msg.pc != g.myColor)
   {
   }
+}
+
+export function MuleDenied(/**@type {t.MuleDenied}*/msg)
+{
+  r.settlementClearOperation();
+  r.tempBlink(msg.reason);
+}
+
+export function MuleOutfitDenied(/**@type {t.MuleOutfitDenied}*/msg)
+{
+  r.settlementClearOperation();
+  r.tempBlink(msg.reason);
+}
+
+export function MuleOutfitAccepted(/**@type {t.MuleOutfitAccepted}*/msg)
+{
+  setPlboxSpanText(msg.pc, MONEYSPAN, msg.newMoney);
+  if (g.myColor != msg.pc) return;
+  r.outfitmule();  
 }

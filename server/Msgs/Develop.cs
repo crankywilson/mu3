@@ -5,9 +5,9 @@ record MuleRequest (
   public override void OnRecv(Player p, Game g)
   {
     if (g.mules < 1) 
-      p.send(new MuleDenied(p.color, "No more MULEs available"));
+      p.send(new MuleDenied("No more MULEs available"));
     else if (g.mulePrice > p.money)
-      p.send(new MuleDenied(p.color, "You can't afford a MULE"));
+      p.send(new MuleDenied("You can't afford a MULE"));
     else
     {
       g.mules--;
@@ -25,7 +25,6 @@ record MuleObtained (
 ) : Msg;
 
 record MuleDenied (
-    PlayerColor pc,
     string reason
 ) : Msg;
 
@@ -95,3 +94,38 @@ record NewMuleDest (
     g.send(this);
   }
 }
+
+record RequestMuleOutfit (
+  string res
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    if (!Enum.TryParse<ResourceType>(res, true, out ResourceType rt))
+    {
+      p.send(new MuleOutfitDenied("Unknown resource"));
+      return;
+    }
+
+    int cost = ((int)rt+1) * 25;
+    if (p.money < cost)
+    {
+       p.send(new MuleOutfitDenied("You can't afford this outfitting"));
+       return;
+    }
+
+    // up to client to ensure player actually has a MULE
+
+    p.money -= cost;
+    g.send(new MuleOutfitAccepted(p.color, p.money));
+  }
+}
+
+record MuleOutfitDenied (
+    string reason
+) : Msg;
+
+record MuleOutfitAccepted (
+    PlayerColor pc,
+    int newMoney
+) : Msg;

@@ -30,7 +30,6 @@
  @property {string} _mt
 
 @typedef MuleDenied
- @property {string} pc
  @property {string} reason
  @property {string} _mt
 
@@ -62,6 +61,19 @@
  @property {number} destx
  @property {number} destz
  @property {number} destspd
+ @property {string} _mt
+
+@typedef RequestMuleOutfit
+ @property {string} res
+ @property {string} _mt
+
+@typedef MuleOutfitDenied
+ @property {string} reason
+ @property {string} _mt
+
+@typedef MuleOutfitAccepted
+ @property {string} pc
+ @property {number} newMoney
  @property {string} _mt
 
 @typedef AvailableGames
@@ -235,6 +247,11 @@ export let GAMESTATE = {
  , destx: destx
  , destz: destz
  , destspd: destspd
+};}
+
+/**@returns {RequestMuleOutfit}*/ export function RequestMuleOutfit(
+ /**@type {string}*/ res,
+) { return { _mt: 'RequestMuleOutfit' , res: res
 };}
 
 /**@returns {CreateGame}*/ export function CreateGame(
