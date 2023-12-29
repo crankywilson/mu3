@@ -117,7 +117,7 @@ record RequestMuleOutfit (
     // up to client to ensure player actually has a MULE
 
     p.money -= cost;
-    g.send(new MuleOutfitAccepted(p.color, p.money));
+    g.send(new MuleOutfitAccepted(p.color, p.money, (int)rt));
   }
 }
 
@@ -127,5 +127,17 @@ record MuleOutfitDenied (
 
 record MuleOutfitAccepted (
     PlayerColor pc,
-    int newMoney
+    int newMoney,
+    int resOutfit
 ) : Msg;
+
+record TurnedOnMuleLight (
+    PlayerColor pc,
+    int lightColor
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    g.send(this);
+  }
+}

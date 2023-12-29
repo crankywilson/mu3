@@ -53,11 +53,30 @@ function returnOutfittedMule()
 {
   setMyMuleDest(g.models.playerMule[g.myColor].position.x,
                 g.models.player[g.myColor].position.z, 1.5);
+
+  let sl = g.muleLight[g.myColor];
+
+  switch (currentOp) {
+    case "Food": sl.color.set(0x00ff00); break;
+    case "Energy": sl.color.set(0xffff88); break;
+    case "Smithore": sl.color.set(0x663311); break;
+    case "Crystite": sl.color.set(0xaaddff); break;
+  }
+  sl.visible = true;
+
   g.destCallback = outfittedMuleReturned;
+}
+
+export function TurnOnMuleLight(/** @type {string}*/playerColor , /** @type {number}*/lightColor )
+{
+  let sl = g.muleLight[playerColor];
+  sl.color.set(lightColor);
+  sl.visible = true;
 }
 
 function outfittedMuleReturned()
 {
+  ui.msgblink.innerText = "";
   g.models.player[g.myColor].rotation.y = 0;
   settlementClearOperation();
 }
@@ -102,6 +121,10 @@ export async function switchCamView(/** @type {boolean?}*/ showSettlement=null)
 
   if (!camTargetIsSettlement)
     settlementClearOperation();  // just in case operation was canceled externally
+
+  // this is basically for page re-load syncing -- since this function already await'ed g.init3DComplete;
+  if (g.me().mule != null && g.models.playerMule[g.myColor].parent == null)
+    g.scene.add(g.models.playerMule[g.myColor]);
 }
 
 function animate() 
@@ -454,7 +477,7 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
       case "Land":    if (bottomLoc == -1) bottomLoc = 3;
         if (g.me().mule != null && bottomLoc > 0)
         {
-          tempBlink("Sorry, no M.U.L.E.'s allowed", 7500);
+          tempBlink("Sorry, no MULEs allowed", 7500);
           settlementClearOperation();
           return;
         }
@@ -479,14 +502,24 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
     {
       if (g.me().mule == null)
       {
-        tempBlink("You must first buy a M.U.L.E. to outfit", 7500);
+        tempBlink("You must first buy a MULE to outfit", 7500);
         settlementClearOperation();
         return;
       }
-      let delta = muleoffset;
-      if (xlocs[muleOutfit] < g.models.player[g.myColor].position.x)
-        delta = -delta;
-        setMyDest(xlocs[muleOutfit] + delta, g.me().z, 1.5);
+      if (g.models.playerMule[g.myColor].position.x == xlocs[muleOutfit])
+      {
+        setMyDest(g.models.player[g.myColor].position.x, 
+                  g.models.player[g.myColor].position.z, 1.5);
+      }
+      else
+      {
+        let delta = muleoffset;
+        if (xlocs[muleOutfit] < g.models.player[g.myColor].position.x)
+          delta = -delta;
+        setMyDest(xlocs[muleOutfit] + delta, 
+            g.models.player[g.myColor].position.z, 1.5);
+      }
+      
       g.destCallback = requestMuleOutfit;
     }
   }
@@ -500,6 +533,7 @@ export function buymule()
   modelm.position.x = xlocs[0];
   modelm.position.z = zlocs[1];
   g.scene.add(modelm);
+  g.muleLight[g.myColor].visible = false;
 
   setMyMuleDest(modelm.position.x, modelp.position.z, 1.5);
 

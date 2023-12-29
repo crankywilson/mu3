@@ -17,6 +17,7 @@ import {
 @typedef {import('../three/Three.js').WebGLRenderer} WebGLRenderer 
 @typedef {import('../three/Three.js').Group} Group 
 @typedef {import('../three/Three.js').AnimationMixer} Mixer 
+@typedef {import('../three/Three.js').SpotLight} SpotLight 
 **/
 
 /** @type { function? } */
@@ -95,6 +96,15 @@ export let g =
     B: null
   },
 
+  /** @type {Object.<string, SpotLight>} */ //@ts-ignore
+  muleLight:
+  {
+    R: null,
+    Y: null,
+    G: null,
+    B: null
+  },
+  
   textures: {
     /** @type {Texture[]} */ //@ts-ignore
     crystiteLevelTexture: [null, null, null, null],

@@ -257,6 +257,16 @@ async function setup3d()
     g.mixerMule[c] = new THREE.AnimationMixer(g.models.playerMule[c]);
     let action = g.mixerMule[c].clipAction(muleAnim);
     action.play();
+
+    let sl = new THREE.SpotLight(0x00ff00, 20);
+    sl.position.set(0,9,0)
+    sl.distance=0.35
+    sl.name='outfitlight';
+    sl.color.set(0);
+    sl.visible = false;
+    g.models.playerMule[c].add(sl.target);  // must do this or spotlight won't point to right thing when mule is moved
+    g.models.playerMule[c].add(sl);
+    g.muleLight[c] = sl;
   }
 
   /* land models */

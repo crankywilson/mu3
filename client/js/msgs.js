@@ -177,7 +177,17 @@ export function MuleOutfitDenied(/**@type {t.MuleOutfitDenied}*/msg)
 
 export function MuleOutfitAccepted(/**@type {t.MuleOutfitAccepted}*/msg)
 {
-  setPlboxSpanText(msg.pc, MONEYSPAN, msg.newMoney);
-  if (g.myColor != msg.pc) return;
-  r.outfitmule();  
+  setPlboxSpanText(msg.pc, MONEYSPAN, msg.newMoney); 
+  let p = g.players[msg.pc];
+  if (p != null && p.mule != null)
+      p.mule.resOutfit = msg.resOutfit;
+
+  if (g.myColor == msg.pc)
+    r.outfitmule();  
+}
+
+export function TurnedOnMuleLight(/**@type {t.TurnedOnMuleLight}*/msg)
+{
+  if (msg.pc != g.myColor)
+    r.TurnOnMuleLight(msg.pc, msg.lightColor);
 }

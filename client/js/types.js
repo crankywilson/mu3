@@ -74,6 +74,12 @@
 @typedef MuleOutfitAccepted
  @property {string} pc
  @property {number} newMoney
+ @property {number} resOutfit
+ @property {string} _mt
+
+@typedef TurnedOnMuleLight
+ @property {string} pc
+ @property {number} lightColor
  @property {string} _mt
 
 @typedef AvailableGames
@@ -252,6 +258,13 @@ export let GAMESTATE = {
 /**@returns {RequestMuleOutfit}*/ export function RequestMuleOutfit(
  /**@type {string}*/ res,
 ) { return { _mt: 'RequestMuleOutfit' , res: res
+};}
+
+/**@returns {TurnedOnMuleLight}*/ export function TurnedOnMuleLight(
+ /**@type {string}*/ pc,
+ /**@type {number}*/ lightColor,
+) { return { _mt: 'TurnedOnMuleLight' , pc: pc
+ , lightColor: lightColor
 };}
 
 /**@returns {CreateGame}*/ export function CreateGame(
