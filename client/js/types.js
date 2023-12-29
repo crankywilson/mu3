@@ -22,6 +22,14 @@
  @property {number} destz
  @property {string} _mt
 
+@typedef NewMuleDest
+ @property {string} pc
+ @property {number} x
+ @property {number} z
+ @property {number} destx
+ @property {number} destz
+ @property {string} _mt
+
 @typedef UpdateGameState
  @property {GameState} gs
  @property {string} _mt
@@ -32,6 +40,20 @@
 
 @typedef PlayerRejoined
  @property {Player} p
+ @property {string} _mt
+
+@typedef MuleRequest
+ @property {string} _mt
+
+@typedef MuleObtained
+ @property {string} pc
+ @property {number} newMoney
+ @property {number} numMules
+ @property {string} _mt
+
+@typedef MuleDenied
+ @property {string} pc
+ @property {string} reason
  @property {string} _mt
 
 @typedef AvailableGames
@@ -109,7 +131,7 @@
 @typedef LandLot
  @property {Player?} owner
  @property {number} mNum
- @property {float[]} mg
+ @property {number[]} mg
  @property {number} res
 
 @typedef Game
@@ -119,6 +141,8 @@
  @property {Player[]} players
  @property {Player} colony
  @property {GameState} state
+ @property {number} mules
+ @property {number} mulePrice
 
 @typedef {(
  'WAITINGFORALLJOIN'|
@@ -175,6 +199,22 @@ export let GAMESTATE = {
  , destx: destx
  , destz: destz
 };}
+
+/**@returns {NewMuleDest}*/ export function NewMuleDest(
+ /**@type {string}*/ pc,
+ /**@type {number}*/ x,
+ /**@type {number}*/ z,
+ /**@type {number}*/ destx,
+ /**@type {number}*/ destz,
+) { return { _mt: 'NewMuleDest' , pc: pc
+ , x: x
+ , z: z
+ , destx: destx
+ , destz: destz
+};}
+
+/**@returns {MuleRequest}*/ export function MuleRequest(
+) { return { _mt: 'MuleRequest'};}
 
 /**@returns {CreateGame}*/ export function CreateGame(
  /**@type {string}*/ name,

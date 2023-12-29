@@ -4,6 +4,24 @@ import * as t from './types.js';
 /** @type {import('../three/Three.js')} */ //@ts-ignore
 let THREE = null;  // initialized in setup.js
 
+/**
+@typedef {import("./types.js").Player} Player 
+*/
+
+
+// BMW -- we need a setdest functiom that communicates to server!!!!
+function setDest()
+{
+}
+
+function sellMule()
+{
+}
+
+function headToBottomBuilding()
+{
+}
+
 
 let animating = false;
 let camTargetIsSettlement = false;
@@ -18,6 +36,8 @@ let cptarget  = cpfar;
 let crxtarget = crxfar;
 let readyToRender = false;
 
+const xlocs = [1.08,.36,-.38,-1.1];
+const zlocs = [-1.2,1.2];
 
 export function initTHREERef(/** @type {import('../three/Three.js')} */r)
 {
@@ -143,6 +163,11 @@ export function camShowingSettlement()
   return g.camera.position.equals(cpset);
 }
 
+function muleMovingIndepently(/**@type {Player}*/p)
+{
+  return (p.mule != null && p.mule.dest != null);
+}
+
 export async function SetupMounds()
 {
   await g.init3DComplete;
@@ -173,7 +198,7 @@ const playerstilltime = .55;
 const mulestilltime = 7;
 
 function AnimatePlayerAndMule(
-/**@type {import("./types.js").Player}*/ p, 
+/**@type {Player}*/ p, 
 /**@type {string}*/ c,
 /**@type {number}*/ delta)
 {
@@ -187,10 +212,16 @@ function AnimatePlayerAndMule(
 
     g.mixer[c].update(delta * p.dest.spd);
 
-    if (p.mule != null)
+    if (p.mule != null && p.mule.dest == null)
+    {
+      let newTime = g.mixerMule[c].time + (delta * p.dest.spd * 12);
+      if (newTime > 20.5)
+        newTime -= 16.5;
+      g.mixerMule[c].setTime(newTime);
       moveTowards(g.models.playerMule[c], 
         new Vector3(p.dest.x, 0, p.dest.z), delta * p.dest.spd);
-        
+    }   
+    
     if (moveTowards(playerModel, 
           new Vector3(p.dest.x, 0, p.dest.z), delta * p.dest.spd))
     {
@@ -199,8 +230,8 @@ function AnimatePlayerAndMule(
 
       p.dest = null;
       playerModel.rotation.y = 0;
-      g.mixer[p.color].setTime(playerstilltime);
-      if (g.myColor == c && g.destCallback != null)
+      g.mixer[c].setTime(playerstilltime);
+      if (g.myColor == c && g.destCallback != null && !muleMovingIndepently(p))
       {
         let cb = g.destCallback;
         g.destCallback = null;
@@ -208,17 +239,25 @@ function AnimatePlayerAndMule(
       }
     }
   }
-  else if (p.mule != null && p.mule.dest != null)
+  // this is for independent mule movement
+  if (p.mule != null && p.mule.dest != null)
   {
     let muleModel = g.models.playerMule[c];
 
-    /* should we rotate model to face dest? */
-    /* think we need to do mixer stuff here */
+    muleModel.rotation.y = Math.atan2(
+      p.mule.dest.x - muleModel.position.x,
+      p.mule.dest.z - muleModel.position.z);
+
+    let newTime = g.mixerMule[c].time + (delta * p.mule.dest.spd * 12);
+      if (newTime > 20.5)
+        newTime -= 16.5;
+      g.mixerMule[c].setTime(newTime);
 
     if (moveTowards(muleModel,
       new Vector3(p.mule.dest.x, 0, p.mule.dest.z), delta * p.mule.dest.spd))
     {
       p.mule.dest = null;
+      g.mixerMule[c].setTime(mulestilltime);
       if (g.myColor == c && g.destCallback != null)
       {
         let cb = g.destCallback;
@@ -279,7 +318,6 @@ export function settlementMouseMove(/**@type {number}*/x, /**@type {number}*/y)
   }
   else {
     let o =getLandLotObjForMouse(x, y);
-    console.log(o);
     if (o.e != 0) {
       ui.msg.innerText = "Leave Settlement";
       ui.msg.style.backgroundColor = "rgba(255,255,255,.4)";
@@ -290,18 +328,17 @@ export function settlementMouseMove(/**@type {number}*/x, /**@type {number}*/y)
   return null;
 }
 
-const firstBuyMule = "You must first buy a M.U.L.E. to outfit";
-function clearBuyMuleMsg()
+async function sleep(/**@type {number}*/msdur)
 {
-  if (ui.msgblink.innerText == firstBuyMule)
-    ui.msgblink.innerText = "";
+  return new Promise((r)=>setTimeout(r, msdur));
 }
 
-const noMulesAllowed = "Sorry, no M.U.L.E.'s allowed";
-function clearNoMuleMsg()
+async function tempBlink(/**@type {string}*/msg, /**@type {number}*/msdur=5000)
 {
-  if (ui.msgblink.innerText == noMulesAllowed)
-    ui.msgblink.innerText = "";
+  ui.msgblink.innerText = msg;
+  await sleep(msdur);
+  if (ui.msgblink.innerText == msg)
+  ui.msgblink.innerText = "";
 }
 
 /** @type {Object.<string, number>} */
@@ -331,6 +368,10 @@ function settlementClearOperation()
   currentOp = "";
 }
 
+function requestMule()
+{
+  send(t.MuleRequest());
+}
 
 export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
 {
@@ -342,17 +383,25 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
   {
     settlementStartOperation(sel);
     let muleOutfit = -1;
+    let bottomLoc = -1
     switch (sel) {
-      case "Cantina":
-      case "Assay":
-      case "Land":
-        if (g.me().mule != null)
+      case "Mule":    if (bottomLoc == -1) bottomLoc = 0;
+      case "Cantina": if (bottomLoc == -1) bottomLoc = 1;
+      case "Assay":   if (bottomLoc == -1) bottomLoc = 2;
+      case "Land":    if (bottomLoc == -1) bottomLoc = 3;
+        if (g.me().mule != null && bottomLoc > 0)
         {
-          ui.msgblink.innerText = noMulesAllowed;
-          setTimeout(clearNoMuleMsg, 7500);
+          tempBlink("Sorry, no M.U.L.E.'s allowed", 7500);
           settlementClearOperation();
           return;
         }
+        g.me().dest = {x: xlocs[bottomLoc], z: g.me().z, spd:1.5};
+        if (bottomLoc == 0 && g.me().mule == null)
+          g.destCallback = requestMule;
+        else if (bottomLoc == 0 && g.me().mule != null)
+          g.destCallback = sellMule;
+        else if (bottomLoc == 1)
+          g.destCallback = headToBottomBuilding;
         break;
       case "Food":
         muleOutfit = 0; break;
@@ -367,14 +416,31 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
     {
       if (g.me().mule == null)
       {
-        ui.msgblink.innerText = firstBuyMule;
-        setTimeout(clearBuyMuleMsg, 7500);
+        tempBlink("You must first buy a M.U.L.E. to outfit", 7500);
         settlementClearOperation();
         return;
       }
+      let delta = .2;
+      if (xlocs[muleOutfit] < g.models.player[g.myColor].position.x)
+        delta = -delta;
+      g.me().dest = {x: xlocs[muleOutfit] + delta, z: g.me().z, spd:1.5};
     }
   }
+}
 
+export function buymule()
+{
+  let model = g.models.playerMule[g.myColor];
+  model.position.x = xlocs[0];
+  model.position.z = zlocs[1];
+  g.scene.add(model);
+
+  g.me().mule = {x:model.position.x,
+                 z:model.position.z,
+                 resOutfit:-1,
+                 dest:{x:model.position.x, 
+                       z:g.models.player[g.myColor].position.z,
+                       spd:1.5}};
 }
 
 

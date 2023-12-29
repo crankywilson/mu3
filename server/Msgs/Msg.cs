@@ -55,6 +55,21 @@ record NewDest (
   }
 }
 
+record NewMuleDest (
+  PlayerColor pc,
+  double x,
+  double z,
+  double destx,
+  double destz
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    p.x = x; p.z = z; p.dest = null;
+    g.send(this);
+  }
+}
+
 record UpdateGameState (
   GameState gs
 ) : Msg;

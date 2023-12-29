@@ -12,6 +12,7 @@ classFiles = [
 typemappings = {
   'int': 'number',
   'double': 'number',
+  'float': 'number',
   'string': 'string',
   'bool': 'boolean',
   'PlayerColor': 'string',

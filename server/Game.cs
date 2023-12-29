@@ -20,13 +20,14 @@ enum GameState {
 
 class Game
 {
-  [JsonInclude] public LandLotDict              landlots = new();
-  [JsonInclude] public int                      month    = 1;
-  [JsonInclude] public string                   name     = "(Unnamed)";
-  [JsonInclude] public List<Player>             players  = new List<Player>();
-  [JsonInclude] public Player                   colony   = new Player();
-  [JsonInclude] public GameState                state    = GameState.WAITINGFORALLJOIN;
-
+  [JsonInclude] public LandLotDict     landlots  = new();
+  [JsonInclude] public int             month     = 1;
+  [JsonInclude] public string          name      = "(Unnamed)";
+  [JsonInclude] public List<Player>    players   = new List<Player>();
+  [JsonInclude] public Player          colony    = new Player();
+  [JsonInclude] public GameState       state     = GameState.WAITINGFORALLJOIN;
+  [JsonInclude] public int             mules     = 14;
+  [JsonInclude] public int             mulePrice = 100;
   public bool started = true;     // this gets set to false when created on web, but is true by default for deserialization
   public Player? starter = null;
   public bool active = true;

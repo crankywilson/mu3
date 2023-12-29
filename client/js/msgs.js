@@ -125,3 +125,13 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
       r.switchCamView(true);
   }
 }
+
+export function MuleObtained(/**@type {t.MuleObtained}*/ msg)
+{
+  setPlboxSpanText(msg.pc, MONEYSPAN, msg.newMoney);
+  ui.mulecount.innerText = msg.numMules.toString();
+  if (g.myColor != msg.pc) return;
+  
+  r.buymule();  
+  
+}
