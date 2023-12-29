@@ -9,9 +9,23 @@ let THREE = null;  // initialized in setup.js
 */
 
 
-// BMW -- we need a setdest functiom that communicates to server!!!!
-function setDest()
+function setMyDest(/**@type {number}*/ x,/**@type {number}*/ z, 
+                   /**@type {number}*/ spd)
 {
+  let my = g.models.player[g.myColor];
+  g.me().dest = {x:x, z:z, spd:spd};
+  send(t.NewDest(g.myColor, my.position.x, my.position.z, x, z, spd));
+}
+
+function setMyMuleDest(/**@type {number}*/ x,/**@type {number}*/ z,
+                       /**@type {number}*/ spd)
+{
+  let my = g.me();
+  let myMule = g.models.playerMule[g.myColor];
+  if (my.mule == null)
+    my.mule = {resOutfit:-1, x:myMule.position.x, z:myMule.position.z, dest:null};
+  my.mule.dest = { x:x, z:z, spd:spd };
+  send(t.NewMuleDest(g.myColor, myMule.position.x, myMule.position.z, x, z, spd));
 }
 
 function sellMule()
@@ -38,6 +52,7 @@ let readyToRender = false;
 
 const xlocs = [1.08,.36,-.38,-1.1];
 const zlocs = [-1.2,1.2];
+const muleoffset = .55;
 
 export function initTHREERef(/** @type {import('../three/Three.js')} */r)
 {
@@ -231,6 +246,10 @@ function AnimatePlayerAndMule(
       p.dest = null;
       playerModel.rotation.y = 0;
       g.mixer[c].setTime(playerstilltime);
+
+      if (p.mule != null && p.mule.dest == null)
+        g.mixerMule[c].setTime(mulestilltime);
+
       if (g.myColor == c && g.destCallback != null && !muleMovingIndepently(p))
       {
         let cb = g.destCallback;
@@ -246,7 +265,7 @@ function AnimatePlayerAndMule(
 
     muleModel.rotation.y = Math.atan2(
       p.mule.dest.x - muleModel.position.x,
-      p.mule.dest.z - muleModel.position.z);
+      muleModel.position.z - p.mule.dest.z);
 
     let newTime = g.mixerMule[c].time + (delta * p.mule.dest.spd * 12);
       if (newTime > 20.5)
@@ -256,8 +275,15 @@ function AnimatePlayerAndMule(
     if (moveTowards(muleModel,
       new Vector3(p.mule.dest.x, 0, p.mule.dest.z), delta * p.mule.dest.spd))
     {
+      if (c == g.myColor)
+        send(t.MuleDestReached(c, p.mule.dest.x, p.mule.dest.z));
+
       p.mule.dest = null;
       g.mixerMule[c].setTime(mulestilltime);
+      muleModel.rotation.y = Math.atan2(
+        g.models.player[c].position.x - muleModel.position.x,
+        muleModel.position.z - g.models.player[c].position.z);
+
       if (g.myColor == c && g.destCallback != null)
       {
         let cb = g.destCallback;
@@ -395,7 +421,7 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
           settlementClearOperation();
           return;
         }
-        g.me().dest = {x: xlocs[bottomLoc], z: g.me().z, spd:1.5};
+        setMyDest(xlocs[bottomLoc], g.me().z, 1.5);
         if (bottomLoc == 0 && g.me().mule == null)
           g.destCallback = requestMule;
         else if (bottomLoc == 0 && g.me().mule != null)
@@ -420,7 +446,7 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
         settlementClearOperation();
         return;
       }
-      let delta = .2;
+      let delta = muleoffset;
       if (xlocs[muleOutfit] < g.models.player[g.myColor].position.x)
         delta = -delta;
       g.me().dest = {x: xlocs[muleOutfit] + delta, z: g.me().z, spd:1.5};
@@ -430,17 +456,20 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
 
 export function buymule()
 {
-  let model = g.models.playerMule[g.myColor];
-  model.position.x = xlocs[0];
-  model.position.z = zlocs[1];
-  g.scene.add(model);
+  let modelm = g.models.playerMule[g.myColor];
+  let modelp = g.models.player[g.myColor];
+  let my = g.me();
 
-  g.me().mule = {x:model.position.x,
-                 z:model.position.z,
-                 resOutfit:-1,
-                 dest:{x:model.position.x, 
-                       z:g.models.player[g.myColor].position.z,
-                       spd:1.5}};
+  modelm.position.x = xlocs[0];
+  modelm.position.z = zlocs[1];
+  g.scene.add(modelm);
+
+  setMyMuleDest(modelm.position.x, modelp.position.z, 1.5);
+
+  setMyDest(modelp.position.x - muleoffset,
+            modelp.position.z, 1.5);
+
+  g.destCallback = settlementClearOperation;
 }
 
 

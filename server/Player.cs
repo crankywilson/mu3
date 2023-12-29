@@ -16,7 +16,7 @@ class Dest
   [JsonInclude] public double x = 0.0;
   [JsonInclude] public double z = 0.0;
   [JsonInclude] public double spd = 0.0;
-
+  public Dest(double x, double z, double spd) { this.x=x; this.z=z; this.spd=spd; }
 }
 
 class MuleData

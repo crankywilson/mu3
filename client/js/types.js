@@ -8,28 +8,6 @@
 @typedef Continue
  @property {string} _mt
 
-@typedef DestReached
- @property {string} pc
- @property {number} x
- @property {number} z
- @property {string} _mt
-
-@typedef NewDest
- @property {string} pc
- @property {number} x
- @property {number} z
- @property {number} destx
- @property {number} destz
- @property {string} _mt
-
-@typedef NewMuleDest
- @property {string} pc
- @property {number} x
- @property {number} z
- @property {number} destx
- @property {number} destz
- @property {string} _mt
-
 @typedef UpdateGameState
  @property {GameState} gs
  @property {string} _mt
@@ -54,6 +32,36 @@
 @typedef MuleDenied
  @property {string} pc
  @property {string} reason
+ @property {string} _mt
+
+@typedef DestReached
+ @property {string} pc
+ @property {number} x
+ @property {number} z
+ @property {string} _mt
+
+@typedef MuleDestReached
+ @property {string} pc
+ @property {number} x
+ @property {number} z
+ @property {string} _mt
+
+@typedef NewDest
+ @property {string} pc
+ @property {number} x
+ @property {number} z
+ @property {number} destx
+ @property {number} destz
+ @property {number} destspd
+ @property {string} _mt
+
+@typedef NewMuleDest
+ @property {string} pc
+ @property {number} x
+ @property {number} z
+ @property {number} destx
+ @property {number} destz
+ @property {number} destspd
  @property {string} _mt
 
 @typedef AvailableGames
@@ -178,11 +186,23 @@ export let GAMESTATE = {
 /**@returns {Continue}*/ export function Continue(
 ) { return { _mt: 'Continue'};}
 
+/**@returns {MuleRequest}*/ export function MuleRequest(
+) { return { _mt: 'MuleRequest'};}
+
 /**@returns {DestReached}*/ export function DestReached(
  /**@type {string}*/ pc,
  /**@type {number}*/ x,
  /**@type {number}*/ z,
 ) { return { _mt: 'DestReached' , pc: pc
+ , x: x
+ , z: z
+};}
+
+/**@returns {MuleDestReached}*/ export function MuleDestReached(
+ /**@type {string}*/ pc,
+ /**@type {number}*/ x,
+ /**@type {number}*/ z,
+) { return { _mt: 'MuleDestReached' , pc: pc
  , x: x
  , z: z
 };}
@@ -193,11 +213,13 @@ export let GAMESTATE = {
  /**@type {number}*/ z,
  /**@type {number}*/ destx,
  /**@type {number}*/ destz,
+ /**@type {number}*/ destspd,
 ) { return { _mt: 'NewDest' , pc: pc
  , x: x
  , z: z
  , destx: destx
  , destz: destz
+ , destspd: destspd
 };}
 
 /**@returns {NewMuleDest}*/ export function NewMuleDest(
@@ -206,15 +228,14 @@ export let GAMESTATE = {
  /**@type {number}*/ z,
  /**@type {number}*/ destx,
  /**@type {number}*/ destz,
+ /**@type {number}*/ destspd,
 ) { return { _mt: 'NewMuleDest' , pc: pc
  , x: x
  , z: z
  , destx: destx
  , destz: destz
+ , destspd: destspd
 };}
-
-/**@returns {MuleRequest}*/ export function MuleRequest(
-) { return { _mt: 'MuleRequest'};}
 
 /**@returns {CreateGame}*/ export function CreateGame(
  /**@type {string}*/ name,

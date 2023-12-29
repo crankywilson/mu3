@@ -133,5 +133,18 @@ export function MuleObtained(/**@type {t.MuleObtained}*/ msg)
   if (g.myColor != msg.pc) return;
   
   r.buymule();  
-  
+}
+
+export function DestReached(/**@type {t.DestReached}*/msg)
+{
+  if (msg.pc != g.myColor)
+  {
+  }
+}
+
+export function MuleDestReached(/**@type {t.MuleDestReached}*/msg)
+{
+  if (msg.pc != g.myColor)
+  {
+  }
 }
