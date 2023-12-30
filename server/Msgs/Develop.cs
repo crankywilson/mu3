@@ -107,7 +107,8 @@ record RequestMuleOutfit (
       return;
     }
 
-    int cost = ((int)rt+1) * 25;
+    int r = (int)rt;
+    int cost = (r+1) * 25;
     if (p.money < cost)
     {
        p.send(new MuleOutfitDenied("You can't afford this outfitting"));
@@ -117,7 +118,10 @@ record RequestMuleOutfit (
     // up to client to ensure player actually has a MULE
 
     p.money -= cost;
-    g.send(new MuleOutfitAccepted(p.color, p.money, (int)rt));
+    if (p.mule == null)
+      p.mule = new();
+    p.mule.resOutfit = r;
+    g.send(new MuleOutfitAccepted(p.color, p.money, r));
   }
 }
 
@@ -141,3 +145,29 @@ record TurnedOnMuleLight (
     g.send(this);
   }
 }
+
+record InstallMule (
+  int e,
+  int n
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    var ll = g.landlots[new LandLotID(e,n)];
+    int oldr = ll.res;
+    ll.res = p.mule?.resOutfit ?? -1;
+    g.send(new MuleInstalled(p.color, ll.res, e, n, oldr));
+    if (oldr != -1 && p.mule is not null)
+      p.mule.resOutfit = oldr;
+    else
+      p.mule = null;
+  }
+}
+
+record MuleInstalled (
+  PlayerColor pc,
+  int resType,
+  int e,
+  int n,
+  int existingResType
+) : Msg;

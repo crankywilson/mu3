@@ -3,7 +3,8 @@ import {
   camShowingSettlement,
   getLandLotObjForMouse,
   settlementMouseMove,
-  settlementClick
+  settlementClick,
+  goInSettlement
 } from "./ren3d.js";
 
 /**
@@ -18,6 +19,8 @@ import {
 @typedef {import('../three/Three.js').Group} Group 
 @typedef {import('../three/Three.js').AnimationMixer} Mixer 
 @typedef {import('../three/Three.js').SpotLight} SpotLight 
+@typedef {import('../three/Three.js').Mesh} Mesh 
+@typedef {import('../three/Three.js').MeshPhongMaterial} MeshPhongMaterial 
 **/
 
 /** @type { function? } */
@@ -50,6 +53,11 @@ export let g =
   /** @returns {t.Player} */ //@ts-ignore
   me: function() { return this.players[this.myColor]; }, 
   
+  /** @returns {Object3D} */ //@ts-ignore
+  myModel: function() { return this.models.player[this.myColor]; }, 
+
+  mySettlementZ : 0,
+
   models: {
     /** @type {Object3D} */ //@ts-ignore
     mule: null,
@@ -109,7 +117,9 @@ export let g =
     /** @type {Texture[]} */ //@ts-ignore
     crystiteLevelTexture: [null, null, null, null],
     /** @type {Texture[]} */ //@ts-ignore
-    buldingResTexture: [null, null, null, null]
+    buldingResTexture: [null, null, null, null],
+    /** @type {Object.<string, Texture>} */
+    flag: {}
   },
 
   materials: {
@@ -151,11 +161,16 @@ export let g =
   landlots: {},
   mgPlaced: false,
 
-  /** @type {Object3D} */ // @ts-ignore
+  /** @type {Mesh} */ // @ts-ignore
   landlotOverlay: null,
+
+   /** @type {MeshPhongMaterial} */ // @ts-ignore
+   lloMaterial: null,
 
   /** @type {t.GameState} */
   state: "?",
+
+  waitingForServerResponse: false,
 
   /** @type {WebSocket} */ // @ts-ignore
   ws: null,
@@ -384,23 +399,12 @@ function highlightPlot(/**@type {string}*/k)
   }
 }
 
-let _lastX = 0;
-let _lastY = 0;
 export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
 {
-  let x = 0;
-  let y = 0;
+  if (g.waitingForServerResponse) return;
 
-  if (mouseEvent == null) {
-    x = _lastX;
-    y = _lastY;
-  }
-  else {
-    x = mouseEvent.pageX;
-    y = mouseEvent.pageY;
-    _lastX = x;
-    _lastY = y;
-  }
+  let x = mouseEvent.pageX;
+  let y = mouseEvent.pageY;
 
   x *= window.devicePixelRatio;
   y *= window.devicePixelRatio;
@@ -421,11 +425,19 @@ export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
       highlightPlot(k);
   }
 }
-  
 
+function llocolor(/**@type {string}*/s)
+{
+  if (s=="R") return 0xff0000;
+  if (s=="Y") return 0xffff00;
+  if (s=="G") return 0x00ff00;
+  return 0x0000ff;
+}
 
 export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
 {
+  if (g.waitingForServerResponse) return;
+  
   let x = mouseEvent.pageX;
   let y = mouseEvent.pageY;
 
@@ -447,8 +459,34 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
 
     let o = getLandLotObjForMouse(x, y);
 
-    g.destCallback = null;
-    g.me().dest = {x: o.e * 4, z: o.n * -4, spd: 2.5};
+    let dest = {x: o.e * 4, z: o.n * -4, spd: 2.5};
+    if (dest.x == g.myModel().position.x &&
+        dest.z == g.myModel().position.z)
+    {
+      if (g.me().mule != null)
+      {
+        g.lloMaterial.color.set(llocolor(g.myColor)); 
+        g.waitingForServerResponse = true;
+        send(t.InstallMule(o.e, o.n));
+      }
+      return;
+    }
+
+    if (dest.x == 0 && dest.z == 0)
+    {
+      if (g.myModel().position.x < 0)
+        dest.x = -2;
+      else
+        dest.x = 2;
+      dest.z = g.mySettlementZ;
+
+      g.destCallback = goInSettlement;
+    }
+
+    send(t.NewDest(g.myColor, g.myModel().position.x,
+      g.myModel().position.z, dest.x, dest.z, dest.spd));
+
+    g.me().dest = dest;
   }
 /*
   if (g.state == st.SCORE || g.state == st.PRODUCTION_DONE ||

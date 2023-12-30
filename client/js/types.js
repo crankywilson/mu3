@@ -82,6 +82,19 @@
  @property {number} lightColor
  @property {string} _mt
 
+@typedef InstallMule
+ @property {number} e
+ @property {number} n
+ @property {string} _mt
+
+@typedef MuleInstalled
+ @property {string} pc
+ @property {number} resType
+ @property {number} e
+ @property {number} n
+ @property {number} existingResType
+ @property {string} _mt
+
 @typedef AvailableGames
  @property {string[]} games
  @property {string} _mt
@@ -265,6 +278,13 @@ export let GAMESTATE = {
  /**@type {number}*/ lightColor,
 ) { return { _mt: 'TurnedOnMuleLight' , pc: pc
  , lightColor: lightColor
+};}
+
+/**@returns {InstallMule}*/ export function InstallMule(
+ /**@type {number}*/ e,
+ /**@type {number}*/ n,
+) { return { _mt: 'InstallMule' , e: e
+ , n: n
 };}
 
 /**@returns {CreateGame}*/ export function CreateGame(

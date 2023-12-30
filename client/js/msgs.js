@@ -41,7 +41,8 @@ function showScores(/**@type {{s: number, c: string}[]}*/ scores,
     ui.plbox(ci.c).style.left = lp + '%';
 
     lpi++;
-    setPlboxSpanText(ci.c, BOTTOMSPAN, "Score: " + ci.s + "  (#" + lpi + ")");
+    if (g.state == "SCORE")
+      setPlboxSpanText(ci.c, BOTTOMSPAN, "Score: " + ci.s + "  (#" + lpi + ")");
   }
 
   if (g.state != "SCORE") return;
@@ -190,4 +191,9 @@ export function TurnedOnMuleLight(/**@type {t.TurnedOnMuleLight}*/msg)
 {
   if (msg.pc != g.myColor)
     r.TurnOnMuleLight(msg.pc, msg.lightColor);
+}
+
+export function MuleInstalled(/**@type {t.MuleInstalled}*/msg)
+{
+  r.MuleInstalled(msg);
 }

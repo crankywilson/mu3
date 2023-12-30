@@ -270,7 +270,35 @@ async function setup3d()
   }
 
   /* land models */
-  // fill in
+	let gltf = await l.loadAsync('models/plants/plants.gltf');
+  g.models.prod[0] = gltf.scene;
+  g.models.prod[0].scale.set(100,50,100);
+  g.models.prod[0].rotation.y = Math.PI;
+	gltf = await l.loadAsync('models/energy/energy.gltf');
+  g.models.prod[1] = gltf.scene;
+  g.models.prod[1].scale.set(.5,.5,.5);
+  g.models.prod[1].rotation.y = 1.8;
+  gltf = await l.loadAsync('models/excv/excv.gltf');
+  g.models.prod[2] = gltf.scene;
+  g.models.prod[2].scale.set(10,10,10);
+  g.models.prod[2].rotation.y = -1;
+	gltf = await l.loadAsync('models/drill/drill.gltf');
+  g.models.prod[3] = gltf.scene;
+  g.models.prod[3].scale.set(30,30,30);
+
+  gltf = await l.loadAsync('models/blueflag/scene.gltf');
+  g.models.flag = gltf.scene;
+  g.models.flag.scale.set(.2,.2,.2);
+  mixer = new THREE.AnimationMixer(g.models.flag);
+  action = mixer.clipAction( gltf.animations[ 0 ] );
+  action.play();
+
+  const tl = new THREE.TextureLoader();
+  g.textures.flag["R"] = await tl.loadAsync('img/redf.png');
+  g.textures.flag["Y"] = await tl.loadAsync('img/yellowf.png');
+  g.textures.flag["G"] = await tl.loadAsync('img/greenf.png');
+  g.textures.flag["B"] = await tl.loadAsync('img/bluef.png');
+
 
   let FBXLoader = await import('../three/addons/FBXLoader.js');
   let fbxLoader = new FBXLoader.FBXLoader();
@@ -284,8 +312,10 @@ async function setup3d()
   if (g.state == "?" || g.players["B"] != null)
     fbxloaded(await fbxLoader.loadAsync('./models/blue.fbx'), 'B');
 
-  g.landlotOverlay = new THREE.Mesh(new THREE.PlaneGeometry(4, 4, 1, 1), new THREE.MeshPhongMaterial({ color: 0xFFFFFF, transparent: true, opacity: .5 }));
+  g.lloMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, transparent: true, opacity: .5 });
+  g.landlotOverlay = new THREE.Mesh(new THREE.PlaneGeometry(4, 4, 1, 1), g.lloMaterial);
   g.landlotOverlay.rotation.x = -90 * Math.PI / 180;
+  
 
   if (mark3DInitialized != null)
     mark3DInitialized();  // causes awaiting on g.init3DComplete to proceed
@@ -417,8 +447,6 @@ function setup()
   setup3d();
   setupPending();
   sync_rygb();
-
-  document.onkeydown = (e)=>{ if (e.key == 'z') r.switchCamView(); };
 }
 
 setup();

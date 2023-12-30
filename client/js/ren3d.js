@@ -12,7 +12,7 @@ let THREE = null;  // initialized in setup.js
 function setMyDest(/**@type {number}*/ x,/**@type {number}*/ z, 
                    /**@type {number}*/ spd)
 {
-  let my = g.models.player[g.myColor];
+  let my = g.myModel();
   g.me().dest = {x:x, z:z, spd:spd};
   send(t.NewDest(g.myColor, my.position.x, my.position.z, x, z, spd));
 }
@@ -44,7 +44,7 @@ function requestMuleOutfit()
 export function outfitmule()
 {
   tempBlink("Outfitting MULE for " + currentOp);
-  g.models.player[g.myColor].rotation.y = 3.14;
+  g.myModel().rotation.y = 3.14;
   setMyMuleDest(g.models.playerMule[g.myColor].position.x, zlocs[0], 1.5);
   g.destCallback = returnOutfittedMule;
 }
@@ -52,7 +52,7 @@ export function outfitmule()
 function returnOutfittedMule()
 {
   setMyMuleDest(g.models.playerMule[g.myColor].position.x,
-                g.models.player[g.myColor].position.z, 1.5);
+                g.myModel().position.z, 1.5);
 
   let sl = g.muleLight[g.myColor];
 
@@ -77,7 +77,7 @@ export function TurnOnMuleLight(/** @type {string}*/playerColor , /** @type {num
 function outfittedMuleReturned()
 {
   ui.msgblink.innerText = "";
-  g.models.player[g.myColor].rotation.y = 0;
+  g.myModel().rotation.y = 0;
   settlementClearOperation();
 }
 
@@ -459,11 +459,47 @@ function requestMule()
   send(t.MuleRequest());
 }
 
+function headOutOfSettlement()
+{
+  setMyDest(g.myModel().position.x < 0 ? -4 : 4, g.myModel().position.z, 2.5);
+  switchCamView(false);
+}
+
+export function goInSettlement()
+{
+  setMyDest(0, g.mySettlementZ, 1.5);
+  switchCamView(true);
+}
+
+export function MuleInstalled(/**@type {t.MuleInstalled}*/msg)
+{
+  g.lloMaterial.color.set(0xffffff);
+  g.scene.remove(g.landlotOverlay);
+  g.waitingForServerResponse = false;
+  
+  let p = g.players[msg.pc];
+  if (p == null) return;
+  let mule = p.mule;
+  if (msg.existingResType > -1 && mule != null)
+    mule.resOutfit = msg.existingResType;
+  else {
+    p.mule = null;
+    g.scene.remove(g.models.playerMule[msg.pc]);
+  }
+
+  let m = g.models.prod[msg.resType].clone();
+  m.position.x = msg.e*4;
+  m.position.z = -msg.n*4;
+  g.scene.add(m);
+}
+
 export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
 {
   let sel = settlementMouseMove(x,y);
   if (typeof sel == "number")
   {
+    setMyDest(sel < 0 ? -1.7 : 1.7, g.myModel().position.z, 1.5);
+    g.destCallback = headOutOfSettlement;
   }
   else if (typeof sel == "string")
   {
@@ -481,7 +517,7 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
           settlementClearOperation();
           return;
         }
-        setMyDest(xlocs[bottomLoc], g.me().z, 1.5);
+        setMyDest(xlocs[bottomLoc], g.myModel().position.z, 1.5);
         if (bottomLoc == 0 && g.me().mule == null)
           g.destCallback = requestMule;
         else if (bottomLoc == 0 && g.me().mule != null)
@@ -508,16 +544,16 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
       }
       if (g.models.playerMule[g.myColor].position.x == xlocs[muleOutfit])
       {
-        setMyDest(g.models.player[g.myColor].position.x, 
-                  g.models.player[g.myColor].position.z, 1.5);
+        setMyDest(g.myModel().position.x, 
+                  g.myModel().position.z, 1.5);
       }
       else
       {
         let delta = muleoffset;
-        if (xlocs[muleOutfit] < g.models.player[g.myColor].position.x)
+        if (xlocs[muleOutfit] < g.myModel().position.x)
           delta = -delta;
         setMyDest(xlocs[muleOutfit] + delta, 
-            g.models.player[g.myColor].position.z, 1.5);
+            g.myModel().position.z, 1.5);
       }
       
       g.destCallback = requestMuleOutfit;
@@ -528,7 +564,7 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
 export function buymule()
 {
   let modelm = g.models.playerMule[g.myColor];
-  let modelp = g.models.player[g.myColor];
+  let modelp = g.myModel();
 
   modelm.position.x = xlocs[0];
   modelm.position.z = zlocs[1];
