@@ -367,14 +367,14 @@ export function LandLotStr(/**@type {number}*/e, /**@type {number}*/n)
   return ret;
 }
 
-function getE(/**@type {string}*/k)
+export function getE(/**@type {string}*/k)
 {
   let e = parseInt(k[1]);
   if (k[0] == 'W') e = -e;
   return e;
 }
 
-function getN(/**@type {string}*/k)
+export function getN(/**@type {string}*/k)
 {
   let n = parseInt(k[3]);
   if (k[2] == 'S') n = -n;

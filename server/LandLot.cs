@@ -45,7 +45,7 @@ class LandLotIDJsonConverter : JsonConverter<LandLotID>
 
 class LandLot
 {
-  [JsonInclude] public Player?      owner     = null;
+  [JsonInclude] public PlayerColor? owner     = null;
   [JsonInclude] public int          mNum      = 0;        // number of mounds
   [JsonInclude] public List<float>  mg        = new();    // mound Geometry
                 public int          crys      = 0;        // crystite level

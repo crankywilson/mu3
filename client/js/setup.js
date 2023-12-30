@@ -1,6 +1,6 @@
 
 import { g, ui, mark3DInitialized, send,
-         mouseMove, mouseClick, doubleClick 
+         mouseMove, mouseClick, doubleClick, LandLotStr 
        } from "./game.js";
 import * as t from "./types.js";
 import { initWS } from "./websock.js";
@@ -411,6 +411,22 @@ function sync_rygb()
   }
 }
 
+function debug(/**@type {KeyboardEvent} */ev)
+{
+  if (g.camera.position.z < 20) return;
+  let e = g.landlotOverlay.position.x / 4;
+  let n = g.landlotOverlay.position.z / -4;
+  let k = LandLotStr(e,n);
+  if (ev.key == "a") r.ClaimLot("R", k);
+  if (ev.key == "r") r.UnclaimLot(k);
+  if (ev.key == "f") r.MuleInstalled({_mt:"",pc:"R",resType:0,e:e,n:n,existingResType:-1});
+  if (ev.key == "e") r.MuleInstalled({_mt:"",pc:"R",resType:1,e:e,n:n,existingResType:-1});
+  if (ev.key == "s") r.MuleInstalled({_mt:"",pc:"R",resType:2,e:e,n:n,existingResType:-1});
+  if (ev.key == "c") r.MuleInstalled({_mt:"",pc:"R",resType:3,e:e,n:n,existingResType:-1});
+  if (ev.key == "u") r.MuleRemoved({_mt:"",pc:"R",e:e,n:n,existingResType:-1});
+}
+
+
 function setupPending()
 {
   ui.joingame.onclick = joinGameClick;
@@ -424,6 +440,8 @@ function setupPending()
   ui.rchangecolor.onchange = (e)=>{ send(t.SetColor(selTarget(e).value)); selTarget(e).value = selTarget(e).id[0].toUpperCase(); };
   ui.rkick.onclick         = (e)=>{ send(t.Kick(btnTarget(e).id[0].toUpperCase())); };
   ui.startgame.onclick     = (_)=>{ send(t.StartGame()); };
+
+  document.onkeydown = debug;
 }
 
 function onWindowResize() 

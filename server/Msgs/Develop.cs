@@ -171,3 +171,10 @@ record MuleInstalled (
   int n,
   int existingResType
 ) : Msg;
+
+record MuleRemoved (
+  PlayerColor pc,
+  int e,
+  int n,
+  int existingResType
+) : Msg;

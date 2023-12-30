@@ -95,6 +95,13 @@
  @property {number} existingResType
  @property {string} _mt
 
+@typedef MuleRemoved
+ @property {string} pc
+ @property {number} e
+ @property {number} n
+ @property {number} existingResType
+ @property {string} _mt
+
 @typedef AvailableGames
  @property {string[]} games
  @property {string} _mt
@@ -168,7 +175,7 @@
  @property {MuleData?} mule
 
 @typedef LandLot
- @property {Player?} owner
+ @property {string?} owner
  @property {number} mNum
  @property {number[]} mg
  @property {number} res

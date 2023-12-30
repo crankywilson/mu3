@@ -1,6 +1,6 @@
 import { Vector3, Object3D, Camera, 
          AnimationMixer, MeshLambertMaterial } from "../three/Three.js";
-import { g, send, LandLotStr } from "./game.js";
+import { g, send, LandLotStr, getE, getN } from "./game.js";
 import * as t from './types.js';
 /** @type {import('../three/Three.js')} */ //@ts-ignore
 let THREE = null;  // initialized in setup.js
@@ -9,6 +9,52 @@ let THREE = null;  // initialized in setup.js
 @typedef {import("./types.js").Player} Player 
 */
 
+
+let animating = false;
+let camTargetIsSettlement = false;
+/**@type {Vector3}*/ //@ts-ignore
+let cpset     = null; //Vector3(0, 1.8, 4)
+let crxset    = -.4;
+/**@type {Vector3}*/ //@ts-ignore
+let cpfar     = null; //Vector3(0, 32.7, 23)
+let crxfar    = -.935;
+let cptarget  = cpfar;
+//@ts-ignore
+let crxtarget = crxfar;
+let readyToRender = false;
+
+const xlocs = [1.08,.36,-.38,-1.1];
+const zlocs = [-1.2,1.2];
+const muleoffset = .55;
+
+
+/** @type {Object.<string, Object3D>} */
+let flags = {};
+/** @type {Object.<string, Object3D>} */
+let flagpoles = {};
+/** @type {Object.<string, Object3D>} */
+let landmodels = {};
+
+/** @type {Object.<string, Object3D>} */
+let nlines = {};
+/** @type {Object.<string, Object3D>} */
+let slines = {};
+/** @type {Object.<string, Object3D>} */
+let elines = {};
+/** @type {Object.<string, Object3D>} */
+let wlines = {};
+
+/** @type {Object.<string, AnimationMixer>} */
+let flagMixer = {};
+/** @type {MeshLambertMaterial} */ // @ts-ignore
+let poleMat = null;
+/** @type {Object.<string, Object3D>} */
+let riverHacks = {};
+
+const NSide = 1;
+const SSide = 2;
+const ESide = 3;
+const WSide = 4;
 
 function setMyDest(/**@type {number}*/ x,/**@type {number}*/ z, 
                    /**@type {number}*/ spd)
@@ -50,20 +96,34 @@ export function outfitmule()
   g.destCallback = returnOutfittedMule;
 }
 
+function setMuleLight(/**@type {string}*/pc, /**@type {number}*/ resType)
+{
+  let sl = g.muleLight[pc];
+
+  switch (resType) {
+    case 0: sl.color.set(0x00ff00); break;
+    case 1: sl.color.set(0xffff88); break;
+    case 2: sl.color.set(0x663311); break;
+    case 3: sl.color.set(0xaaddff); break;
+  }
+  sl.visible = true;
+}
+
+function resStrToNum(/**@type {string}*/ resStr)
+{
+  if (resStr == "Energy")   return 1;
+  if (resStr == "Smithore") return 2;
+  if (resStr == "Crystite") return 3;
+  return 0;
+}
+
 function returnOutfittedMule()
 {
   setMyMuleDest(g.models.playerMule[g.myColor].position.x,
                 g.myModel().position.z, 1.5);
 
-  let sl = g.muleLight[g.myColor];
-
-  switch (currentOp) {
-    case "Food": sl.color.set(0x00ff00); break;
-    case "Energy": sl.color.set(0xffff88); break;
-    case "Smithore": sl.color.set(0x663311); break;
-    case "Crystite": sl.color.set(0xaaddff); break;
-  }
-  sl.visible = true;
+  
+  setMuleLight(g.myColor, resStrToNum(currentOp));
 
   g.destCallback = outfittedMuleReturned;
 }
@@ -81,23 +141,6 @@ function outfittedMuleReturned()
   g.myModel().rotation.y = 0;
   settlementClearOperation();
 }
-
-let animating = false;
-let camTargetIsSettlement = false;
-/**@type {Vector3}*/ //@ts-ignore
-let cpset     = null; //Vector3(0, 1.8, 4)
-let crxset    = -.4;
-/**@type {Vector3}*/ //@ts-ignore
-let cpfar     = null; //Vector3(0, 32.7, 23)
-let crxfar    = -.935;
-let cptarget  = cpfar;
-//@ts-ignore
-let crxtarget = crxfar;
-let readyToRender = false;
-
-const xlocs = [1.08,.36,-.38,-1.1];
-const zlocs = [-1.2,1.2];
-const muleoffset = .55;
 
 export function initTHREERef(/** @type {import('../three/Three.js')} */r)
 {
@@ -189,6 +232,9 @@ function rotateCameraX()
       pct *= 4;
       g.camera.rotation.x = crxfar + (pct * (crxset - crxfar));
     }
+    else
+      g.camera.rotation.x = crxfar;
+
     ui.sett.style.visibility = "hidden";
   }
 }
@@ -482,36 +528,20 @@ export function goInSettlement()
 }
 
 
-/** @type {Object.<string, Object3D>} */
-let flags = {};
-/** @type {Object.<string, AnimationMixer>} */
-let flagMixer = {};
-/** @type {Object.<string, Object3D>} */
-let flagpoles = {};
-/** @type {MeshLambertMaterial} */ // @ts-ignore
-let poleMat = null;
-/** @type {Object.<string, Object3D>} */
-let riverHacks = {};
-/** @type {Object.<string, Object3D>} */
-let nlines = {};
-/** @type {Object.<string, Object3D>} */
-let slines = {};
-/** @type {Object.<string, Object3D>} */
-let elines = {};
-/** @type {Object.<string, Object3D>} */
-let wlines = {};
 
 globalThis.flags = flags;
 
 function addFlag(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}*/ pc)
 {
+  let k = LandLotStr(e, n);
+  if (k in flags) return;
+
   let f = g.models.flag.clone();
   let mixer = new THREE.AnimationMixer(f);
   let action = mixer.clipAction(g.flagAnim);
   action.play();
   g.scene.add(f);
   
-  let k = LandLotStr(e, n);
   flags[k] = f;
   flagMixer[k] = mixer;
 
@@ -549,7 +579,7 @@ function addFlag(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}*
 /** @type {Object.<string, MeshLambertMaterial>} */
 let plotboundMat = {};
 
-function addLines(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}*/ pc)
+function addLines(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}*/ pc, /**@type {number?}*/onlySide = null)
 {
   let k = LandLotStr(e, n);
   let mat = plotboundMat[pc];
@@ -566,25 +596,66 @@ function addLines(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}
 
   let bg = new THREE.BoxGeometry(4, .01, .1);
   let m = new THREE.Mesh( bg, mat );
-  nlines[k] = m;
-  m.position.set(e*4, 0, n*-4 - 1.95);
-  g.scene.add(m);
+  if ((onlySide == NSide || onlySide == null) && !(k in nlines))
+  {
+    nlines[k] = m;
+    m.position.set(e*4, 0, n*-4 - 1.95);
+    g.scene.add(m);
+  }
 
-  m = new THREE.Mesh( bg, mat );
-  slines[k] = m;
-  m.position.set(e*4, 0, n*-4 + 1.95);
-  g.scene.add(m);
+  if ((onlySide == SSide || onlySide == null) && !(k in slines))
+  {
+    m = new THREE.Mesh( bg, mat );
+    slines[k] = m;
+    m.position.set(e*4, 0, n*-4 + 1.95);
+    g.scene.add(m);
+  }
 
   bg = new THREE.BoxGeometry(.1, .01, 4);
-  m = new THREE.Mesh( bg, mat );
-  elines[k] = m;
-  m.position.set(e*4 + 1.95, 0, n*-4);
-  g.scene.add(m);
+  if ((onlySide == ESide || onlySide == null) && !(k in elines))
+  {
+    m = new THREE.Mesh( bg, mat );
+    elines[k] = m;
+    m.position.set(e*4 + 1.95, 0, n*-4);
+    g.scene.add(m);
+  }
 
-  m = new THREE.Mesh( bg, mat );
-  wlines[k] = m;
-  m.position.set(e*4 - 1.95, 0, n*-4);
-  g.scene.add(m);
+  if ((onlySide == WSide || onlySide == null) && !(k in wlines))
+  {
+    m = new THREE.Mesh( bg, mat );
+    wlines[k] = m;
+    m.position.set(e*4 - 1.95, 0, n*-4);
+    g.scene.add(m);
+  }
+}
+
+/** @param msg */
+export function MuleRemoved(/**@type {t.MuleRemoved}*/msg)
+{
+  g.lloMaterial.color.set(0xffffff);
+  g.scene.remove(g.landlotOverlay);
+  g.waitingForServerResponse = false;
+
+  let p = g.players[msg.pc];
+  if (p == null) return;
+ 
+  if (msg.existingResType > -1) {
+    p.mule = {x:p.x, z:p.z, resOutfit:msg.existingResType, dest:null};
+    if (g.models.playerMule[msg.pc].parent == null)
+      g.scene.add(g.models.playerMule[msg.pc]);
+    setMuleLight(msg.pc, msg.existingResType);
+  }
+
+  let k = LandLotStr(msg.e, msg.n);
+  if (k in landmodels)
+  {
+    let m = landmodels[k];
+    g.scene.remove(m);
+    delete landmodels[k];
+  }
+
+  g.landlots[k].res = -1;
+  syncLinesFlags(msg.e, msg.n);
 }
 
 export function MuleInstalled(/**@type {t.MuleInstalled}*/msg)
@@ -596,20 +667,232 @@ export function MuleInstalled(/**@type {t.MuleInstalled}*/msg)
   let p = g.players[msg.pc];
   if (p == null) return;
   let mule = p.mule;
-  if (msg.existingResType > -1 && mule != null)
+  if (msg.existingResType > -1 && mule != null) {
     mule.resOutfit = msg.existingResType;
+    setMuleLight(msg.pc, msg.existingResType);
+  }
   else {
     p.mule = null;
     g.scene.remove(g.models.playerMule[msg.pc]);
   }
 
+  let k = LandLotStr(msg.e, msg.n);
+  if (k in landmodels)
+    g.scene.remove(landmodels[k]);
+  
   let m = g.models.prod[msg.resType].clone();
   m.position.x = msg.e*4;
   m.position.z = -msg.n*4;
   g.scene.add(m);
+  
+  g.landlots[k].res = msg.resType;
+  landmodels[k] = m;
+  syncLinesFlags(msg.e, msg.n);
+}
 
-  addFlag(msg.e, msg.n, msg.pc);
-  addLines(msg.e, msg.n, msg.pc);
+function ll(/**@type {number}*/e, /**@type {number}*/n)
+{
+  let ll = g.landlots[LandLotStr(e,n)];
+  if (ll == null || ll == undefined || ll.owner == null) return null;
+  return ll;
+}
+
+function owner(/**@type {number}*/e, /**@type {number}*/n)
+{
+  let l = ll(e,n);
+  return l ? l.owner : null;
+}
+
+function res(/**@type {number}*/e, /**@type {number}*/n)
+{
+  let l = ll(e,n);
+  return l ? l.res : -1;
+}
+
+function removeFlag(/**@type {number}*/e, /**@type {number}*/n)
+{
+  let k = LandLotStr(e,n);
+  if (k in flags)
+  {
+    g.scene.remove(flags[k]);
+    delete flags[k];
+  }
+  if (k in flagpoles)
+  {
+    g.scene.remove(flagpoles[k]);
+    delete flagpoles[k];
+  }
+  if (k in flagMixer)
+  {
+    delete flagMixer[k];
+  }
+}
+
+function setflagen(/**@type {{e:number,n:number}}*/ flagen, /**@type {number}*/e, /**@type {number}*/n)
+{ flagen.e = e; flagen.n = n; }
+
+function ownerres(/**@type {number}*/e, /**@type {number}*/n, /**@type {string}*/o, /**@type {number}*/r)
+{
+  return owner(e, n) == o && res(e, n) == r;
+}
+
+function recursiveFindAdjacentLots(/**@type {number}*/e, /**@type {number}*/n,
+  /**@type {string}*/thisOwner, /**@type {number}*/thisRes,
+  /**@type {Set<string>}*/ keySet, /**@type {{e:number,n:number}}*/ flagen)
+{
+  keySet.add(LandLotStr(e,n));
+
+  if (e != 0)
+  {
+    if ((flagen.e == 0) ||
+        (n > flagen.n)  ||
+        (n == flagen.n && e < flagen.e)) 
+          setflagen(flagen, e, n);
+  }
+
+  if (e < 4 && ownerres(e+1, n, thisOwner, thisRes) && !keySet.has(LandLotStr(e+1,n)))
+    recursiveFindAdjacentLots(e+1, n, thisOwner, thisRes, keySet, flagen);
+
+  if (e > -4 && ownerres(e-1, n, thisOwner, thisRes) && !keySet.has(LandLotStr(e-1,n)))
+    recursiveFindAdjacentLots(e-1, n, thisOwner, thisRes, keySet, flagen);
+
+  if (n < 2 && ownerres(e, n+1, thisOwner, thisRes) && !keySet.has(LandLotStr(e,n+1)))
+    recursiveFindAdjacentLots(e, n+1, thisOwner, thisRes, keySet, flagen);
+
+  if (n > -2 && ownerres(e, n-1, thisOwner, thisRes) && !keySet.has(LandLotStr(e,n-1)))
+    recursiveFindAdjacentLots(e, n-1, thisOwner, thisRes, keySet, flagen);
+}
+
+function handleFlags(/**@type {number}*/e, /**@type {number}*/n)
+{
+  if (e > 4) return;
+  if (e < -4) return;
+  if (n > 2) return;
+  if (n < -2) return;
+
+  let thisowner = owner(e,n);
+  let thisres = res(e,n);
+  if (thisowner == null) return;
+
+  let flagen = {e:e,n:n};
+  let keySet = new Set();
+  recursiveFindAdjacentLots(e, n, thisowner, thisres, keySet, flagen);
+  for (let k of keySet)
+  {
+    let e = getE(k);
+    let n = getN(k);
+    if (e == flagen.e && n == flagen.n) addFlag(e, n, thisowner);
+    else removeFlag(e, n);
+  }
+}
+
+function removeLineIfExists(/**@type {number}*/e,  /**@type {number}*/n, 
+                    /**@type {number}*/side)
+{
+  let l = undefined;
+  let k = LandLotStr(e,n);
+
+       if (side == NSide) { l = nlines[k]; delete nlines[k]; }
+  else if (side == SSide) { l = slines[k]; delete slines[k]; }
+  else if (side == ESide) { l = elines[k]; delete elines[k]; }
+  else if (side == WSide) { l = wlines[k]; delete wlines[k]; }
+
+  if (l != undefined && l != null)
+    g.scene.remove(l);
+}
+
+
+/**@param otherSide*/
+function mergeOrAddLines(/**@type {number}*/thisE,   /**@type {number}*/thisN, 
+                         /**@type {number}*/otherE,  /**@type {number}*/otherN,
+                         /**@type {number}*/thisSide,/**@type {number}*/otherSide)
+{
+  if (otherE > 4 || otherE < -4) return;
+  if (otherN > 2 || otherN < -2) return;
+
+  if (owner(thisE, thisN) == owner(otherE, otherN) &&
+        res(thisE, thisN) ==   res(otherE, otherN) &&
+      owner(thisE, thisN) !=  null)
+  {
+    removeLineIfExists(thisE,  thisN,  thisSide);
+    removeLineIfExists(otherE, otherN, otherSide);
+  }
+  else 
+  {
+    let pc = owner(otherE, otherN);
+    if (pc != null)
+      addLines(otherE, otherN, pc, otherSide);
+
+    // may be necessary in case of re-outfitting a previously joined area
+    pc = owner(thisE, thisN);
+    if (pc != null)
+      addLines(thisE,  thisN,  pc, thisSide); 
+  }
+}
+
+function syncLinesFlags(/**@type {number}*/e, /**@type {number}*/n)
+{
+  let thisowner = owner(e,n);
+  let thisres = res(e,n);
+  let unclaiming = thisowner == null;
+
+  mergeOrAddLines(e, n, e+1, n, ESide, WSide);
+  mergeOrAddLines(e, n, e-1, n, WSide, ESide);
+  mergeOrAddLines(e, n, e, n+1, NSide, SSide);
+  mergeOrAddLines(e, n, e, n-1, SSide, NSide);
+
+
+  // flags
+  if (unclaiming)
+  {
+    if (owner(e+1,n) != null) handleFlags(e+1, n);
+    if (owner(e-1,n) != null) handleFlags(e-1, n);
+    if (owner(e,n+1) != null) handleFlags(e, n+1);
+    if (owner(e,n-1) != null) handleFlags(e, n-1);
+  }
+  else
+  {
+    handleFlags(e,n);
+    if (owner(e+1,n) != thisowner || res(e+1,n) != thisres) handleFlags(e+1, n);
+    if (owner(e-1,n) != thisowner || res(e-1,n) != thisres) handleFlags(e-1, n);
+    if (owner(e,n+1) != thisowner || res(e,n+1) != thisres) handleFlags(e, n+1);
+    if (owner(e,n-1) != thisowner || res(e,n-1) != thisres) handleFlags(e, n-1);
+  }
+}
+
+export function UnclaimLot(/**@type {string}*/k)
+{
+  let oldOwner = g.landlots[k].owner;
+  let e = getE(k);
+  let n = getN(k);
+
+  if (g.landlots[k].res > -1 && oldOwner != null)
+    MuleRemoved({_mt:"",pc:oldOwner,e:e,n:n,existingResType:-1});
+  
+  g.landlots[k].owner = null;
+  g.landlots[k].res = -1;
+
+  if (k in elines) { let l = elines[k]; g.scene.remove(l); delete elines[k]; }
+  if (k in wlines) { let l = wlines[k]; g.scene.remove(l); delete wlines[k]; }
+  if (k in nlines) { let l = nlines[k]; g.scene.remove(l); delete nlines[k]; }
+  if (k in slines) { let l = slines[k]; g.scene.remove(l); delete slines[k]; }
+
+  removeFlag(e, n);
+  syncLinesFlags(e, n);
+}
+
+export function ClaimLot(/**@type {string}*/pc, /**@type {string}*/k)
+{
+  let e = getE(k);
+  let n = getN(k);
+  let l = ll(e, n);
+  if (l != null && l.owner == pc) return;
+  if (l != null) UnclaimLot(k);
+
+  g.landlots[k].owner = pc;
+  addLines(e, n, pc);
+  addFlag(e, n, pc);
+  syncLinesFlags(e, n);
 }
 
 export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)

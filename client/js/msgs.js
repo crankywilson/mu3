@@ -106,10 +106,6 @@ export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
   showScores(scores, msg.g.players.length, msg.g.month);
 }
 
-function UpdateLandLotOverlayState()
-{
-}
-
 export function PlayerRejoined(/**@type {t.PlayerRejoined}*/ msg)
 {
 }
