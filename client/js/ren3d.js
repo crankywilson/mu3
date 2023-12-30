@@ -114,7 +114,7 @@ export async function switchCamView(/** @type {boolean?}*/ showSettlement=null)
 
   ui.msg.innerText = "";
 
-  if (showSettlement == undefined)
+  if (showSettlement == null)
     camTargetIsSettlement = !camTargetIsSettlement;
   else
     camTargetIsSettlement = showSettlement;
