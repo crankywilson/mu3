@@ -289,8 +289,9 @@ async function setup3d()
   gltf = await l.loadAsync('models/blueflag/scene.gltf');
   g.models.flag = gltf.scene;
   g.models.flag.scale.set(.2,.2,.2);
+  g.flagAnim = gltf.animations[ 0 ];
   mixer = new THREE.AnimationMixer(g.models.flag);
-  action = mixer.clipAction( gltf.animations[ 0 ] );
+  action = mixer.clipAction( g.flagAnim );
   action.play();
 
   const tl = new THREE.TextureLoader();

@@ -20,7 +20,7 @@ import {
 @typedef {import('../three/Three.js').AnimationMixer} Mixer 
 @typedef {import('../three/Three.js').SpotLight} SpotLight 
 @typedef {import('../three/Three.js').Mesh} Mesh 
-@typedef {import('../three/Three.js').MeshPhongMaterial} MeshPhongMaterial 
+@typedef {import('../three/Three.js').MeshPhongMaterial} MeshPhongMaterial
 **/
 
 /** @type { function? } */
@@ -112,6 +112,10 @@ export let g =
     G: null,
     B: null
   },
+
+  /** @type {AnimationClip} */ //@ts-ignore
+  flagAnim: null,
+
   
   textures: {
     /** @type {Texture[]} */ //@ts-ignore
@@ -352,7 +356,7 @@ export let ui =
 globalThis.g = g;
 globalThis.ui = ui;  
 
-function LandLotStr(/**@type {number}*/e, /**@type {number}*/n)
+export function LandLotStr(/**@type {number}*/e, /**@type {number}*/n)
 {
   let ret="";
   if (e < 0) ret += "W" + (-e).toString();
@@ -437,7 +441,7 @@ function llocolor(/**@type {string}*/s)
 export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
 {
   if (g.waitingForServerResponse) return;
-  
+
   let x = mouseEvent.pageX;
   let y = mouseEvent.pageY;
 

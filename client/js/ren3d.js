@@ -1,5 +1,6 @@
-import { Vector3, Object3D, Camera } from "../three/Three.js";
-import { g, send } from "./game.js";
+import { Vector3, Object3D, Camera, 
+         AnimationMixer, MeshLambertMaterial } from "../three/Three.js";
+import { g, send, LandLotStr } from "./game.js";
 import * as t from './types.js';
 /** @type {import('../three/Three.js')} */ //@ts-ignore
 let THREE = null;  // initialized in setup.js
@@ -110,6 +111,8 @@ export function initTHREERef(/** @type {import('../three/Three.js')} */r)
 export async function switchCamView(/** @type {boolean?}*/ showSettlement=null)
 {
   await g.init3DComplete;
+
+  ui.msg.innerText = "";
 
   if (showSettlement == undefined)
     camTargetIsSettlement = !camTargetIsSettlement;
@@ -354,6 +357,12 @@ function AnimatePlayerAndMule(
   }
 }
 
+function animFlags(/**@type {number}*/delta)
+{
+  for (let k in flagMixer)
+    flagMixer[k].update(delta);
+}
+
 function render()
 {
   if (!readyToRender) return;
@@ -361,6 +370,7 @@ function render()
 
   moveTowards(g.camera, cptarget, delta * 60);
   rotateCameraX();
+  animFlags(delta);
 
   for (let c in g.players)
   {
@@ -471,12 +481,118 @@ export function goInSettlement()
   switchCamView(true);
 }
 
+
+/** @type {Object.<string, Object3D>} */
+let flags = {};
+/** @type {Object.<string, AnimationMixer>} */
+let flagMixer = {};
+/** @type {Object.<string, Object3D>} */
+let flagpoles = {};
+/** @type {MeshLambertMaterial} */ // @ts-ignore
+let poleMat = null;
+/** @type {Object.<string, Object3D>} */
+let riverHacks = {};
+/** @type {Object.<string, Object3D>} */
+let nlines = {};
+/** @type {Object.<string, Object3D>} */
+let slines = {};
+/** @type {Object.<string, Object3D>} */
+let elines = {};
+/** @type {Object.<string, Object3D>} */
+let wlines = {};
+
+globalThis.flags = flags;
+
+function addFlag(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}*/ pc)
+{
+  let f = g.models.flag.clone();
+  let mixer = new THREE.AnimationMixer(f);
+  let action = mixer.clipAction(g.flagAnim);
+  action.play();
+  g.scene.add(f);
+  
+  let k = LandLotStr(e, n);
+  flags[k] = f;
+  flagMixer[k] = mixer;
+
+  function updateTexture(/**@type {Object3D}*/ child)
+  {
+    if (child instanceof THREE.Mesh) {
+      child.material = child.material.clone();
+      child.material.map = g.textures.flag[pc];
+    }
+  }
+  f.traverse(updateTexture);
+
+  f.position.set(e * 4 - 1, 1.5, n * -4);
+
+  // hack to get flags to show in river
+  if (e == 0 && riverHacks[k] == undefined)
+  {
+    let b = g.landlotOverlay.clone();
+    b.material = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0 });
+    b.position.x = e * 4;
+    b.position.y = 2;
+    b.position.z = n * -4;
+    g.scene.add(b);
+    riverHacks[k] = b;
+  }
+
+  let poleGeom = new THREE.CylinderGeometry(.04, .05, 1.8);
+  if (poleMat == null)
+    poleMat = new THREE.MeshLambertMaterial( {color: 0x666666, reflectivity: 15} );
+  flagpoles[k] = new THREE.Mesh( poleGeom, poleMat );
+  flagpoles[k].position.set(e * 4 - 1.35, .9, n * -4);
+  g.scene.add(flagpoles[k]);
+}
+
+/** @type {Object.<string, MeshLambertMaterial>} */
+let plotboundMat = {};
+
+function addLines(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}*/ pc)
+{
+  let k = LandLotStr(e, n);
+  let mat = plotboundMat[pc];
+  if (mat == undefined)
+  {
+    switch (pc) {
+     case "R": plotboundMat.R = new THREE.MeshLambertMaterial( {color: '#ff0000', reflectivity: 15}); break;
+     case "Y": plotboundMat.Y = new THREE.MeshLambertMaterial( {color: '#ff8a45', reflectivity: 15}); break;
+     case "G": plotboundMat.G = new THREE.MeshLambertMaterial( {color: '#006600', reflectivity: 15}); break;
+     case "B": plotboundMat.B = new THREE.MeshLambertMaterial( {color: '#3366ff', reflectivity: 15}); break;
+    }
+    mat = plotboundMat[pc];
+  }
+
+  let bg = new THREE.BoxGeometry(4, .01, .1);
+  let m = new THREE.Mesh( bg, mat );
+  nlines[k] = m;
+  m.position.set(e*4, 0, n*-4 - 1.95);
+  g.scene.add(m);
+
+  m = new THREE.Mesh( bg, mat );
+  slines[k] = m;
+  m.position.set(e*4, 0, n*-4 + 1.95);
+  g.scene.add(m);
+
+  bg = new THREE.BoxGeometry(.1, .01, 4);
+  m = new THREE.Mesh( bg, mat );
+  elines[k] = m;
+  m.position.set(e*4 + 1.95, 0, n*-4);
+  g.scene.add(m);
+
+  m = new THREE.Mesh( bg, mat );
+  wlines[k] = m;
+  m.position.set(e*4 - 1.95, 0, n*-4);
+  g.scene.add(m);
+}
+
 export function MuleInstalled(/**@type {t.MuleInstalled}*/msg)
 {
   g.lloMaterial.color.set(0xffffff);
   g.scene.remove(g.landlotOverlay);
   g.waitingForServerResponse = false;
-  
+
   let p = g.players[msg.pc];
   if (p == null) return;
   let mule = p.mule;
@@ -491,6 +607,9 @@ export function MuleInstalled(/**@type {t.MuleInstalled}*/msg)
   m.position.x = msg.e*4;
   m.position.z = -msg.n*4;
   g.scene.add(m);
+
+  addFlag(msg.e, msg.n, msg.pc);
+  addLines(msg.e, msg.n, msg.pc);
 }
 
 export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
