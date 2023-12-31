@@ -161,7 +161,8 @@
  @property {string} _mt
 
 @typedef SetColor
- @property {string} colorStr
+ @property {string} fromColorStr
+ @property {string} toColorStr
  @property {string} _mt
 
 @typedef Kick
@@ -195,6 +196,7 @@
  @property {number} z
  @property {Dest?} dest
  @property {MuleData?} mule
+ @property {number} rank
 
 @typedef LandLot
  @property {string?} owner
@@ -211,6 +213,7 @@
  @property {GameState} state
  @property {number} mules
  @property {number} mulePrice
+ @property {number[]} resPrice
 
 @typedef {(
  'WAITINGFORALLJOIN'|
@@ -350,8 +353,10 @@ export let GAMESTATE = {
 };}
 
 /**@returns {SetColor}*/ export function SetColor(
- /**@type {string}*/ colorStr,
-) { return { _mt: 'SetColor' , colorStr: colorStr
+ /**@type {string}*/ fromColorStr,
+ /**@type {string}*/ toColorStr,
+) { return { _mt: 'SetColor' , fromColorStr: fromColorStr
+ , toColorStr: toColorStr
 };}
 
 /**@returns {Kick}*/ export function Kick(

@@ -358,18 +358,11 @@ function inputTarget(/**@type {Event}*/ e)
   return new HTMLInputElement();
 }
 
-/**@returns {HTMLButtonElement} */
-function btnTarget(/**@type {Event}*/ e)
+/**@returns {string} */
+function targetID(/**@type {Event}*/ e)
 {
-  if (e.target instanceof HTMLButtonElement) return e.target;
-  return new HTMLButtonElement();
-}
-
-/**@returns {HTMLSelectElement} */
-function selTarget(/**@type {Event}*/ e)
-{
-  if (e.target instanceof HTMLSelectElement) return e.target;
-  return new HTMLSelectElement();
+  if (e.target instanceof HTMLElement) return e.target.id;
+  return "";
 }
 
 function sync_rygb()
@@ -411,19 +404,30 @@ function sync_rygb()
   }
 }
 
+/** @this {GlobalEventHandlers} */
+function handleColorChange()
+{  
+  if (!(this instanceof HTMLSelectElement)) return;
+  let c = this.id[0].toUpperCase();
+  send(t.SetColor(c, this.value));
+  this.value = c;
+  ui.ccspan(c).style.visibility = "hidden";
+}
+
 function debug(/**@type {KeyboardEvent} */ev)
 {
+  if (g.state != "IMPROVE") return;
   if (g.camera.position.z < 20) return;
   let e = g.landlotOverlay.position.x / 4;
   let n = g.landlotOverlay.position.z / -4;
   let k = LandLotStr(e,n);
-  if (ev.key == "a") r.ClaimLot("R", k);
+  if (ev.key == "a") r.ClaimLot(g.myColor, k);
   if (ev.key == "r") r.UnclaimLot(k);
-  if (ev.key == "f") r.MuleInstalled({_mt:"",pc:"R",resType:0,e:e,n:n,existingResType:-1});
-  if (ev.key == "e") r.MuleInstalled({_mt:"",pc:"R",resType:1,e:e,n:n,existingResType:-1});
-  if (ev.key == "s") r.MuleInstalled({_mt:"",pc:"R",resType:2,e:e,n:n,existingResType:-1});
-  if (ev.key == "c") r.MuleInstalled({_mt:"",pc:"R",resType:3,e:e,n:n,existingResType:-1});
-  if (ev.key == "u") r.MuleRemoved({_mt:"",pc:"R",e:e,n:n,existingResType:-1});
+  if (ev.key == "f") r.MuleInstalled({_mt:"",pc:g.myColor,resType:0,e:e,n:n,existingResType:-1});
+  if (ev.key == "e") r.MuleInstalled({_mt:"",pc:g.myColor,resType:1,e:e,n:n,existingResType:-1});
+  if (ev.key == "s") r.MuleInstalled({_mt:"",pc:g.myColor,resType:2,e:e,n:n,existingResType:-1});
+  if (ev.key == "c") r.MuleInstalled({_mt:"",pc:g.myColor,resType:3,e:e,n:n,existingResType:-1});
+  if (ev.key == "u") r.MuleRemoved({_mt:"",pc:g.myColor,e:e,n:n,existingResType:-1});
 }
 
 
@@ -436,9 +440,10 @@ function setupPending()
 
   ui.rnameinput.onfocus    = (e)=>{ inputTarget(e).select(); };
   ui.rnameinput.oninput    = (e)=>{ send(t.NameChange(inputTarget(e).value)); };
-  ui.rdesiredbtn.onclick   = (e)=>{ send(t.ColorReq(btnTarget(e).id[0].toUpperCase())); };
-  ui.rchangecolor.onchange = (e)=>{ send(t.SetColor(selTarget(e).value)); selTarget(e).value = selTarget(e).id[0].toUpperCase(); };
-  ui.rkick.onclick         = (e)=>{ send(t.Kick(btnTarget(e).id[0].toUpperCase())); };
+  ui.rdesiredbtn.onclick   = (e)=>{ send(t.ColorReq(targetID(e)[0].toUpperCase())); };
+  ui.rdesiredimg.onclick   = ui.rdesiredbtn.onclick;
+  ui.rchangecolor.onchange = handleColorChange;
+  ui.rkick.onclick         = (e)=>{ send(t.Kick(targetID(e)[0].toUpperCase())); };
   ui.startgame.onclick     = (_)=>{ send(t.StartGame()); };
 
   document.onkeydown = debug;
@@ -446,7 +451,7 @@ function setupPending()
 
 function onWindowResize() 
 {
-	g.camera.aspect = 2;
+  g.camera.aspect = 2;
   g.camera.updateProjectionMatrix();
   g.renderer.setSize( ui.boardview.clientWidth, ui.boardview.clientHeight );
 }

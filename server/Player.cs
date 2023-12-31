@@ -1,6 +1,4 @@
 
-using System;
-using System.Net.Http.Json;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
@@ -9,7 +7,6 @@ using System.Text.Json.Serialization;
 [JsonConverter(typeof(JsonStringEnumConverter))]  // use string for JSON Serialization
 enum PlayerColor { R, Y, G, B, NONE }
 enum ResourceType { FOOD, ENERGY, SMITHORE, CRYSTITE }
-
 
 class Dest
 {
@@ -27,6 +24,9 @@ class MuleData
   [JsonInclude] public Dest?   dest      = null;
 }
 
+#pragma warning disable CS0660
+#pragma warning disable CS0661
+
 class Player
 {
   [JsonInclude] public string       name    = "";
@@ -42,6 +42,8 @@ class Player
   [JsonInclude] public double       z       = 0.0;
   [JsonInclude] public Dest?        dest    = null;
   [JsonInclude] public MuleData?    mule    = null;
+
+  [JsonInclude] public int          rank    = 1;
   
   public WebSocket? ws = null;
 
@@ -51,6 +53,11 @@ class Player
 
   public Player() {}
   public Player(PlayerColor pc) { color = pc; }
+
+  public static bool operator ==(Player? p, PlayerColor? pc) { return p?.color == pc; }
+  public static bool operator !=(Player? p, PlayerColor? pc) { return p?.color != pc; }
+  public static bool operator ==(PlayerColor? pc, Player? p) { return p?.color == pc; }
+  public static bool operator !=(PlayerColor? pc, Player? p) { return p?.color != pc; }
 
   public void send(Msg m)
   {

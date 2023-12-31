@@ -26,23 +26,43 @@ function setPlboxSpanText(/**@type {string}*/ clr, /**@type {number}*/ i, /**@ty
   let spans = ui.plbox(clr).getElementsByTagName('span');
   if (typeof str=="number") str=str.toString();
   spans[i].innerText = str;
+  if (i == NAMESPAN && clr == g.myColor)
+    spans[NAMESPAN].style.textDecoration = "underline";
 }
 
-function showScores(/**@type {{s: number, c: string}[]}*/ scores, 
-                    /**@type {number}*/ numPlayers, /**@type {number}*/ month)
+function showScores(/**@type {t.Player[]}*/ players, /**@type {number}*/ month)
 {
   const leftPositions = [[],[42.5],[30,55],[10,42.5,75],[5,30,55,80]];
-  let lpi = 0;
+  let lastScore = 0;
+  let lastRank = 0;
+  let i = 0;
+  let numPlayers = players.length;
+  const xdist = .4;
+  const zdist = .3
+  let setMinZ =  ((numPlayers-1)/2) * -xdist;
+  let setMinX =  ((numPlayers-1)/2) * -zdist;
   
-  scores.sort((a,b)=>{return b.s-a.s;});  // descending
-  for (let ci of scores)
+  for (let p of players)
   {
-    let lp = leftPositions[numPlayers][lpi];
-    ui.plbox(ci.c).style.left = lp + '%';
+    let lp = leftPositions[numPlayers][i];
+    ui.plbox(p.color).style.left = lp + '%';
 
-    lpi++;
+    let rank = (p.score == lastScore) ? lastRank : p.rank;
     if (g.state == "SCORE")
-      setPlboxSpanText(ci.c, BOTTOMSPAN, "Score: " + ci.s + "  (#" + lpi + ")");
+      setPlboxSpanText(p.color, BOTTOMSPAN, "Score: " + p.score + 
+        "  (#" + rank + ")");
+
+    if (p.color == g.myColor)
+      g.mySettlementZ = zdist * i + setMinZ; 
+    
+    if (g.state == "SCORE" || true)
+    {
+      AddModelIfNeeded(p.color, zdist * i + setMinX, xdist * i + setMinZ);
+    }
+
+    i++;
+    lastScore = p.score;
+    lastRank = rank;
   }
 
   if (g.state != "SCORE") return;
@@ -60,12 +80,16 @@ function showScores(/**@type {{s: number, c: string}[]}*/ scores,
   g.prepSound.play();
 }
 
-async function AddModelIfNeeded(/**@type {string}*/ color)
+async function AddModelIfNeeded(/**@type {string}*/ color, /**@type {number?}*/ x=null, /**@type {number?}*/ z=null)
 {
   await g.init3DComplete;
   let playerModel = g.models.player[color];
   if (playerModel.parent == null)
     g.scene.add(playerModel);
+
+  if (x != null) playerModel.position.x = x;
+  if (z != null) playerModel.position.z = z;
+  console.log(color + ":" + x + "," + z);
 }
 
 export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
@@ -77,22 +101,18 @@ export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
   document.cookie = "?g=" + encodeURIComponent(msg.g.name) + 
                     "&c=" + g.myColor + "; max-age=3600";
 
-  let scores = [];
-  
   for (let p of msg.g.players) 
   {
     g.players[p.color] = p;
     setPlboxSpanText(p.color, NAMESPAN, p.name);
     setPlboxSpanText(p.color, MONEYSPAN, p.money);
     show(ui.plbox(p.color));
-    scores.push({s:p.score, c:p.color});
-
     AddModelIfNeeded(p.color);
   }
 
   g.landlots = msg.g.landlots;
   g.state = msg.g.state;
-
+  
   if (!g.mgPlaced)
     r.SetupMounds();
   r.SyncLandGeom();
@@ -103,7 +123,7 @@ export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
     r.startAnimating();
   
   UpdateGameState({gs:g.state, _mt:""});
-  showScores(scores, msg.g.players.length, msg.g.month);
+  showScores(msg.g.players, msg.g.month);
 }
 
 export function PlayerRejoined(/**@type {t.PlayerRejoined}*/ msg)

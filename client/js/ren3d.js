@@ -48,6 +48,8 @@ let wlines = {};
 let flagMixer = {};
 /** @type {MeshLambertMaterial} */ // @ts-ignore
 let poleMat = null;
+/** @type {MeshLambertMaterial} */ // @ts-ignore
+let poleMatWater = null;
 /** @type {Object.<string, Object3D>} */
 let riverHacks = {};
 
@@ -598,8 +600,14 @@ function addFlag(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}*
 
   let poleGeom = new THREE.CylinderGeometry(.04, .05, 1.8);
   if (poleMat == null)
-    poleMat = new THREE.MeshLambertMaterial( {color: 0x666666, reflectivity: 15} );
-  flagpoles[k] = new THREE.Mesh( poleGeom, poleMat );
+  {
+    poleMat = new THREE.MeshLambertMaterial(
+       {color:  0x666666, reflectivity: 15} );
+    poleMatWater = new THREE.MeshLambertMaterial(
+       {color:  0xdddddd, reflectivity: 15} );
+  }
+  
+  flagpoles[k] = new THREE.Mesh( poleGeom, e == 0 ? poleMatWater : poleMat );
   flagpoles[k].position.set(e * 4 - 1.35, .9, n * -4);
   g.scene.add(flagpoles[k]);
 }
@@ -615,8 +623,8 @@ function addLines(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}
   {
     switch (pc) {
      case "R": plotboundMat.R = new THREE.MeshLambertMaterial( {color: '#ff0000', reflectivity: 15}); break;
-     case "Y": plotboundMat.Y = new THREE.MeshLambertMaterial( {color: '#ff8a45', reflectivity: 15}); break;
-     case "G": plotboundMat.G = new THREE.MeshLambertMaterial( {color: '#006600', reflectivity: 15}); break;
+     case "Y": plotboundMat.Y = new THREE.MeshLambertMaterial( {color: '#ddaa80', reflectivity: 15}); break;
+     case "G": plotboundMat.G = new THREE.MeshLambertMaterial( {color: '#008500', reflectivity: 15}); break;
      case "B": plotboundMat.B = new THREE.MeshLambertMaterial( {color: '#3366ff', reflectivity: 15}); break;
     }
     mat = plotboundMat[pc];

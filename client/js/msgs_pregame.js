@@ -29,8 +29,6 @@ export function GameNameExists(/**@type {t.GameNameExists}*/ msg)
   alert("Couldn't create game - name is already in use.");
 }
 
-let firstMsg = true;
-
 export function JoinedGameStats(/**@type {t.JoinedGameStats}*/ msg)
 {
   ui.gamename.innerText = msg.gameName;
@@ -40,6 +38,7 @@ export function JoinedGameStats(/**@type {t.JoinedGameStats}*/ msg)
   ui.availgamesdiv.style.visibility = hidden;
   ui.startgame.style.visibility = msg.youAreOwner ? visible : hidden;
 
+  let switchedColor = (g.myColor != msg.currentColor);
   g.myColor = msg.currentColor;
   
   for (let c of ['R','Y','G','B'])
@@ -56,7 +55,7 @@ export function JoinedGameStats(/**@type {t.JoinedGameStats}*/ msg)
   for (let p of msg.players)
   {
     let c = p.color;
-    if (firstMsg)
+    if (switchedColor)
       ui.nameinput(c).value = p.name;
     ui.namespan(c).innerText = c == msg.currentColor ? "Your Name:" : p.name;
     ui.ip(c).innerText = p.ip;
@@ -72,6 +71,4 @@ export function JoinedGameStats(/**@type {t.JoinedGameStats}*/ msg)
 
   let nameedit = ui.nameinput(msg.currentColor);
   if (nameedit.value[0] == '(') nameedit.select();
-
-  firstMsg = false;
 }

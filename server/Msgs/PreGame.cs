@@ -103,14 +103,20 @@ record ColorReq (
 }
 
 record SetColor (
-  string colorStr
+  string fromColorStr,
+  string toColorStr
 ) : Msg
 {
   public override void OnRecv(Player p, Game g)
   {
-    if (Enum.TryParse<PlayerColor>(colorStr, out PlayerColor color))
-      g.SetPlayerColor(p, color);
-    g.send(new JoinedGameStats());
+    if (Enum.TryParse<PlayerColor>(fromColorStr, out PlayerColor fromColor) &&
+        Enum.TryParse<PlayerColor>(toColorStr, out PlayerColor toColor))
+    {
+      var fromP = g.Get(fromColor);
+      if (fromP is null) return;
+      g.SetPlayerColor(fromP, toColor);
+      g.send(new JoinedGameStats());
+    }
   }
 }
 

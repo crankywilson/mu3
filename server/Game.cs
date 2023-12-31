@@ -28,6 +28,8 @@ class Game
   [JsonInclude] public GameState       state     = GameState.WAITINGFORALLJOIN;
   [JsonInclude] public int             mules     = 14;
   [JsonInclude] public int             mulePrice = 100;
+  [JsonInclude] public int[]           resPrice  = new int[4] { 15, 10, 40, 100 };
+
   public bool started = true;     // this gets set to false when created on web, but is true by default for deserialization
   public Player? starter = null;
   public bool active = true;
@@ -81,7 +83,7 @@ class Game
 
   public void SetPlayerColor(Player p, PlayerColor pc)
   {
-    Player? other = Get(p.color);
+    Player? other = Get(pc);
     if (other != null) other.color = p.color;
     p.color = pc;
   }
@@ -194,8 +196,30 @@ class Game
     }
 
     started = true;
+    UpdateScores();
     state = GameState.SCORE;
     send(new CurrentGameState(this));
+  }
+
+  public void UpdateScores()
+  {
+    foreach (var p in players)
+    {
+      p.score = p.money;
+      for (int r = 0; r<4; r++)
+        p.score += resPrice[r] * p.res[r];
+      foreach (var ll in landlots.Values) {
+        if (ll.owner == p) {
+          p.score += 500; if (ll.res > -1) {
+            p.score += mulePrice; } }
+      }
+    }
+
+    players.Sort(delegate(Player p1, Player p2) 
+      { return p2.score - p1.score; } );
+    
+    int rank = 0;
+    foreach (var p in players) p.rank = ++rank;
   }
 
   public void send(Msg m)
