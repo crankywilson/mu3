@@ -90,7 +90,7 @@ record NewMuleDest (
   {
     if (p.mule == null)
       p.mule = new MuleData();
-    p.mule.x = x; p.mule.z = z; p.dest = new(destx, destz, destspd);
+    p.mule.x = x; p.mule.z = z; p.mule.dest = new(destx, destz, destspd);
     g.send(this);
   }
 }
@@ -178,3 +178,51 @@ record MuleRemoved (
   int n,
   int existingResType
 ) : Msg;
+
+record SellMule (
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    //p.mule = null;  no this has to happen once removed from scene
+    g.mules++;
+    p.money += g.mulePrice;
+    g.send(new MuleSold(g.mules, p.color, p.money));
+  }
+}
+
+record MuleSold (
+  int newNumMules,
+  PlayerColor pc,
+  int newMoney
+) : Msg;
+
+// only used for selling mule
+record MuleRemovedFromScene (
+  PlayerColor pc
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    p.mule = null;
+    g.send(this);
+  }
+}
+
+record Cantina (
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    p.money += 100;
+    g.send(new CantinaResult(p.color, 100, p.money));
+  }
+}
+
+record CantinaResult (
+  PlayerColor pc,
+  int winnings,
+  int newMoney
+) :  Msg;
+
+

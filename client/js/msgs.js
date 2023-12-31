@@ -115,6 +115,12 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   ui.msg.innerText = "";
   g.state = msg.gs;
 
+  for (let pi in g.players)
+  {
+    if (g.players[pi] == null) continue;
+    setPlboxSpanText(pi, BOTTOMSPAN, "");
+  }
+
   if (g.state == "IMPROVE")
   {
     let my = g.me();
@@ -125,11 +131,23 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
 
 export function MuleObtained(/**@type {t.MuleObtained}*/ msg)
 {
+  g.doLandMark = false;
+  g.doAssayMark = false;
+
   setPlboxSpanText(msg.pc, MONEYSPAN, msg.newMoney);
   ui.mulecount.innerText = msg.numMules.toString();
   if (g.myColor != msg.pc) return;
   
   r.buymule();  
+}
+
+export function MuleSold(/**@type {t.MuleSold}*/ msg)
+{
+  setPlboxSpanText(msg.pc, MONEYSPAN, msg.newMoney);
+  ui.mulecount.innerText = msg.newNumMules.toString();
+  if (g.myColor != msg.pc) return;
+  
+  r.sellMuleConfirmed();  
 }
 
 export function NewDest(/**@type {t.NewDest}*/msg)
@@ -192,4 +210,15 @@ export function TurnedOnMuleLight(/**@type {t.TurnedOnMuleLight}*/msg)
 export function MuleInstalled(/**@type {t.MuleInstalled}*/msg)
 {
   r.MuleInstalled(msg);
+}
+
+export function MuleRemovedFromScene(/**@type {t.MuleRemovedFromScene}*/msg)
+{
+  if (msg.pc != g.myColor)
+    r.RemoveMuleFromScene(msg.pc);
+}
+
+export function CantinaResult(/**@type {t.CantinaResult}*/msg)
+{
+  r.CantinaWinnings(msg);
 }

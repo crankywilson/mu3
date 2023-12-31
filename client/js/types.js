@@ -102,6 +102,28 @@
  @property {number} existingResType
  @property {string} _mt
 
+@typedef SellMule
+ @property {string} _mt
+
+@typedef MuleSold
+ @property {number} newNumMules
+ @property {string} pc
+ @property {number} newMoney
+ @property {string} _mt
+
+@typedef MuleRemovedFromScene
+ @property {string} pc
+ @property {string} _mt
+
+@typedef Cantina
+ @property {string} _mt
+
+@typedef CantinaResult
+ @property {string} pc
+ @property {number} winnings
+ @property {number} newMoney
+ @property {string} _mt
+
 @typedef AvailableGames
  @property {string[]} games
  @property {string} _mt
@@ -293,6 +315,17 @@ export let GAMESTATE = {
 ) { return { _mt: 'InstallMule' , e: e
  , n: n
 };}
+
+/**@returns {SellMule}*/ export function SellMule(
+) { return { _mt: 'SellMule'};}
+
+/**@returns {MuleRemovedFromScene}*/ export function MuleRemovedFromScene(
+ /**@type {string}*/ pc,
+) { return { _mt: 'MuleRemovedFromScene' , pc: pc
+};}
+
+/**@returns {Cantina}*/ export function Cantina(
+) { return { _mt: 'Cantina'};}
 
 /**@returns {CreateGame}*/ export function CreateGame(
  /**@type {string}*/ name,

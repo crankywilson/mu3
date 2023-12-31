@@ -77,10 +77,38 @@ function setMyMuleDest(/**@type {number}*/ x,/**@type {number}*/ z,
 
 function sellMule()
 {
+  send(t.SellMule());
+}
+
+function nowInBottomBuilding()
+{
+  if (currentOp == "Cantina")
+  {
+    send(t.Cantina());
+    return;
+  }
+
+  if (currentOp == "Land")
+  {
+    tempBlink("Select lot for auction next month.", 8000);
+    g.doLandMark = true;
+    g.doAssayMark = false;
+  }
+  else
+  {
+    tempBlink("Select lot for crystite analysis.", 8000);
+    g.doLandMark = false;
+    g.doAssayMark = true;
+  }
+
+  setMyDest(g.models.player[g.myColor].position.x, g.mySettlementZ, 1.5);
+  settlementClearOperation();
 }
 
 function headToBottomBuilding()
 {
+  setMyDest(g.models.player[g.myColor].position.x, zlocs[1], 1.5);
+  g.destCallback = nowInBottomBuilding;
 }
 
 function requestMuleOutfit()
@@ -911,21 +939,30 @@ export function settlementClick(/**@type {number}*/x, /**@type {number}*/y)
     switch (sel) {
       case "Mule":    if (bottomLoc == -1) bottomLoc = 0;
       case "Cantina": if (bottomLoc == -1) bottomLoc = 1;
-      case "Assay":   if (bottomLoc == -1) bottomLoc = 2;
-      case "Land":    if (bottomLoc == -1) bottomLoc = 3;
+      case "Assay":   if (bottomLoc == -1) bottomLoc = 3;
+      case "Land":    if (bottomLoc == -1) bottomLoc = 2;
         if (g.me().mule != null && bottomLoc > 0)
         {
           tempBlink("Sorry, no MULEs allowed", 7500);
           settlementClearOperation();
           return;
         }
-        setMyDest(xlocs[bottomLoc], g.myModel().position.z, 1.5);
         if (bottomLoc == 0 && g.me().mule == null)
           g.destCallback = requestMule;
         else if (bottomLoc == 0 && g.me().mule != null)
+        {
+          if (g.models.playerMule[g.myColor].position.x == xlocs[0])
+          {
+            // skip player walking
+            sellMule();
+            return;
+          }
           g.destCallback = sellMule;
-        else if (bottomLoc == 1)
+        }
+        else if (bottomLoc > 0)
           g.destCallback = headToBottomBuilding;
+
+        setMyDest(xlocs[bottomLoc], g.myModel().position.z, 1.5);
         break;
       case "Food":
         muleOutfit = 0; break;
@@ -981,4 +1018,62 @@ export function buymule()
   g.destCallback = settlementClearOperation;
 }
 
+export function RemoveMuleFromScene(/**@type {string}*/ pc)
+{
+  if (pc != g.myColor)
+    g.scene.remove(g.models.playerMule[pc]);
+}
 
+function removeMule()
+{
+  settlementClearOperation();
+  g.me().mule = null;
+  g.scene.remove(g.models.playerMule[g.myColor]);
+  g.muleLight[g.myColor].visible = false;
+  if (g.models.player[g.myColor].position.x > xlocs[0])
+    setMyDest(xlocs[0], g.models.player[g.myColor].position.z, 1.5);
+
+  send(t.MuleRemovedFromScene());
+}
+
+function muleGoesBack()
+{
+  setMyMuleDest(xlocs[0], zlocs[1], 1.5);
+
+  g.destCallback = removeMule;
+}
+
+export function sellMuleConfirmed()
+{
+  let modelp = g.myModel();
+  let modelm = g.models.playerMule[g.myColor];
+
+  if (modelm.position.x == xlocs[0])
+  {
+    // skip player walking
+    muleGoesBack();
+    return;
+  }
+
+  setMyDest(xlocs[0] + muleoffset,
+    modelp.position.z, 1.5);
+
+  g.destCallback = muleGoesBack;
+}
+
+
+let cantinaSound = new Audio("/sound/cantina.mp3");
+
+export async function CantinaWinnings(/**@type {t.CantinaResult}*/ msg)
+{
+  if (msg.pc == g.myColor)
+  {
+    cantinaSound.play();
+    tempBlink("You won (\u20BF)" + msg.winnings + " gambling at the Cantina.", 5500);
+    await sleep(4000);
+    switchCamView(false);
+    g.waitingForServerResponse = true;
+  }
+  
+  g.scene.remove(g.models.player[msg.pc]);
+}

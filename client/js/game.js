@@ -58,6 +58,9 @@ export let g =
 
   mySettlementZ : 0,
 
+  doLandMark: false,
+  doAssayMark: false,
+
   models: {
     /** @type {Object3D} */ //@ts-ignore
     mule: null,
@@ -413,7 +416,7 @@ export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
   x *= window.devicePixelRatio;
   y *= window.devicePixelRatio;
 
-  if (camShowingSettlement()) 
+  if (camShowingSettlement() && g.state == "IMPROVE") 
   {
     settlementMouseMove(x, y);
     return;
@@ -421,6 +424,7 @@ export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
 
   if (g.state == "IMPROVE" || g.state == "LANDGRANT")
   {
+    ui.msg.innerText = "";
     let o = getLandLotObjForMouse(x, y);
     let k = LandLotStr(o.e, o.n);
     if (g.state == "LANDGRANT" && !validForLandGrant(k))
