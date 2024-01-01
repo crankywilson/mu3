@@ -53,5 +53,12 @@ class LandLot
                 public int          resprod   = 0;        // production amount for this month
 }
 
-class LandLotDict : Dictionary<LandLotID, LandLot> {}
+class LandLotDict : Dictionary<LandLotID, LandLot>
+{
+    new public LandLot this[LandLotID key]
+    {
+      get { TryGetValue(key, out LandLot? val); return val ?? new(); }
+      set { if (value != null) base[key] = value; }
+    }
+}
 

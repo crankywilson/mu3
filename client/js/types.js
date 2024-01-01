@@ -24,6 +24,19 @@
  @property {Player} p
  @property {string} _mt
 
+@typedef ClaimLot
+ @property {number} e
+ @property {number} n
+ @property {string} _mt
+
+@typedef LotGranted
+ @property {string} pc
+ @property {string} k
+ @property {string} _mt
+
+@typedef LotDenied
+ @property {string} _mt
+
 @typedef MuleRequest
  @property {string} _mt
 
@@ -97,6 +110,11 @@
  @property {number} e
  @property {number} n
  @property {number} existingResType
+ @property {string} _mt
+
+@typedef UninstallMule
+ @property {number} e
+ @property {number} n
  @property {string} _mt
 
 @typedef MuleRemoved
@@ -222,11 +240,10 @@
 @typedef {(
  'WAITINGFORALLJOIN'|
  'SCORE'|
- 'WAITFORLANDGRANT'|
  'LANDGRANT'|
  'WAITINGFORLANDAUCTION'|
  'LANDAUCTION'|
- 'WAITINGTOSTARTIMPROVE'|
+ 'PLAYEREVENT'|
  'IMPROVE'|
  'PROD'|
  'AUCTIONPREP'|
@@ -239,11 +256,10 @@
 export let GAMESTATE = {
  WAITINGFORALLJOIN: "WAITINGFORALLJOIN",
  SCORE: "SCORE",
- WAITFORLANDGRANT: "WAITFORLANDGRANT",
  LANDGRANT: "LANDGRANT",
  WAITINGFORLANDAUCTION: "WAITINGFORLANDAUCTION",
  LANDAUCTION: "LANDAUCTION",
- WAITINGTOSTARTIMPROVE: "WAITINGTOSTARTIMPROVE",
+ PLAYEREVENT: "PLAYEREVENT",
  IMPROVE: "IMPROVE",
  PROD: "PROD",
  AUCTIONPREP: "AUCTIONPREP",
@@ -252,6 +268,13 @@ export let GAMESTATE = {
 }
 /**@returns {Continue}*/ export function Continue(
 ) { return { _mt: 'Continue'};}
+
+/**@returns {ClaimLot}*/ export function ClaimLot(
+ /**@type {number}*/ e,
+ /**@type {number}*/ n,
+) { return { _mt: 'ClaimLot' , e: e
+ , n: n
+};}
 
 /**@returns {MuleRequest}*/ export function MuleRequest(
 ) { return { _mt: 'MuleRequest'};}
@@ -320,6 +343,13 @@ export let GAMESTATE = {
  /**@type {number}*/ e,
  /**@type {number}*/ n,
 ) { return { _mt: 'InstallMule' , e: e
+ , n: n
+};}
+
+/**@returns {UninstallMule}*/ export function UninstallMule(
+ /**@type {number}*/ e,
+ /**@type {number}*/ n,
+) { return { _mt: 'UninstallMule' , e: e
  , n: n
 };}
 

@@ -154,9 +154,13 @@ record InstallMule (
   public override void OnRecv(Player p, Game g)
   {
     var ll = g.landlots[new LandLotID(e,n)];
+    if (ll.owner != p) 
+      { g.send(new MuleInstalled(p.color, -2, e, n, -2)); return; } // -2 does nothing but take player out of waiting state
+    
     int oldr = ll.res;
     ll.res = p.mule?.resOutfit ?? -1;
     g.send(new MuleInstalled(p.color, ll.res, e, n, oldr));
+    
     if (oldr != -1 && p.mule is not null)
       p.mule.resOutfit = oldr;
     else
@@ -171,6 +175,25 @@ record MuleInstalled (
   int n,
   int existingResType
 ) : Msg;
+
+record UninstallMule (
+  int e,
+  int n
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    var ll = g.landlots[new LandLotID(e,n)];
+
+    if (ll.owner != p) 
+      { g.send(new MuleInstalled(p.color, -2, e, n, -2)); return; } // -2 does nothing but take player out of waiting state
+
+    int oldr = ll.res;
+    if (oldr > -1) p.mule = new MuleData(oldr, p);
+    ll.res = -1;
+    g.send(new MuleRemoved(p.color, e, n, oldr));
+  }
+}
 
 record MuleRemoved (
   PlayerColor pc,

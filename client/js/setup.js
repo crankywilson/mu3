@@ -1,6 +1,6 @@
 
 import { g, ui, mark3DInitialized, send,
-         mouseMove, mouseClick, doubleClick, LandLotStr 
+         mouseMove, mouseClick, LandLotStr 
        } from "./game.js";
 import * as t from "./types.js";
 import { initWS } from "./websock.js";
@@ -316,7 +316,8 @@ async function setup3d()
   g.lloMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, transparent: true, opacity: .5 });
   g.landlotOverlay = new THREE.Mesh(new THREE.PlaneGeometry(4, 4, 1, 1), g.lloMaterial);
   g.landlotOverlay.rotation.x = -90 * Math.PI / 180;
-  
+  g.scene.add(g.landlotOverlay);
+  g.landlotOverlay.visible = false;
 
   if (mark3DInitialized != null)
     mark3DInitialized();  // causes awaiting on g.init3DComplete to proceed
@@ -466,7 +467,6 @@ function setup()
   window.addEventListener('contextmenu', (e) => {e.preventDefault();}, false);
   ui.boardview.onpointermove = mouseMove;
   ui.boardview.onpointerdown = mouseClick;
-  ui.boardview.ondblclick    = doubleClick;
 
   setup3d();
   setupPending();

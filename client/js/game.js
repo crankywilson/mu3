@@ -4,7 +4,8 @@ import {
   getLandLotObjForMouse,
   settlementMouseMove,
   settlementClick,
-  goInSettlement
+  goInSettlement,
+  tempBlink
 } from "./ren3d.js";
 
 /**
@@ -391,6 +392,8 @@ export function getN(/**@type {string}*/k)
 
 function validForLandGrant(/**@type {string}*/k)
 {
+  if (getE(k) == 0 && getN(k) == 0) return false;
+  if (!(k in g.landlots) || g.landlots[k].owner != null) return false;
   return true;
 }
 
@@ -401,13 +404,11 @@ function highlightPlot(/**@type {string}*/k)
   let e = getE(k);
   let n = getN(k);
   if (e > -5 && e < 5 && n > -3 && n < 3) {
-    if (g.landlotOverlay.parent == null)
-      g.scene.add(g.landlotOverlay);
+    g.landlotOverlay.visible = true;
     g.landlotOverlay.position.set(e * 4, .01, n * -4);
   }
   else {
-    if (g.landlotOverlay.parent != null)
-      g.scene.remove(g.landlotOverlay);
+    g.landlotOverlay.visible = false;
   }
 }
 
@@ -431,10 +432,16 @@ export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
   {
     if (g.state == "IMPROVE") ui.msg.innerText = "";
     let o = getLandLotObjForMouse(x, y);
+    if (o.e > 4 || o.e < -4 || o.n > 2 || o.n < -2)
+    {
+      g.landlotOverlay.visible = false;
+      return;
+    }
+
     let k = LandLotStr(o.e, o.n);
     if (g.state == "LANDGRANT" && !validForLandGrant(k))
-      g.scene.remove(g.landlotOverlay);
-    else 
+      g.landlotOverlay.visible = false;
+    else
       highlightPlot(k);
   }
 }
@@ -469,18 +476,31 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
       settlementClick(x, y);
       return;
     }
-
+    ui.msgblink.innerText = "";
     let o = getLandLotObjForMouse(x, y);
 
     let dest = {x: o.e * 4, z: o.n * -4, spd: 2.5};
     if (dest.x == g.myModel().position.x &&
         dest.z == g.myModel().position.z)
     {
+      let k = LandLotStr(o.e, o.n);
+      if (!(k in g.landlots) || g.landlots[k].owner != g.myColor)
+      {
+        tempBlink("You don't own this lot.");
+        return;
+      }
+
       if (g.me().mule != null)
       {
         g.lloMaterial.color.set(llocolor(g.myColor)); 
         g.waitingForServerResponse = true;
         send(t.InstallMule(o.e, o.n));
+      }
+      else if (g.landlots[k].res > -1)
+      {
+        g.lloMaterial.color.set(llocolor(g.myColor)); 
+        g.waitingForServerResponse = true;
+        send(t.UninstallMule(o.e, o.n));
       }
       return;
     }
@@ -500,6 +520,18 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
       g.myModel().position.z, dest.x, dest.z, dest.spd));
 
     g.me().dest = dest;
+  }
+  else if (g.state == "LANDGRANT")
+  {
+    if (g.landlotOverlay.visible)
+    {
+      let o = getLandLotObjForMouse(x, y);
+      if (o.e < -4 || o.e > 4 || o.n > 2 || o.n < -2) return;
+      g.lloMaterial.color.set(llocolor(g.myColor)); 
+      g.waitingForServerResponse = true;
+      send(t.ClaimLot(o.e, o.n));
+    }
+    return;
   }
 /*
   if (g.state == st.SCORE || g.state == st.PRODUCTION_DONE ||
@@ -562,8 +594,4 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
     return;
   }
   */
-}
-
-export function doubleClick(/**@type {MouseEvent}*/ ev)
-{
 }

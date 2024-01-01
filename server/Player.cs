@@ -22,6 +22,8 @@ class MuleData
   [JsonInclude] public double  x         = 0.0;
   [JsonInclude] public double  z         = 0.0;
   [JsonInclude] public Dest?   dest      = null;
+  public MuleData(int r, Player p) { resOutfit = r; x = p.x; z=p.z; }
+  public MuleData() {}
 }
 
 #pragma warning disable CS0660
@@ -65,9 +67,38 @@ class Player
 
     byte[] buf = JsonSerializer.SerializeToUtf8Bytes(m, m.GetType());
 
-    Console.WriteLine($"{DateTime.Now:h:mm:ss} Send {color.ToString()[0]} {Encoding.UTF8.GetString(buf)}");
+    Log(buf);
 
     _ = ws.SendAsync(buf, WebSocketMessageType.Text, true, CancellationToken.None);
+  }
+
+  string RemoveLandLots(string orig)
+  {
+    int i = orig.IndexOf("\"landlots\":");
+    int st = i;
+    if (i < 1) return orig;
+    int count = 1;
+    try {
+     while (orig[i] != '{') i++;
+     i++;
+     while (count > 0)
+     {
+      if (orig[i] == '}') count--;
+      else if (orig[i] == '{') count++;
+      i++;
+     }
+     return $"{orig[..st]}\"landlots\":{{...}}{orig[i..]}";
+    } catch {}
+    return orig;
+  }
+
+  public void Log(byte[] buf, bool recv=false)
+  {
+    string msg = "\"", Send = recv ? "Recv" : "Send";
+    msg = Encoding.UTF8.GetString(buf);
+    if (msg.Contains("Dest")) return;
+    msg = RemoveLandLots(msg);
+    Console.WriteLine($"{DateTime.Now:h:mm:ss} {Send} {color.ToString()[0]} {msg}");
   }
 
   public override string ToString()

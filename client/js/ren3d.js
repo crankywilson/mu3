@@ -252,8 +252,7 @@ function rotateCameraX()
   {
     g.camera.rotation.x = crxset;
     ui.sett.style.visibility = "visible";
-    if (g.landlotOverlay != null && g.landlotOverlay.parent == g.scene)
-      g.scene.remove(g.landlotOverlay);
+    g.landlotOverlay.visible = false;
   }
   else 
   {
@@ -633,6 +632,12 @@ function addFlag(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}*
     b.position.z = n * -4;
     g.scene.add(b);
     riverHacks[k] = b;
+
+      let m = new THREE.Mesh(new THREE.PlaneGeometry(4, 4, 1, 1), b.material);
+      m.position.copy(new Vector3(e*4,2,n*-4));
+      m.rotation.x = -90 * Math.PI / 180;
+      g.scene.add(m);
+
   }
 
   let poleGeom = new THREE.CylinderGeometry(.04, .05, 1.8);
@@ -719,9 +724,12 @@ function deleteLandModelIfExists(/**@type {string}*/k)
 /** @param msg */
 export function MuleRemoved(/**@type {t.MuleRemoved}*/msg)
 {
-  g.lloMaterial.color.set(0xffffff);
-  g.scene.remove(g.landlotOverlay);
-  g.waitingForServerResponse = false;
+  if (msg.pc == g.myColor)
+  {
+    g.lloMaterial.color.set(0xffffff);
+    g.landlotOverlay.visible = false;
+    g.waitingForServerResponse = false;
+  }
 
   let p = g.players[msg.pc];
   if (p == null) return;
@@ -753,11 +761,39 @@ function addLandModel(/**@type {number}*/ e,/**@type {number}*/ n,
   landmodels[k] = m;
 }
 
+export function UninstallMule(/**@type {t.MuleRemoved}*/msg)
+{
+  if (msg.pc == g.myColor)
+  {
+    g.lloMaterial.color.set(0xffffff);
+    g.landlotOverlay.visible = false;
+    g.waitingForServerResponse = false;
+  }
+
+  deleteLandModelIfExists(LandLotStr(msg.e, msg.n));
+  let m = g.models.playerMule[msg.pc];
+  let pm = g.models.player[msg.pc];
+  g.scene.add(m);
+  setMuleLight(msg.pc, msg.existingResType);
+  let p = g.players[msg.pc];
+  if (p == null) return;
+  p.x = pm.position.x;
+  p.z = pm.position.z;
+  p.mule = { resOutfit:msg.existingResType, x:p.x, z:p.z, dest:null };
+  m.position.x = p.x;
+  m.position.z = p.z;
+}
+
 export function MuleInstalled(/**@type {t.MuleInstalled}*/msg)
 {
-  g.lloMaterial.color.set(0xffffff);
-  g.scene.remove(g.landlotOverlay);
-  g.waitingForServerResponse = false;
+  if (msg.pc == g.myColor)
+  {
+    g.lloMaterial.color.set(0xffffff);
+    g.landlotOverlay.visible = false;
+    g.waitingForServerResponse = false;
+  }
+
+  if (msg.resType < -1) return;
 
   let p = g.players[msg.pc];
   if (p == null) return;

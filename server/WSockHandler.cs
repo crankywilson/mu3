@@ -175,8 +175,8 @@ static class WSockHandler
 
     if (len == 0) return SockCloseMsg;
     
-    Console.WriteLine($"{DateTime.Now:h:mm:ss} Recv {p.color.ToString()[0]} {Encoding.UTF8.GetString(buf, 0, len)}");
-
+    p.Log(buf, true);
+    
     var t = GetTypeForMsg(buf);
     return GetMsg(buf, len, t);
   }

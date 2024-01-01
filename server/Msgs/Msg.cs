@@ -54,3 +54,28 @@ record CurrentGameState (
 record PlayerRejoined (
   Player p
 ) : Msg;
+
+record ClaimLot (
+  int e,
+  int n
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    if (g.continueRecvd.Contains(p.color)) { p.send(new LotDenied()); return; };
+    var id = new LandLotID(e,n);
+    var ll = g.landlots[id];
+    if (ll.owner != null) { p.send(new LotDenied()); return; };
+    ll.owner = p.color;
+    g.send(new LotGranted(p.color, id.str()));
+    new Continue().OnRecv(p, g);
+  }
+}
+
+record LotGranted (
+  PlayerColor pc,
+  string k
+) : Msg;
+
+record LotDenied (
+) : Msg;

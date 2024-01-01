@@ -297,6 +297,11 @@ export function MuleRemovedFromScene(/**@type {t.MuleRemovedFromScene}*/msg)
     r.RemoveMuleFromScene(msg.pc);
 }
 
+export function MuleRemoved(/**@type {t.MuleRemoved}*/msg)
+{
+  r.UninstallMule(msg);
+}
+
 export function CantinaResult(/**@type {t.CantinaResult}*/msg)
 {
   r.CantinaWinnings(msg);
@@ -306,4 +311,22 @@ export function ShowWaiting(/**@type {t.ShowWaiting}*/msg)
 {
   let spans = ui.plbox(msg.pc).getElementsByTagName('span');
   spans[NAMESPAN].style.color = 'black';
+}
+
+export function LotDenied(/**@type {t.LotDenied}*/msg)
+{ // msg only sent to player requesting...
+  g.waitingForServerResponse = false;
+  g.lloMaterial.color.set(0xffffff);
+}
+
+export function LotGranted(/**@type {t.LotGranted}*/msg)
+{ 
+  if (msg.pc == g.myColor)
+  {
+    g.waitingForServerResponse = false;
+    g.lloMaterial.color.set(0xffffff);
+    g.landlotOverlay.visible = false;
+  }
+
+  r.ClaimLot(msg.pc, msg.k);  // handles setting g.landlots
 }
