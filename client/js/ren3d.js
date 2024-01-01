@@ -137,6 +137,8 @@ function setMuleLight(/**@type {string}*/pc, /**@type {number}*/ resType)
     case 3: sl.color.set(0xaaddff); break;
   }
   sl.visible = true;
+
+  send(t.TurnedOnMuleLight(pc, sl.color.getHex()));
 }
 
 function resStrToNum(/**@type {string}*/ resStr)
@@ -332,8 +334,43 @@ export async function SetupMounds()
   g.mgPlaced = true;
 }
 
-export function SyncLandGeom()
+export async function SyncLandGeom()
 {
+  await g.init3DComplete;
+
+  for (let k in g.landlots)
+  {
+    let e = getE(k);
+    let n = getN(k);
+    let ll = g.landlots[k];
+    if (ll.res < 0 && k in landmodels)
+      deleteLandModelIfExists(k);
+    else if (ll.res >= 0 && 
+            ( (k in landmodels && landmodels[k].name != ll.res.toString()) ||
+              (!(k in landmodels)) ) )
+    {
+      deleteLandModelIfExists(k);
+      addLandModel(e, n, ll.res, k);
+    }
+
+    let existingLineColor = null;
+    if (k in nlines) existingLineColor = nlines[k].name;
+    else if (k in slines) existingLineColor = slines[k].name;
+    else if (k in elines) existingLineColor = elines[k].name;
+    else if (k in wlines) existingLineColor = wlines[k].name;
+    if (ll.owner != existingLineColor)
+    {
+      for (let side=NSide; side<=WSide; side++) 
+        removeLineIfExists(e, n, side);
+      if (ll.owner != null)
+      {
+        addLines(e, n, ll.owner);
+        removeFlag(e, n);
+        addFlag(e, n, ll.owner);
+      }
+      syncLinesFlags(e, n);
+    }
+  }
 }
 
 const playerstilltime = .55;
@@ -360,7 +397,7 @@ function AnimatePlayerAndMule(
     if (moveTowards(playerModel, dest, delta * spd))
     {
       if (c == g.myColor)
-        send(t.DestReached(c, p.x, p.z));
+        send(t.DestReached(c, dest.x, dest.z));
 
       p.dest = null;
       playerModel.rotation.y = 0;
@@ -636,6 +673,7 @@ function addLines(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}
   {
     nlines[k] = m;
     m.position.set(e*4, 0, n*-4 - 1.95);
+    m.name = pc;
     g.scene.add(m);
   }
 
@@ -644,6 +682,7 @@ function addLines(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}
     m = new THREE.Mesh( bg, mat );
     slines[k] = m;
     m.position.set(e*4, 0, n*-4 + 1.95);
+    m.name = pc;
     g.scene.add(m);
   }
 
@@ -653,6 +692,7 @@ function addLines(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}
     m = new THREE.Mesh( bg, mat );
     elines[k] = m;
     m.position.set(e*4 + 1.95, 0, n*-4);
+    m.name = pc;
     g.scene.add(m);
   }
 
@@ -661,7 +701,18 @@ function addLines(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}
     m = new THREE.Mesh( bg, mat );
     wlines[k] = m;
     m.position.set(e*4 - 1.95, 0, n*-4);
+    m.name = pc;
     g.scene.add(m);
+  }
+}
+
+function deleteLandModelIfExists(/**@type {string}*/k)
+{
+  if (k in landmodels)
+  {
+    let m = landmodels[k];
+    g.scene.remove(m);
+    delete landmodels[k];
   }
 }
 
@@ -683,15 +734,23 @@ export function MuleRemoved(/**@type {t.MuleRemoved}*/msg)
   }
 
   let k = LandLotStr(msg.e, msg.n);
-  if (k in landmodels)
-  {
-    let m = landmodels[k];
-    g.scene.remove(m);
-    delete landmodels[k];
-  }
+  deleteLandModelIfExists(k);
 
   g.landlots[k].res = -1;
   syncLinesFlags(msg.e, msg.n);
+}
+
+function addLandModel(/**@type {number}*/ e,/**@type {number}*/ n, 
+        /**@type {number}*/r,/**@type {string}*/k)
+{
+  let m = g.models.prod[r].clone();
+  m.name = r.toString();
+  m.position.x = e*4;
+  m.position.z = -n*4;
+  g.scene.add(m);
+  
+  g.landlots[k].res = r;
+  landmodels[k] = m;
 }
 
 export function MuleInstalled(/**@type {t.MuleInstalled}*/msg)
@@ -716,13 +775,8 @@ export function MuleInstalled(/**@type {t.MuleInstalled}*/msg)
   if (k in landmodels)
     g.scene.remove(landmodels[k]);
   
-  let m = g.models.prod[msg.resType].clone();
-  m.position.x = msg.e*4;
-  m.position.z = -msg.n*4;
-  g.scene.add(m);
-  
-  g.landlots[k].res = msg.resType;
-  landmodels[k] = m;
+  addLandModel(msg.e,msg.n,msg.resType,k);
+
   syncLinesFlags(msg.e, msg.n);
 }
 

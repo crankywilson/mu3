@@ -89,8 +89,9 @@ async function AddModelIfNeeded(/**@type {string}*/ color, /**@type {number?}*/ 
 
   if (x != null) playerModel.position.x = x;
   if (z != null) playerModel.position.z = z;
-  console.log(color + ":" + x + "," + z);
 }
+
+let month = 1;
 
 export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
 {
@@ -123,7 +124,8 @@ export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
     r.startAnimating();
   
   UpdateGameState({gs:g.state, _mt:""});
-  showScores(msg.g.players, msg.g.month);
+  month = msg.g.month;
+  showScores(msg.g.players, month);
 }
 
 export function PlayerRejoined(/**@type {t.PlayerRejoined}*/ msg)
@@ -132,6 +134,12 @@ export function PlayerRejoined(/**@type {t.PlayerRejoined}*/ msg)
 
 export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
 {
+  for (let p in g.players)  // this include non-playing players, but it doesn't matter
+  {
+    let spans = ui.plbox(p).getElementsByTagName('span');
+    spans[NAMESPAN].style.color = 'white';
+  }
+
   ui.msg.innerText = "";
   g.state = msg.gs;
 
@@ -139,6 +147,12 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   {
     if (g.players[pi] == null) continue;
     setPlboxSpanText(pi, BOTTOMSPAN, "");
+  }
+
+  if (g.state == "LANDGRANT")
+  {
+    ui.msg.innerText = "Land Grant for month #" + month +
+      ". Click on a land lot to claim.";
   }
 
   if (g.state == "IMPROVE")
@@ -156,8 +170,12 @@ export function MuleObtained(/**@type {t.MuleObtained}*/ msg)
 
   setPlboxSpanText(msg.pc, MONEYSPAN, msg.newMoney);
   ui.mulecount.innerText = msg.numMules.toString();
-  if (g.myColor != msg.pc) return;
-  
+  if (g.myColor != msg.pc) 
+  {
+    g.muleLight[msg.pc].visible = false;
+    return;
+  }
+
   r.buymule();  
 }
 
@@ -174,6 +192,14 @@ export function NewDest(/**@type {t.NewDest}*/msg)
 {
   if (msg.pc != g.myColor)
   {
+    let p = g.players[msg.pc];
+    if (p == null) return;
+    p.x = msg.x;
+    p.z = msg.z;
+    p.dest = {x:msg.destx, z:msg.destz, spd:msg.destspd};
+    let m = g.models.player[msg.pc];
+    m.position.x = msg.x;
+    m.position.z = msg.z;
   }
 }
 
@@ -181,6 +207,16 @@ export function DestReached(/**@type {t.DestReached}*/msg)
 {
   if (msg.pc != g.myColor)
   {
+    let p = g.players[msg.pc];
+    if (p == null) return;
+    p.x = msg.x;
+    p.z = msg.z;
+    p.dest = null;
+    let m = g.models.player[msg.pc];
+    m.position.x = msg.x;
+    m.position.z = msg.z;
+    m.rotation.y = 0;
+    g.mixer[msg.pc].setTime(.55);
   }
 }
 
@@ -188,6 +224,17 @@ export function NewMuleDest(/**@type {t.NewMuleDest}*/msg)
 {
   if (msg.pc != g.myColor)
   {
+    let p = g.players[msg.pc];
+    if (p == null) return;
+    let r = -1;
+    if (p.mule != null) r = p.mule.resOutfit;
+    let mm = g.models.playerMule[msg.pc];
+    if (mm.parent == null)
+      g.scene.add(mm);
+    mm.position.x = msg.x;
+    mm.position.z = msg.z;
+    p.mule = {x: msg.x, z: msg.z, resOutfit:r, dest:
+       {x:msg.destx, z:msg.destz, spd:msg.destspd}};
   }
 }
 
@@ -195,6 +242,18 @@ export function MuleDestReached(/**@type {t.MuleDestReached}*/msg)
 {
   if (msg.pc != g.myColor)
   {
+    let p = g.players[msg.pc];
+    if (p == null) return;
+    let m = p.mule;
+    if (m == null) return;
+    m.x = msg.x;
+    m.z = msg.z;
+    m.dest = null;
+    let mm = g.models.playerMule[msg.pc];
+    if (mm.parent == null)
+      g.scene.add(mm);
+    mm.position.x = msg.x;
+    mm.position.z = msg.z;
   }
 }
 
@@ -241,4 +300,10 @@ export function MuleRemovedFromScene(/**@type {t.MuleRemovedFromScene}*/msg)
 export function CantinaResult(/**@type {t.CantinaResult}*/msg)
 {
   r.CantinaWinnings(msg);
+}
+
+export function ShowWaiting(/**@type {t.ShowWaiting}*/msg)
+{
+  let spans = ui.plbox(msg.pc).getElementsByTagName('span');
+  spans[NAMESPAN].style.color = 'black';
 }

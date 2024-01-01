@@ -5,6 +5,10 @@
 @typedef Msg
  @property {string} _mt
 
+@typedef ShowWaiting
+ @property {string} pc
+ @property {string} _mt
+
 @typedef Continue
  @property {string} _mt
 

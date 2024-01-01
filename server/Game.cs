@@ -7,11 +7,10 @@ using System.Threading.Channels;
 enum GameState {  
   /*GS*/ WAITINGFORALLJOIN      ,
   /*GS*/ SCORE                  ,
-  /*GS*/ WAITFORLANDGRANT       ,
   /*GS*/ LANDGRANT              ,
   /*GS*/ WAITINGFORLANDAUCTION  ,
   /*GS*/ LANDAUCTION            ,
-  /*GS*/ WAITINGTOSTARTIMPROVE  ,
+  /*GS*/ PLAYEREVENT            ,
   /*GS*/ IMPROVE                ,
   /*GS*/ PROD                   ,
   /*GS*/ AUCTIONPREP            ,

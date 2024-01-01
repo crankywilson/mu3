@@ -12,16 +12,32 @@ record Msg (
   public Msg() : this("") { _mt = GetType().Name; }
 }
 
+record ShowWaiting (
+  PlayerColor pc
+) : Msg;
+
 record Continue (
 ) : Msg
 {
   public override void OnRecv(Player p, Game g)
   {
     g.continueRecvd.Add(p.color);
+    g.send(new ShowWaiting(p.color));
     if (g.AllActivePlayersInSet(g.continueRecvd))
     {
-      if (g.state == GameState.SCORE)
-        g.UpdateGameState(GameState.IMPROVE);
+      g.continueRecvd.Clear();
+      switch (g.state)
+      {
+        case GameState.SCORE:
+          g.UpdateGameState(GameState.LANDGRANT); break;
+        case GameState.LANDGRANT:
+          // possible auction... or...
+          g.UpdateGameState(GameState.IMPROVE); break;
+        case GameState.LANDAUCTION:
+          g.UpdateGameState(GameState.IMPROVE); break;
+        case GameState.PLAYEREVENT:
+          g.UpdateGameState(GameState.IMPROVE); break;
+      }
     }
   }
 }

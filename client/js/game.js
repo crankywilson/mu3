@@ -429,7 +429,7 @@ export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
 
   if (g.state == "IMPROVE" || g.state == "LANDGRANT")
   {
-    ui.msg.innerText = "";
+    if (g.state == "IMPROVE") ui.msg.innerText = "";
     let o = getLandLotObjForMouse(x, y);
     let k = LandLotStr(o.e, o.n);
     if (g.state == "LANDGRANT" && !validForLandGrant(k))
