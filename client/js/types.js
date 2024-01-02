@@ -146,6 +146,22 @@
  @property {number} newMoney
  @property {string} _mt
 
+@typedef Assay
+ @property {number} e
+ @property {number} n
+ @property {string} _mt
+
+@typedef AssayResult
+ @property {number} e
+ @property {number} n
+ @property {number} val
+ @property {string} _mt
+
+@typedef AuctionLot
+ @property {number} e
+ @property {number} n
+ @property {string} _mt
+
 @typedef AvailableGames
  @property {string[]} games
  @property {string} _mt
@@ -245,6 +261,7 @@
  'LANDAUCTION'|
  'PLAYEREVENT'|
  'IMPROVE'|
+ 'COLONYEVENT'|
  'PROD'|
  'AUCTIONPREP'|
  'AUCTION'|
@@ -261,6 +278,7 @@ export let GAMESTATE = {
  LANDAUCTION: "LANDAUCTION",
  PLAYEREVENT: "PLAYEREVENT",
  IMPROVE: "IMPROVE",
+ COLONYEVENT: "COLONYEVENT",
  PROD: "PROD",
  AUCTIONPREP: "AUCTIONPREP",
  AUCTION: "AUCTION",
@@ -363,6 +381,20 @@ export let GAMESTATE = {
 
 /**@returns {Cantina}*/ export function Cantina(
 ) { return { _mt: 'Cantina'};}
+
+/**@returns {Assay}*/ export function Assay(
+ /**@type {number}*/ e,
+ /**@type {number}*/ n,
+) { return { _mt: 'Assay' , e: e
+ , n: n
+};}
+
+/**@returns {AuctionLot}*/ export function AuctionLot(
+ /**@type {number}*/ e,
+ /**@type {number}*/ n,
+) { return { _mt: 'AuctionLot' , e: e
+ , n: n
+};}
 
 /**@returns {CreateGame}*/ export function CreateGame(
  /**@type {string}*/ name,

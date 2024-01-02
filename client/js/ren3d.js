@@ -480,6 +480,14 @@ function render()
   if (!readyToRender) return;
   const delta = g.clock.getDelta();
 
+  // the way this was written, it's possible for cam
+  // to end in settlement but player to turn around and
+  // be outside -- we'll force this to reconcile here...
+  if (g.myModel() != null)
+    if (Math.abs(g.myModel().position.x) > 2.5)
+      if (cptarget != cpfar)
+        switchCamView(false);
+
   moveTowards(g.camera, cptarget, delta * 60);
   rotateCameraX();
   animFlags(delta);
@@ -520,7 +528,7 @@ export function settlementMouseMove(/**@type {number}*/x, /**@type {number}*/y)
     mat.color.set(0xcccccc);
     ui.msg.innerText = mat.name;
     ui.msg.style.backgroundColor = "rgba(255,255,255,.4)";
-    if (intersects[0].object.position.z > 0)
+    if (intersects[0].object.position.z > 0 && !g.doAssayMark && !g.doLandMark)
       ui.msgblink.innerText = "";
     return mat.name;
   }
@@ -1174,4 +1182,19 @@ export async function CantinaWinnings(/**@type {t.CantinaResult}*/ msg)
   }
   
   g.scene.remove(g.models.player[msg.pc]);
+}
+
+export async function AssayResult(/**@type {t.AssayResult}*/msg)
+{
+  let pg = new THREE.PlaneGeometry( 3.75, .8 );
+  let material = new THREE.MeshBasicMaterial({
+        map: g.textures.crystiteLevelTexture[msg.val],
+        transparent: true
+    });
+  let cm = new THREE.Mesh( pg, material );
+  cm.rotation.x =  Math.PI * - 0.5;
+  cm.position.set(msg.e*4, 0.1, msg.n*-4-1.4);
+  g.markers.add(cm); 
+  await sleep(12000);
+  g.markers.remove(cm);
 }

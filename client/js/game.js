@@ -484,9 +484,24 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
         dest.z == g.myModel().position.z)
     {
       let k = LandLotStr(o.e, o.n);
+      
+      if (g.doAssayMark)
+      {
+        g.doLandMark = g.doAssayMark = false;
+        send(t.Assay(o.e, o.n));
+        return;
+      }
+     
       if (!(k in g.landlots) || g.landlots[k].owner != g.myColor)
       {
         tempBlink("You don't own this lot.");
+        return;
+      }
+
+      if (g.doLandMark)
+      {
+        g.doAssayMark = g.doLandMark = false;
+        send(t.AuctionLot(o.e, o.n));
         return;
       }
 

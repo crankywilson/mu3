@@ -153,7 +153,7 @@ record InstallMule (
 {
   public override void OnRecv(Player p, Game g)
   {
-    var ll = g.landlots[new LandLotID(e,n)];
+    var ll = g.landlots[new(e,n)];
     if (ll.owner != p) 
       { g.send(new MuleInstalled(p.color, -2, e, n, -2)); return; } // -2 does nothing but take player out of waiting state
     
@@ -183,7 +183,7 @@ record UninstallMule (
 {
   public override void OnRecv(Player p, Game g)
   {
-    var ll = g.landlots[new LandLotID(e,n)];
+    var ll = g.landlots[new(e,n)];
 
     if (ll.owner != p) 
       { g.send(new MuleInstalled(p.color, -2, e, n, -2)); return; } // -2 does nothing but take player out of waiting state
@@ -247,5 +247,33 @@ record CantinaResult (
   int winnings,
   int newMoney
 ) :  Msg;
+
+record Assay (
+  int e,
+  int n
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    g.send(new AssayResult(e, n, g.landlots[new(e,n)].crys));
+  }
+}
+
+record AssayResult (
+  int e,
+  int n,
+  int val
+) : Msg;
+
+record AuctionLot (
+  int e,
+  int n
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    g.plLotsToAuction.Add(new(e,n));
+  }
+}
 
 

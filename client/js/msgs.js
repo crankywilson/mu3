@@ -157,10 +157,16 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
 
   if (g.state == "IMPROVE")
   {
+    g.doAssayMark = false;
+    g.doLandMark = false;
     let my = g.me();
     if (my.x > -2 && my.x < 2 && my.z > -2 && my.z < 2)
       r.switchCamView(true);
   }
+
+  if (g.state == "PLAYEREVENT" || g.state == "COLONYEVENT")
+    g.markers.clear();
+
 }
 
 export function MuleObtained(/**@type {t.MuleObtained}*/ msg)
@@ -329,4 +335,9 @@ export function LotGranted(/**@type {t.LotGranted}*/msg)
   }
 
   r.ClaimLot(msg.pc, msg.k);  // handles setting g.landlots
+}
+
+export function AssayResult(/**@type {t.AssayResult}*/msg)
+{
+  r.AssayResult(msg);
 }

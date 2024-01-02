@@ -12,6 +12,7 @@ enum GameState {
   /*GS*/ LANDAUCTION            ,
   /*GS*/ PLAYEREVENT            ,
   /*GS*/ IMPROVE                ,
+  /*GS*/ COLONYEVENT            , // this can come before or after PROD dep. on event
   /*GS*/ PROD                   ,
   /*GS*/ AUCTIONPREP            ,
   /*GS*/ AUCTION                
@@ -28,6 +29,7 @@ class Game
   [JsonInclude] public int             mules     = 14;
   [JsonInclude] public int             mulePrice = 100;
   [JsonInclude] public int[]           resPrice  = new int[4] { 15, 10, 40, 100 };
+       public HashSet<LandLotID> plLotsToAuction = new();
 
   public bool started = true;     // this gets set to false when created on web, but is true by default for deserialization
   public Player? starter = null;
