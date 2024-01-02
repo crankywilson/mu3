@@ -31,6 +31,13 @@ class Game
   [JsonInclude] public int[]           resPrice  = new int[4] { 15, 10, 40, 100 };
        public HashSet<LandLotID> plLotsToAuction = new();
 
+  List<int> possibleColonyEvents = new(){0,1,2,3,4,5,6,7,8,0,1,2,3,4,5,6,7,0,1,2,3};
+  List<int> possibleGoodPlayerEvents = Enumerable.Range(0, 13).ToList();
+  List<int> possibleBadPlayerEvents  = Enumerable.Range(13, 9).ToList();
+  
+  public int colonyEvent = 0;
+  bool colonyEventIsBeforeProd() { return bp.Contains(colonyEvent); }
+
   public bool started = true;     // this gets set to false when created on web, but is true by default for deserialization
   public Player? starter = null;
   public bool active = true;
@@ -233,4 +240,49 @@ class Game
     }
   }
 
+  string[] pe = new[] {
+/*0*/"You just received a package from your home-world relatives containing 3 food and 2 energy units.",
+/*1*/"A wandering space traveler repaid your hospitality by leaving two bars of smithore.",
+/*2*/"Your MULE was judged \"best built\" at the colony fair. You won ₿?",
+/*3*/"Your MULE won the colony tap-dancing contest. You collected ₿?.",
+/*4*/"The colony council for agriculture awarded you ₿1? for each food lot you have developed. The total grant is ₿2?.",
+/*5*/"The colony awarded you ₿? for stopping the wart worm infestation.",
+/*6*/"The museum bought your antique personal computer for ₿?.",
+/*7*/"You won the colony swamp eel eating contest and collected ₿?. (Yuck!)",
+/*8*/"A charity from your home-world took pity on you and sent ₿?.",
+/*9*/"Your offworld investments in artificial dumbness paid ₿? in dividends.",
+/*10*/"A distant relative died and left you a vast fortune٬ but after taxes you only got ₿?.",
+/*11*/"You found a dead moose rat and sold the hide for ₿?.",
+/*12*/"You received an extra lot of land to encourage colony development.",
+// above are good٬ below are bad
+/*13*/"Mischievous glac-elves broke into your storage shed and stole half your food.",
+/*14*/"One of your MULEs lost a bolt. Repairs cost you ₿?.",
+/*15*/"Your mining MULEs have deteriorated from heavy use and cost ₿1? each to repair. The total cost is ₿2?.",
+/*16*/"The solar collectors on your energy MULEs are dirty. Cleaning cost you ₿1? Each for a total of ₿2?.",
+/*17*/"Your space gypsy inlaws made a mess of the settlement. It cost you ₿? to clean it up.",
+/*18*/"Flying cat-bugs ate the roof off your dwelling. Repairs cost ₿?.",
+/*19*/"You lost ₿? betting on the two-legged kazinga races.",
+/*20*/"Your child was bitten by a bat lizard and the hospital bill cost you ₿?.",
+/*21*/"You lost a lot of land because the claim was not recorded."};
+
+  string[] ce = new[] {
+/*0*/"A planetquake reduces mining production!",                             // 15% 3 times max
+/*1*/"A pest attack on lot ? causes all food to be destroyed!",              // 15% 3 times max
+/*2*/"Sunspot activity increases energy production!",                        // 15% 3 times max
+/*3*/"Acid rain increases food production, but decreases energy production.",// 15% 3 times max
+/*4*/"A fire at the settlement destroys all colony-held goods!",             // 10% 2 times max
+/*5*/"An asteroid smashes into lot ?٬ making a new crystite deposit!",       // 10% 2 times max
+/*6*/"Space radiation destroys the MULE at lot ?!",                          // 10% 2 times max
+/*7*/"Space pirates steal all crystite!"};                                   // 10% 2 times max
+
+  int[] bp = new[] { 0, 2, 3, 5, 6 };
+  Dictionary<int,string> et = new() {
+  {0,      "Overall٬ the colony failed...dismally. The Federation debtors' prison is your new home!"},
+  {20000,  "Overall٬ the colony failed...The Federation will no longer send trade ships. You are on your own!"},
+  {40000,  "Overall٬ the colony survived...barely. You will be living in tents. Few trading ships will come your way!"},
+  {60000,  "Overall٬ the colony was a success. You have met the minimum standards set by the Federation٬ but your life will not be easy!"},
+  {80000,  "Overall٬ the colony succeeded. The Federation is pleased by your efforts. You will live comfortably!"},
+  {100000, "Overall٬ the colony succeeded...extremely well. You can now retire in elegant estates!"},
+  {120000, "Overall٬ the colony delighted the Federation with your exceptional achievement. Your retirement will be luxurious!"}
+  };
 }

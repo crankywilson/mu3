@@ -502,6 +502,7 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
       {
         g.doAssayMark = g.doLandMark = false;
         send(t.AuctionLot(o.e, o.n));
+        tempBlink("This lot will be auctioned next month.");
         return;
       }
 
