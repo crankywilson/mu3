@@ -108,63 +108,63 @@ class Game
           m = (rand.Next(month)+1)*25;
           shortMsg = $"+ (₿){m}";
           p.money += m;
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 3:
           m = (rand.Next(month)+1)*25;
           shortMsg = $"+ (₿){m}";
           p.money += m;
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 4:
           m = (rand.Next(1)+1)*25*p.res[FOOD];
           if (m <= 0) { p.plEvent = -1; continue; }
           shortMsg = $"+ (₿){m}";
           p.money += m;
-          longMsg.Replace("1?", (m/p.res[FOOD]).ToString());
-          longMsg.Replace("2?", m.ToString());
+          longMsg = longMsg.Replace("1?", (m/p.res[FOOD]).ToString());
+          longMsg = longMsg.Replace("2?", m.ToString());
           break;
         case 5:
           m = (rand.Next(1)+1)*25;
           shortMsg = $"+ (₿){m}";
           p.money += m;
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 6:
           m = ((int)(month/4)+1)*200;
           shortMsg = $"+ (₿){m}";
           p.money += m;
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 7:
           m = ((int)(month/4)+1)*50;
           shortMsg = $"+ (₿){m}";
           p.money += m;
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 8:
           m = ((int)(month/3)+1)*50;
           shortMsg = $"+ (₿){m}";
           p.money += m;
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 9:
           m = (rand.Next(40)+11)*month;
           shortMsg = $"+ (₿){m}";
           p.money += m;
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 10:
           m = (rand.Next(15)+11)*month;
           shortMsg = $"+ (₿){m}";
           p.money += m;
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 11:
           m = ((int)(month/3)+1)*50;
           shortMsg = $"+ (₿){m}";
           p.money += m;
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 12: {
           var l = new List<LandLotID>();
@@ -188,11 +188,11 @@ class Game
           if (m >= p.money || month == 1) { p.plEvent = -1; continue; }
           p.money -= m;
           shortMsg = $"- (₿){m}";
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 15: {
           m = ((int)(month/3)+1)*25;
-          longMsg.Replace("1?", m.ToString());
+          longMsg = longMsg.Replace("1?", m.ToString());
           int n = 0;
           foreach (var kv in landlots)
             if (kv.Value.owner == p && kv.Value.res >= SMITHORE) n++;
@@ -200,11 +200,11 @@ class Game
           if (m == 0 || m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
           shortMsg = $"- (₿){m}";
-          longMsg.Replace("2?", m.ToString());
+          longMsg = longMsg.Replace("2?", m.ToString());
           break; }
         case 16: {
           m = ((int)(month/3)+1)*25;
-          longMsg.Replace("1?", m.ToString());
+          longMsg = longMsg.Replace("1?", m.ToString());
           int n = 0;
           foreach (var kv in landlots)
             if (kv.Value.owner == p && kv.Value.res == ENERGY) n++;
@@ -212,7 +212,7 @@ class Game
           if (m == 0 || m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
           shortMsg = $"- (₿){m}";
-          longMsg.Replace("2?", m.ToString());
+          longMsg = longMsg.Replace("2?", m.ToString());
           break; }
         case 17:
           m = (rand.Next(50)+21)*(int)(month/4);
@@ -220,7 +220,7 @@ class Game
           if (m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
           shortMsg = $"- (₿){m}";
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 18:
           m = (rand.Next(40)+11)*month;
@@ -228,7 +228,7 @@ class Game
           if (m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
           shortMsg = $"- (₿){m}";
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 19:
           m = (rand.Next(15)+11)*month;
@@ -236,7 +236,7 @@ class Game
           if (m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
           shortMsg = $"- (₿){m}";
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 20:
           m = ((int)(month/4)+1)*200;
@@ -244,7 +244,7 @@ class Game
           if (m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
           shortMsg = $"- (₿){m}";
-          longMsg.Replace("?", m.ToString());
+          longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 21: {
           var l = new List<LandLotID>();
