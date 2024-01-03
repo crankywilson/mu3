@@ -53,6 +53,8 @@ class Player
 
   public Dictionary<Type, DelayedEvent> pendingEvents = new();
 
+  public int plEvent = -1;
+
   public Player() {}
   public Player(PlayerColor pc) { color = pc; }
 

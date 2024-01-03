@@ -32,9 +32,9 @@ record Continue (
           g.UpdateGameState(GameState.LANDGRANT); break;
         case GameState.LANDGRANT:
           // possible auction... or...
-          g.UpdateGameState(GameState.IMPROVE); break;
+          g.UpdateGameState(GameState.PLAYEREVENT); break;
         case GameState.LANDAUCTION:
-          g.UpdateGameState(GameState.IMPROVE); break;
+          g.UpdateGameState(GameState.PLAYEREVENT); break;
         case GameState.PLAYEREVENT:
           g.UpdateGameState(GameState.IMPROVE); break;
       }
@@ -78,4 +78,16 @@ record LotGranted (
 ) : Msg;
 
 record LotDenied (
+) : Msg;
+
+record PlayerEvent (
+  PlayerColor pc,
+  string shortMsg,
+  string? lotKey = null,
+  bool? addLot = null
+) : Msg;
+
+record PlayerEventText (
+  string fullMsg,
+  bool isGood
 ) : Msg;

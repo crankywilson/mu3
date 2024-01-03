@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Text.Json.Serialization;
 using System.Threading.Channels;
 
+
 [JsonConverter(typeof(JsonStringEnumConverter))]  // use string for JSON Serialization
 enum GameState {  
   /*GS*/ WAITINGFORALLJOIN      ,
@@ -35,7 +36,7 @@ class Game
   List<int> possibleGoodPlayerEvents = Enumerable.Range(0, 13).ToList();
   List<int> possibleBadPlayerEvents  = Enumerable.Range(13, 9).ToList();
   
-  public int colonyEvent = 0;
+  public int colonyEvent = -1;
   bool colonyEventIsBeforeProd() { return bp.Contains(colonyEvent); }
 
   public bool started = true;     // this gets set to false when created on web, but is true by default for deserialization
@@ -53,10 +54,227 @@ class Game
     return true;
   }
 
+  public int PopRandom(List<int> l)
+  {
+    if (l.Count == 0) return -1;
+    int i = rand.Next(l.Count);
+    int ret = l[i];
+    l.RemoveAt(i);
+
+    if (l.Count == 0 && l == possibleGoodPlayerEvents) l.AddRange(Enumerable.Range(0, 13).ToList());
+    if (l.Count == 0 && l == possibleBadPlayerEvents) l.AddRange(Enumerable.Range(13, 9).ToList());
+
+    return ret;
+  }
+
+  const int FOOD = (int) ResourceType.FOOD;
+  const int ENERGY = (int) ResourceType.ENERGY;
+  const int SMITHORE = (int) ResourceType.SMITHORE;
+  const int CRYSTITE = (int) ResourceType.CRYSTITE;
+
+  public void SendPlayerEvents()
+  {
+    foreach (var p in players)
+    {
+      string shortMsg = "?", longMsg = "?";
+      string? lotKey = null;
+      bool?   addLot = null;
+      int m = 0;
+      p.plEvent = -1;
+      double goodEvtProb = (double)p.rank/(players.Count + 2);
+      double badEventProb = (double)(players.Count-p.rank)/(players.Count + 3);
+      double r = rand.NextDouble();
+      if (r >= (1.0 - goodEvtProb))
+        p.plEvent = PopRandom(possibleGoodPlayerEvents);
+      else if (r < badEventProb)
+        p.plEvent = PopRandom(possibleBadPlayerEvents);
+      else
+        continue;
+
+      longMsg = pe[p.plEvent];
+
+      switch (p.plEvent)
+      {
+        case 0:
+          shortMsg = "+3 F, +2 E";
+          p.res[FOOD] += 3;
+          p.res[ENERGY] += 2;
+          break;
+        case 1:
+          shortMsg = "+2 Sm";
+          p.res[SMITHORE] += 2;
+          break;
+        case 2:
+          m = (rand.Next(month)+1)*25;
+          shortMsg = $"+ (₿){m}";
+          p.money += m;
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 3:
+          m = (rand.Next(month)+1)*25;
+          shortMsg = $"+ (₿){m}";
+          p.money += m;
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 4:
+          m = (rand.Next(1)+1)*25*p.res[FOOD];
+          if (m <= 0) { p.plEvent = -1; continue; }
+          shortMsg = $"+ (₿){m}";
+          p.money += m;
+          longMsg.Replace("1?", (m/p.res[FOOD]).ToString());
+          longMsg.Replace("2?", m.ToString());
+          break;
+        case 5:
+          m = (rand.Next(1)+1)*25;
+          shortMsg = $"+ (₿){m}";
+          p.money += m;
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 6:
+          m = ((int)(month/4)+1)*200;
+          shortMsg = $"+ (₿){m}";
+          p.money += m;
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 7:
+          m = ((int)(month/4)+1)*50;
+          shortMsg = $"+ (₿){m}";
+          p.money += m;
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 8:
+          m = ((int)(month/3)+1)*50;
+          shortMsg = $"+ (₿){m}";
+          p.money += m;
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 9:
+          m = (rand.Next(40)+11)*month;
+          shortMsg = $"+ (₿){m}";
+          p.money += m;
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 10:
+          m = (rand.Next(15)+11)*month;
+          shortMsg = $"+ (₿){m}";
+          p.money += m;
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 11:
+          m = ((int)(month/3)+1)*50;
+          shortMsg = $"+ (₿){m}";
+          p.money += m;
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 12: {
+          var l = new List<LandLotID>();
+          foreach (var kv in landlots)
+            if (kv.Value.owner is null) l.Add(kv.Key);
+          if (l.Count == 0) { p.plEvent = -1; continue; }
+          var k = l[rand.Next(l.Count)];
+          landlots[k].owner = p.color;
+          lotKey = k.str();
+          addLot = true;
+          shortMsg = $"Lot " + lotKey;
+          break; }
+        case 13:
+          m = (int)(p.res[FOOD]/2);
+          if (m == 0) { p.plEvent = -1; continue; }
+          shortMsg = $"-{m} Food";
+          p.res[FOOD] -= m;
+          break;
+        case 14:
+          m = (rand.Next(month)+1)*25;
+          if (m >= p.money || month == 1) { p.plEvent = -1; continue; }
+          p.money -= m;
+          shortMsg = $"- (₿){m}";
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 15: {
+          m = ((int)(month/3)+1)*25;
+          longMsg.Replace("1?", m.ToString());
+          int n = 0;
+          foreach (var kv in landlots)
+            if (kv.Value.owner == p && kv.Value.res >= SMITHORE) n++;
+          m *= n;
+          if (m == 0 || m >= p.money) { p.plEvent = -1; continue; }
+          p.money -= m;
+          shortMsg = $"- (₿){m}";
+          longMsg.Replace("2?", m.ToString());
+          break; }
+        case 16: {
+          m = ((int)(month/3)+1)*25;
+          longMsg.Replace("1?", m.ToString());
+          int n = 0;
+          foreach (var kv in landlots)
+            if (kv.Value.owner == p && kv.Value.res == ENERGY) n++;
+          m *= n;
+          if (m == 0 || m >= p.money) { p.plEvent = -1; continue; }
+          p.money -= m;
+          shortMsg = $"- (₿){m}";
+          longMsg.Replace("2?", m.ToString());
+          break; }
+        case 17:
+          m = (rand.Next(50)+21)*(int)(month/4);
+          shortMsg = $"+ (₿){m}";
+          if (m >= p.money) { p.plEvent = -1; continue; }
+          p.money -= m;
+          shortMsg = $"- (₿){m}";
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 18:
+          m = (rand.Next(40)+11)*month;
+          shortMsg = $"+ (₿){m}";
+          if (m >= p.money) { p.plEvent = -1; continue; }
+          p.money -= m;
+          shortMsg = $"- (₿){m}";
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 19:
+          m = (rand.Next(15)+11)*month;
+          shortMsg = $"+ (₿){m}";
+          if (m >= p.money) { p.plEvent = -1; continue; }
+          p.money -= m;
+          shortMsg = $"- (₿){m}";
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 20:
+          m = ((int)(month/4)+1)*200;
+          shortMsg = $"+ (₿){m}";
+          if (m >= p.money) { p.plEvent = -1; continue; }
+          p.money -= m;
+          shortMsg = $"- (₿){m}";
+          longMsg.Replace("?", m.ToString());
+          break;
+        case 21: {
+          var l = new List<LandLotID>();
+          foreach (var kv in landlots)
+            if (kv.Value.owner == p.color) l.Add(kv.Key);
+          if (l.Count == 0) { p.plEvent = -1; continue; }
+          var k = l[rand.Next(l.Count)];
+          landlots[k].owner = p.color;
+          lotKey = k.str();
+          addLot = false;
+          shortMsg = $"Lot " + lotKey;
+          break; }
+      }
+
+      if (p.plEvent > -1)
+      {
+        send(new PlayerEvent(p.color, shortMsg, lotKey, addLot));
+        p.send(new PlayerEventText(longMsg, p.plEvent < 13));
+      }
+    }
+  }
+
   public void UpdateGameState(GameState gs)
   {
     state = gs;
     send(new UpdateGameState(gs));
+
+    if (gs == GameState.PLAYEREVENT)
+      SendPlayerEvents();
+      
   }
   
   // each game having its own channel allows synchronicity within a game, but multiple games
@@ -243,27 +461,29 @@ class Game
   string[] pe = new[] {
 /*0*/"You just received a package from your home-world relatives containing 3 food and 2 energy units.",
 /*1*/"A wandering space traveler repaid your hospitality by leaving two bars of smithore.",
-/*2*/"Your MULE was judged \"best built\" at the colony fair. You won ₿?",
-/*3*/"Your MULE won the colony tap-dancing contest. You collected ₿?.",
-/*4*/"The colony council for agriculture awarded you ₿1? for each food lot you have developed. The total grant is ₿2?.",
-/*5*/"The colony awarded you ₿? for stopping the wart worm infestation.",
-/*6*/"The museum bought your antique personal computer for ₿?.",
-/*7*/"You won the colony swamp eel eating contest and collected ₿?. (Yuck!)",
-/*8*/"A charity from your home-world took pity on you and sent ₿?.",
+/*2*/"Your MULE was judged \"best built\" at the colony fair. You won ₿?",  //150 r8
+/*3*/"Your MULE won the colony tap-dancing contest. You collected ₿?.",  //200 r4
+/*4*/"The colony council for agriculture awarded you ₿1? for each food lot you have developed. The total grant is ₿2?.",  //50 r2
+/*5*/"The colony awarded you ₿? for stopping the wart worm infestation.", //200 r7
+/*6*/"The museum bought your antique personal computer for ₿?.",  //600 r8
+/*7*/"You won the colony swamp eel eating contest and collected ₿?. (Yuck!)",  //150 r8
+/*8*/"A charity from your home-world took pity on you and sent ₿?.", //150 r7
 /*9*/"Your offworld investments in artificial dumbness paid ₿? in dividends.",
-/*10*/"A distant relative died and left you a vast fortune٬ but after taxes you only got ₿?.",
-/*11*/"You found a dead moose rat and sold the hide for ₿?.",
+/*10*/"A distant relative died and left you a vast fortune٬ but after taxes you only got ₿?.",  //200 r6
+/*11*/"You found a dead moose rat and sold the hide for ₿?.",  //50 r1
 /*12*/"You received an extra lot of land to encourage colony development.",
 // above are good٬ below are bad
 /*13*/"Mischievous glac-elves broke into your storage shed and stole half your food.",
-/*14*/"One of your MULEs lost a bolt. Repairs cost you ₿?.",
+/*14*/"One of your MULEs lost a bolt. Repairs cost you ₿?.", //225 r9
 /*15*/"Your mining MULEs have deteriorated from heavy use and cost ₿1? each to repair. The total cost is ₿2?.",
 /*16*/"The solar collectors on your energy MULEs are dirty. Cleaning cost you ₿1? Each for a total of ₿2?.",
 /*17*/"Your space gypsy inlaws made a mess of the settlement. It cost you ₿? to clean it up.",
 /*18*/"Flying cat-bugs ate the roof off your dwelling. Repairs cost ₿?.",
-/*19*/"You lost ₿? betting on the two-legged kazinga races.",
+/*19*/"You lost ₿? betting on the two-legged kazinga races.",  //200 r5
 /*20*/"Your child was bitten by a bat lizard and the hospital bill cost you ₿?.",
 /*21*/"You lost a lot of land because the claim was not recorded."};
+
+// wampus 100 1-4, 200 5-8, 300 9-
 
   string[] ce = new[] {
 /*0*/"A planetquake reduces mining production!",                             // 15% 3 times max
