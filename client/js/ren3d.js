@@ -662,23 +662,10 @@ function addFlag(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}*
   g.scene.add(flagpoles[k]);
 }
 
-/** @type {Object.<string, MeshLambertMaterial>} */
-let plotboundMat = {};
-
 function addLines(/**@type {number}*/ e,/**@type {number}*/ n, /**@type {string}*/ pc, /**@type {number?}*/onlySide = null)
 {
   let k = LandLotStr(e, n);
-  let mat = plotboundMat[pc];
-  if (mat == undefined)
-  {
-    switch (pc) {
-     case "R": plotboundMat.R = new THREE.MeshLambertMaterial( {color: '#ff0000', reflectivity: 15}); break;
-     case "Y": plotboundMat.Y = new THREE.MeshLambertMaterial( {color: '#ddaa80', reflectivity: 15}); break;
-     case "G": plotboundMat.G = new THREE.MeshLambertMaterial( {color: '#008500', reflectivity: 15}); break;
-     case "B": plotboundMat.B = new THREE.MeshLambertMaterial( {color: '#3366ff', reflectivity: 15}); break;
-    }
-    mat = plotboundMat[pc];
-  }
+  let mat = g.materials.lotColor[pc];
 
   let bg = new THREE.BoxGeometry(4, .01, .1);
   let m = new THREE.Mesh( bg, mat );
@@ -1197,4 +1184,46 @@ export async function AssayResult(/**@type {t.AssayResult}*/msg)
   g.markers.add(cm); 
   await sleep(12000);
   g.markers.remove(cm);
+}
+
+/**@param {Object3D} box @param {number} e @param {number} s @param {number} n*/
+function setPosForProdBox(box, e, s, n)
+{
+  let x = e * 4 - 2.5 + n;
+  let y = .15;
+  let z = s * 4 + 1.5;
+  if (n > 4 && n < 8)
+   x -= 3.5;
+  else if (n >= 8)
+  {
+    x = e * 4 + 1.5;
+    z = s * 4 + 1 - (.5 * (n-8));
+  }
+  box.position.set(x,y,z);
+}
+
+/** @param {string[]} keys */
+async function addProdUnit(keys)
+{
+  /** @type {Object.<string,number>} */
+  let prodCounts = {};
+  for (let k of keys)
+  {
+    let pc = g.landlots[k].owner;
+    if (pc == null) continue;
+    new Audio("/sound/beep.wav").play();
+    
+    let box = new THREE.BoxGeometry(.2,.2,.2);
+    let mesh = new THREE.Mesh(box, g.materials.lotColor[pc]);
+    mesh.userData = g.landlots[k];
+    g.prodGroup.add(mesh);
+    
+    if (prodCounts[k] == undefined)
+      prodCounts[k] = 0;
+    prodCounts[k]++;
+
+    setPosForProdBox(mesh, getE(k), getN(k), prodCounts[k]);
+    
+    await sleep(140);
+  }
 }

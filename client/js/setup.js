@@ -154,6 +154,11 @@ async function setup3d()
   setBldngTexture( -.37,  2);
   setBldngTexture(-1.13,  3);
 
+  g.materials.lotColor["R"] = new THREE.MeshLambertMaterial( {color: '#ff0000', reflectivity: 15}); 
+  g.materials.lotColor["Y"] = new THREE.MeshLambertMaterial( {color: '#ddaa80', reflectivity: 15}); 
+  g.materials.lotColor["G"] = new THREE.MeshLambertMaterial( {color: '#008500', reflectivity: 15}); 
+  g.materials.lotColor["B"] = new THREE.MeshLambertMaterial( {color: '#3366ff', reflectivity: 15}); 
+
 
 	// buildings
   g.buildingsGroup = new THREE.Group()

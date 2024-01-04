@@ -134,7 +134,9 @@ export let g =
     /** @type {Material[]} */ //@ts-ignore
     building: [],
     /** @type {Object.<string, Material>} */
-    buildingByName: {}
+    buildingByName: {},
+    /** @type {Object.<string, Material>} */
+    lotColor: {}
   },
 
   animations: {},
