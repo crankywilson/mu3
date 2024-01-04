@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]  // use string for JSON Serialization
-enum PlayerColor { R, Y, G, B, NONE }
+enum PlayerColor { R, Y, G, B, NONE, COLONY }  // COLONY is a hack for the asteroid event
 enum ResourceType { FOOD, ENERGY, SMITHORE, CRYSTITE }
 
 class Dest
@@ -47,6 +47,10 @@ class Player
 
   [JsonInclude] public int          rank    = 1;
   
+  public int[] used     = new[]{ 0, 0, 0, 0 };
+  public int[] spoiled  = new[]{ 0, 0, 0, 0 };
+  public int[] produced = new[]{ 0, 0, 0, 0 };
+
   public WebSocket? ws = null;
 
   public Game? game = null;

@@ -50,7 +50,6 @@ class LandLot
   [JsonInclude] public List<float>  mg        = new();    // mound Geometry
                 public int          crys      = 0;        // crystite level
   [JsonInclude] public int          res       = -1;       // resource being produced
-                public int          resprod   = 0;        // production amount for this month
 }
 
 class LandLotDict : Dictionary<LandLotID, LandLot>

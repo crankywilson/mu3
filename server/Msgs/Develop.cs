@@ -239,6 +239,7 @@ record Cantina (
   {
     p.money += 100;
     g.send(new CantinaResult(p.color, 100, p.money));
+    new Continue().OnRecv(p,g);
   }
 }
 

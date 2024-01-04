@@ -141,6 +141,7 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   }
 
   ui.msg.innerText = "";
+  g.waitingForServerResponse = false;
   g.state = msg.gs;
 
   for (let pi in g.players)
@@ -167,6 +168,11 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   if (g.state == "PLAYEREVENT" || g.state == "COLONYEVENT")
     g.markers.clear();
 
+  if (g.state == "PLAYEREVENT")
+  {
+    ui.msg.innerText = "Development for month #" + month + " to begin...";
+    ui.msgblink.innerText = 'Click anywhere to continue.';
+  }
 }
 
 export function MuleObtained(/**@type {t.MuleObtained}*/ msg)
@@ -311,6 +317,9 @@ export function MuleRemoved(/**@type {t.MuleRemoved}*/msg)
 export function CantinaResult(/**@type {t.CantinaResult}*/msg)
 {
   r.CantinaWinnings(msg);
+  let spans = ui.plbox(msg.pc).getElementsByTagName('span');
+  spans[MONEYSPAN].innerText = msg.newMoney.toString();
+  ShowWaiting(msg);
 }
 
 export function ShowWaiting(/**@type {t.ShowWaiting}*/msg)
@@ -340,4 +349,27 @@ export function LotGranted(/**@type {t.LotGranted}*/msg)
 export function AssayResult(/**@type {t.AssayResult}*/msg)
 {
   r.AssayResult(msg);
+}
+
+let charge = new Audio("/sound/charge.mp3");
+let volga = new Audio("/sound/volga.mp3")
+export function PlayerEventText(/**@type {t.PlayerEventText}*/msg)
+{
+  ui.msg.innerText = msg.fullMsg;
+  if (msg.isGood) charge.play();
+  else volga.play();
+}
+
+export function PlayerEvent(/**@type {t.PlayerEvent}*/msg)
+{
+  let spans = ui.plbox(msg.pc).getElementsByTagName('span');
+  spans[BOTTOMSPAN].innerText = msg.shortMsg;
+  spans[MONEYSPAN].innerText = msg.money.toString();
+  if (msg.lotKey != null)
+  {
+    if (msg.addLot)
+      r.ClaimLot(msg.pc, msg.lotKey);
+    else
+      r.UnclaimLot(msg.lotKey);
+  }
 }

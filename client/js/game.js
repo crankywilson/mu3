@@ -464,9 +464,12 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
   x *= window.devicePixelRatio;
   y *= window.devicePixelRatio;
 
-  if (g.state == "SCORE")
+  if (g.state == "SCORE" || g.state == "PLAYEREVENT")
   {
     ui.msgblink.innerText = "";
+    if (g.state == "SCORE") ui.msg.innerText = "(Waiting for other players to begin land grant)";
+    if (g.state == "PLAYEREVENT") ui.msg.innerText = "(Waiting for other players to begin development)";
+    g.waitingForServerResponse = true;
     send(t.Continue());
   }
   else if (g.state == "IMPROVE")

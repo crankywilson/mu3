@@ -13,7 +13,6 @@ enum GameState {
   /*GS*/ LANDAUCTION            ,
   /*GS*/ PLAYEREVENT            ,
   /*GS*/ IMPROVE                ,
-  /*GS*/ COLONYEVENT            , // this can come before or after PROD dep. on event
   /*GS*/ PROD                   ,
   /*GS*/ AUCTIONPREP            ,
   /*GS*/ AUCTION                
@@ -32,12 +31,11 @@ class Game
   [JsonInclude] public int[]           resPrice  = new int[4] { 15, 10, 40, 100 };
        public HashSet<LandLotID> plLotsToAuction = new();
 
-  List<int> possibleColonyEvents = new(){0,1,2,3,4,5,6,7,8,0,1,2,3,4,5,6,7,0,1,2,3};
+  List<int> possibleColonyEvents = new(){-1,0,1,2,3,4,5,6,7,8,0,1,2,3,4,5,6,7,0,1,2,3,-1};
   List<int> possibleGoodPlayerEvents = Enumerable.Range(0, 13).ToList();
   List<int> possibleBadPlayerEvents  = Enumerable.Range(13, 9).ToList();
   
   public int colonyEvent = -1;
-  bool colonyEventIsBeforeProd() { return bp.Contains(colonyEvent); }
 
   public bool started = true;     // this gets set to false when created on web, but is true by default for deserialization
   public Player? starter = null;
@@ -106,63 +104,63 @@ class Game
           break;
         case 2:
           m = (rand.Next(month)+1)*25;
-          shortMsg = $"+ (₿){m}";
+          shortMsg = $"+(₿) {m}";
           p.money += m;
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 3:
           m = (rand.Next(month)+1)*25;
-          shortMsg = $"+ (₿){m}";
+          shortMsg = $"+(₿) {m}";
           p.money += m;
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 4:
           m = (rand.Next(1)+1)*25*p.res[FOOD];
           if (m <= 0) { p.plEvent = -1; continue; }
-          shortMsg = $"+ (₿){m}";
+          shortMsg = $"+(₿) {m}";
           p.money += m;
           longMsg = longMsg.Replace("1?", (m/p.res[FOOD]).ToString());
           longMsg = longMsg.Replace("2?", m.ToString());
           break;
         case 5:
           m = (rand.Next(1)+1)*25;
-          shortMsg = $"+ (₿){m}";
+          shortMsg = $"+(₿) {m}";
           p.money += m;
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 6:
           m = ((int)(month/4)+1)*200;
-          shortMsg = $"+ (₿){m}";
+          shortMsg = $"+(₿) {m}";
           p.money += m;
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 7:
           m = ((int)(month/4)+1)*50;
-          shortMsg = $"+ (₿){m}";
+          shortMsg = $"+(₿) {m}";
           p.money += m;
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 8:
           m = ((int)(month/3)+1)*50;
-          shortMsg = $"+ (₿){m}";
+          shortMsg = $"+(₿) {m}";
           p.money += m;
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 9:
           m = (rand.Next(40)+11)*month;
-          shortMsg = $"+ (₿){m}";
+          shortMsg = $"+(₿) {m}";
           p.money += m;
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 10:
           m = (rand.Next(15)+11)*month;
-          shortMsg = $"+ (₿){m}";
+          shortMsg = $"+(₿) {m}";
           p.money += m;
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 11:
           m = ((int)(month/3)+1)*50;
-          shortMsg = $"+ (₿){m}";
+          shortMsg = $"+(₿) {m}";
           p.money += m;
           longMsg = longMsg.Replace("?", m.ToString());
           break;
@@ -175,7 +173,7 @@ class Game
           landlots[k].owner = p.color;
           lotKey = k.str();
           addLot = true;
-          shortMsg = $"Lot " + lotKey;
+          shortMsg = $"Grant " + lotKey;
           break; }
         case 13:
           m = (int)(p.res[FOOD]/2);
@@ -187,7 +185,7 @@ class Game
           m = (rand.Next(month)+1)*25;
           if (m >= p.money || month == 1) { p.plEvent = -1; continue; }
           p.money -= m;
-          shortMsg = $"- (₿){m}";
+          shortMsg = $"-(₿) {m}";
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 15: {
@@ -199,7 +197,7 @@ class Game
           m *= n;
           if (m == 0 || m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
-          shortMsg = $"- (₿){m}";
+          shortMsg = $"-(₿) {m}";
           longMsg = longMsg.Replace("2?", m.ToString());
           break; }
         case 16: {
@@ -211,39 +209,35 @@ class Game
           m *= n;
           if (m == 0 || m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
-          shortMsg = $"- (₿){m}";
+          shortMsg = $"-(₿) {m}";
           longMsg = longMsg.Replace("2?", m.ToString());
           break; }
         case 17:
           m = (rand.Next(50)+21)*(int)(month/4);
-          shortMsg = $"+ (₿){m}";
           if (m >= p.money) { p.plEvent = -1; continue; }
+          shortMsg = $"-(₿) {m}";
           p.money -= m;
-          shortMsg = $"- (₿){m}";
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 18:
           m = (rand.Next(40)+11)*month;
-          shortMsg = $"+ (₿){m}";
           if (m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
-          shortMsg = $"- (₿){m}";
+          shortMsg = $"-(₿) {m}";
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 19:
           m = (rand.Next(15)+11)*month;
-          shortMsg = $"+ (₿){m}";
           if (m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
-          shortMsg = $"- (₿){m}";
+          shortMsg = $"-(₿) {m}";
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 20:
           m = ((int)(month/4)+1)*200;
-          shortMsg = $"+ (₿){m}";
           if (m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
-          shortMsg = $"- (₿){m}";
+          shortMsg = $"-(₿) {m}";
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 21: {
@@ -255,13 +249,13 @@ class Game
           landlots[k].owner = p.color;
           lotKey = k.str();
           addLot = false;
-          shortMsg = $"Lot " + lotKey;
+          shortMsg = $"Lost " + lotKey;
           break; }
       }
 
       if (p.plEvent > -1)
       {
-        send(new PlayerEvent(p.color, shortMsg, lotKey, addLot));
+        send(new PlayerEvent(p.color, p.money, shortMsg, lotKey, addLot));
         p.send(new PlayerEventText(longMsg, p.plEvent < 13));
       }
     }
@@ -387,6 +381,8 @@ class Game
         landlots[k] = new();
         if (col != 0)
           availMoundPlots.Add(k);
+        else
+          landlots[k].owner = PlayerColor.COLONY;  // use this to prevent asteroid here
         availHCPlots.Add(k);
       }
     }
@@ -448,6 +444,102 @@ class Game
     foreach (var p in players) p.rank = ++rank;
   }
 
+  delegate bool LLCond(LandLot ll);
+  string RandomLotWithCondition(LLCond lldelegate)
+  {
+    List<LandLotID> candidates = new();
+    foreach (var pair in landlots) 
+      if (lldelegate(pair.Value)) candidates.Add(pair.Key);
+    if (candidates.Count == 0) {
+      colonyEvent = -1;
+      return "?"; }
+    else
+      return candidates[rand.Next(candidates.Count)].str();
+  }
+
+  public void DoProduction()
+  {
+    const int QUAKE = 0;
+    const int PEST = 1;
+    const int SUNSPOT = 2;
+    const int RAIN = 3;
+    const int FIRE = 4;
+    const int ASTEROID = 5;
+    const int MULERAD = 6;
+    const int PIRATES = 7;
+
+    foreach (Player p in players)
+      p.produced = new[] {0,0,0,0};
+
+    colonyEvent = PopRandom(possibleColonyEvents);
+  
+    string fullMsg = "";
+    string? lotKey = null;
+    int rainRow = -3;
+
+    if (colonyEvent > -1)
+      fullMsg = ce[colonyEvent];
+    if (colonyEvent == PEST)
+      lotKey = RandomLotWithCondition(ll=>ll.res == FOOD); // updates colonyEvent to -1 if needed...
+    else if (colonyEvent == MULERAD)
+      lotKey = RandomLotWithCondition(ll=>ll.res > -1 && ll.owner != null);
+    else if (colonyEvent == ASTEROID)
+      lotKey = RandomLotWithCondition(ll=>ll.owner != PlayerColor.COLONY);
+
+    if (lotKey != null)
+      fullMsg = fullMsg.Replace("?", lotKey);
+
+    List<string> rkeys = new(); // each element in here will be a production dot
+    foreach (var pair in landlots)
+    {
+      var ll = pair.Key;
+      var res = pair.Value.res;
+      Player? p = Get(pair.Value.owner ?? PlayerColor.NONE);
+      if (p != null)
+      {      
+        int numResProduced = 8;
+        if (colonyEvent == RAIN)
+        {
+          if (pair.Key.n == rainRow) {}
+        }
+        if (colonyEvent == SUNSPOT)
+        {
+        }
+        if (colonyEvent == QUAKE)
+        {
+        }
+        for (int i=0; i<numResProduced; i++) rkeys.Add(pair.Key.str());
+        p.produced[res] += numResProduced;
+      }
+    }
+
+    var keyArray = rkeys.ToArray();
+    rand.Shuffle(keyArray);
+
+    ColonoyEvent colonyEventMsg = new(fullMsg, colonyEvent, lotKey);
+    bool sendEventFirst = new[]{ 0, 2, 3, 5, 6 }.Contains(colonyEvent);
+
+    if (sendEventFirst)
+      send(colonyEventMsg);
+
+    send(new Production(keyArray));
+
+    if (colonyEvent == PIRATES)
+      foreach (Player p in players) p.produced[CRYSTITE] = 0;
+
+    if (colonyEvent == FIRE)
+      colony.res = new[] {0,0,0,0}; 
+
+    if (!sendEventFirst)
+      send(colonyEventMsg);
+
+    foreach (Player p in players)
+    {
+      for (int r=0; r<4; r++) 
+       p.res[r] += p.produced[CRYSTITE] = 0; 
+    }
+  }
+
   public void send(Msg m)
   {
     foreach (Player p in players)
@@ -461,26 +553,26 @@ class Game
   string[] pe = new[] {
 /*0*/"You just received a package from your home-world relatives containing 3 food and 2 energy units.",
 /*1*/"A wandering space traveler repaid your hospitality by leaving two bars of smithore.",
-/*2*/"Your MULE was judged \"best built\" at the colony fair. You won ₿?",  //150 r8
-/*3*/"Your MULE won the colony tap-dancing contest. You collected ₿?.",  //200 r4
-/*4*/"The colony council for agriculture awarded you ₿1? for each food lot you have developed. The total grant is ₿2?.",  //50 r2
-/*5*/"The colony awarded you ₿? for stopping the wart worm infestation.", //200 r7
-/*6*/"The museum bought your antique personal computer for ₿?.",  //600 r8
-/*7*/"You won the colony swamp eel eating contest and collected ₿?. (Yuck!)",  //150 r8
-/*8*/"A charity from your home-world took pity on you and sent ₿?.", //150 r7
-/*9*/"Your offworld investments in artificial dumbness paid ₿? in dividends.",
-/*10*/"A distant relative died and left you a vast fortune٬ but after taxes you only got ₿?.",  //200 r6
-/*11*/"You found a dead moose rat and sold the hide for ₿?.",  //50 r1
+/*2*/"Your MULE was judged \"best built\" at the colony fair. You won (₿) ?",  //150 r8
+/*3*/"Your MULE won the colony tap-dancing contest. You collected (₿) ?.",  //200 r4
+/*4*/"The colony council for agriculture awarded you (₿) 1? for each food lot you have developed. The total grant is (₿) 2?.",  //50 r2
+/*5*/"The colony awarded you (₿) ? for stopping the wart worm infestation.", //200 r7
+/*6*/"The museum bought your antique personal computer for (₿) ?.",  //600 r8
+/*7*/"You won the colony swamp eel eating contest and collected (₿) ?. (Yuck!)",  //150 r8
+/*8*/"A charity from your home-world took pity on you and sent (₿) ?.", //150 r7
+/*9*/"Your offworld investments in artificial dumbness paid (₿) ? in dividends.",
+/*10*/"A distant relative died and left you a vast fortune٬ but after taxes you only got (₿) ?.",  //200 r6
+/*11*/"You found a dead moose rat and sold the hide for (₿) ?.",  //50 r1
 /*12*/"You received an extra lot of land to encourage colony development.",
 // above are good٬ below are bad
 /*13*/"Mischievous glac-elves broke into your storage shed and stole half your food.",
-/*14*/"One of your MULEs lost a bolt. Repairs cost you ₿?.", //225 r9
-/*15*/"Your mining MULEs have deteriorated from heavy use and cost ₿1? each to repair. The total cost is ₿2?.",
-/*16*/"The solar collectors on your energy MULEs are dirty. Cleaning cost you ₿1? Each for a total of ₿2?.",
-/*17*/"Your space gypsy inlaws made a mess of the settlement. It cost you ₿? to clean it up.",
-/*18*/"Flying cat-bugs ate the roof off your dwelling. Repairs cost ₿?.",
-/*19*/"You lost ₿? betting on the two-legged kazinga races.",  //200 r5
-/*20*/"Your child was bitten by a bat lizard and the hospital bill cost you ₿?.",
+/*14*/"One of your MULEs lost a bolt. Repairs cost you (₿) ?.", //225 r9
+/*15*/"Your mining MULEs have deteriorated from heavy use and cost (₿) 1? each to repair. The total cost is (₿) 2?.",
+/*16*/"The solar collectors on your energy MULEs are dirty. Cleaning cost you (₿) 1? Each for a total of (₿) 2?.",
+/*17*/"Your space gypsy inlaws made a mess of the settlement. It cost you (₿) ? to clean it up.",
+/*18*/"Flying cat-bugs ate the roof off your dwelling. Repairs cost (₿) ?.",
+/*19*/"You lost (₿) ? betting on the two-legged kazinga races.",  //200 r5
+/*20*/"Your child was bitten by a bat lizard and the hospital bill cost you (₿) ?.",
 /*21*/"You lost a lot of land because the claim was not recorded."};
 
 // wampus 100 1-4, 200 5-8, 300 9-
@@ -495,7 +587,6 @@ class Game
 /*6*/"Space radiation destroys the MULE at lot ?!",                          // 10% 2 times max
 /*7*/"Space pirates steal all crystite!"};                                   // 10% 2 times max
 
-  int[] bp = new[] { 0, 2, 3, 5, 6 };
   Dictionary<int,string> et = new() {
   {0,      "Overall٬ the colony failed...dismally. The Federation debtors' prison is your new home!"},
   {20000,  "Overall٬ the colony failed...The Federation will no longer send trade ships. You are on your own!"},

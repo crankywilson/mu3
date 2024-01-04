@@ -37,6 +37,8 @@ record Continue (
           g.UpdateGameState(GameState.PLAYEREVENT); break;
         case GameState.PLAYEREVENT:
           g.UpdateGameState(GameState.IMPROVE); break;
+        case GameState.IMPROVE:
+          g.UpdateGameState(GameState.PROD); g.DoProduction(); break;
       }
     }
   }
@@ -82,6 +84,7 @@ record LotDenied (
 
 record PlayerEvent (
   PlayerColor pc,
+  int money,
   string shortMsg,
   string? lotKey = null,
   bool? addLot = null
@@ -90,4 +93,14 @@ record PlayerEvent (
 record PlayerEventText (
   string fullMsg,
   bool isGood
+) : Msg;
+
+record ColonoyEvent (
+  string fullMsg,
+  int eventType,
+  string? lotKey
+) : Msg;
+
+record Production (
+  string[] lotKeys
 ) : Msg;

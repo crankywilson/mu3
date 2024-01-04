@@ -37,6 +37,29 @@
 @typedef LotDenied
  @property {string} _mt
 
+@typedef PlayerEvent
+ @property {string} pc
+ @property {number} money
+ @property {string} shortMsg
+ @property {string?} lotKey
+ @property {boolean?} addLot
+ @property {string} _mt
+
+@typedef PlayerEventText
+ @property {string} fullMsg
+ @property {boolean} isGood
+ @property {string} _mt
+
+@typedef ColonoyEvent
+ @property {string} fullMsg
+ @property {number} eventType
+ @property {string?} lotKey
+ @property {string} _mt
+
+@typedef Production
+ @property {string[]} lotKeys
+ @property {string} _mt
+
 @typedef MuleRequest
  @property {string} _mt
 
@@ -261,7 +284,6 @@
  'LANDAUCTION'|
  'PLAYEREVENT'|
  'IMPROVE'|
- 'COLONYEVENT'|
  'PROD'|
  'AUCTIONPREP'|
  'AUCTION'|
@@ -278,7 +300,6 @@ export let GAMESTATE = {
  LANDAUCTION: "LANDAUCTION",
  PLAYEREVENT: "PLAYEREVENT",
  IMPROVE: "IMPROVE",
- COLONYEVENT: "COLONYEVENT",
  PROD: "PROD",
  AUCTIONPREP: "AUCTIONPREP",
  AUCTION: "AUCTION",
