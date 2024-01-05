@@ -165,7 +165,7 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
       r.switchCamView(true);
   }
 
-  if (g.state == "PLAYEREVENT" || g.state == "COLONYEVENT")
+  if (g.state == "PLAYEREVENT" || g.state == "PROD")
     g.markers.clear();
 
   if (g.state == "PLAYEREVENT")
@@ -372,4 +372,17 @@ export function PlayerEvent(/**@type {t.PlayerEvent}*/msg)
     else
       r.UnclaimLot(msg.lotKey);
   }
+}
+
+// this probably should be moved to Production msg, but oh well, we'll straddle
+/**@type {t.ColonyEvent}*/
+let colonyEvent = {fullMsg:"",eventType:-1,lotKey:null,beforeProd:false,_mt:""};
+export function ColonyEvent(/**@type {t.ColonyEvent}*/msg)
+{
+  colonyEvent = msg;
+}
+
+export function Production(/**@type {t.Production}*/msg)
+{
+  r.Production(msg, colonyEvent);
 }

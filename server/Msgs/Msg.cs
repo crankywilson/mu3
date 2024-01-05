@@ -95,10 +95,11 @@ record PlayerEventText (
   bool isGood
 ) : Msg;
 
-record ColonoyEvent (
+record ColonyEvent (
   string fullMsg,
   int eventType,
-  string? lotKey
+  string? lotKey,
+  bool beforeProd
 ) : Msg;
 
 record Production (

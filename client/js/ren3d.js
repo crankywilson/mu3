@@ -1202,8 +1202,10 @@ function setPosForProdBox(box, e, s, n)
   box.position.set(x,y,z);
 }
 
+let beep = new Audio("/sound/beep.wav");
+
 /** @param {string[]} keys */
-async function addProdUnit(keys)
+export async function addProdUnits(keys)
 {
   /** @type {Object.<string,number>} */
   let prodCounts = {};
@@ -1211,7 +1213,7 @@ async function addProdUnit(keys)
   {
     let pc = g.landlots[k].owner;
     if (pc == null) continue;
-    new Audio("/sound/beep.wav").play();
+    beep.play();
     
     let box = new THREE.BoxGeometry(.2,.2,.2);
     let mesh = new THREE.Mesh(box, g.materials.lotColor[pc]);
@@ -1226,4 +1228,29 @@ async function addProdUnit(keys)
     
     await sleep(140);
   }
+}
+
+export async function Production(/**@type {t.Production}*/msg, /**@type {t.ColonyEvent}*/ colonyEvent)
+{
+  if (colonyEvent.eventType > -1 && colonyEvent.beforeProd)
+  {
+    ui.msg.innerText = colonyEvent.fullMsg;
+    // do sounds?
+    // highlight if colonyEvent.lotKey not null?
+    // change geom for rad, asteroid
+  }
+  
+  await sleep(4000);
+  addProdUnits(msg.lotKeys);
+  await sleep(2500);
+  
+  if (colonyEvent.eventType > -1 && !colonyEvent.beforeProd)
+  {
+    ui.msg.innerText = colonyEvent.fullMsg;
+    // remove prod units for pest attack, pirates
+    // probably highlight for pest attack
+  }
+
+  await sleep(2000);
+  ui.msgblink.innerText = 'Click anywhere to continue.';
 }

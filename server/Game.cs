@@ -457,6 +457,14 @@ class Game
       return candidates[rand.Next(candidates.Count)].str();
   }
 
+  LandLot LL(string k)
+  {
+    if (k.Length < 4) return new LandLot();
+    var llid = LandLotID.FromString(k);
+    if (!landlots.ContainsKey(llid)) return new LandLot();
+    return landlots[llid];
+  }
+
   public void DoProduction()
   {
     const int QUAKE = 0;
@@ -481,10 +489,17 @@ class Game
       fullMsg = ce[colonyEvent];
     if (colonyEvent == PEST)
       lotKey = RandomLotWithCondition(ll=>ll.res == FOOD); // updates colonyEvent to -1 if needed...
-    else if (colonyEvent == MULERAD)
+    else if (colonyEvent == MULERAD) 
+    {
       lotKey = RandomLotWithCondition(ll=>ll.res > -1 && ll.owner != null);
+      LL(lotKey).res = -1;
+    }
     else if (colonyEvent == ASTEROID)
+    {
       lotKey = RandomLotWithCondition(ll=>ll.owner != PlayerColor.COLONY);
+      LL(lotKey).res = -1;
+      LL(lotKey).crys = 4;
+    }
 
     if (lotKey != null)
       fullMsg = fullMsg.Replace("?", lotKey);
@@ -492,7 +507,7 @@ class Game
     List<string> rkeys = new(); // each element in here will be a production dot
     foreach (var pair in landlots)
     {
-      var ll = pair.Key;
+      var k = pair.Key;
       var res = pair.Value.res;
       Player? p = Get(pair.Value.owner ?? PlayerColor.NONE);
       if (p != null)
@@ -509,20 +524,13 @@ class Game
         {
         }
         for (int i=0; i<numResProduced; i++) rkeys.Add(pair.Key.str());
-        p.produced[res] += numResProduced;
+
+        bool thisWasPestAttack = (colonyEvent == PEST) && (k.str() == lotKey);
+
+        if (!thisWasPestAttack)
+          p.produced[res] += numResProduced;
       }
     }
-
-    var keyArray = rkeys.ToArray();
-    rand.Shuffle(keyArray);
-
-    ColonoyEvent colonyEventMsg = new(fullMsg, colonyEvent, lotKey);
-    bool sendEventFirst = new[]{ 0, 2, 3, 5, 6 }.Contains(colonyEvent);
-
-    if (sendEventFirst)
-      send(colonyEventMsg);
-
-    send(new Production(keyArray));
 
     if (colonyEvent == PIRATES)
       foreach (Player p in players) p.produced[CRYSTITE] = 0;
@@ -530,14 +538,20 @@ class Game
     if (colonyEvent == FIRE)
       colony.res = new[] {0,0,0,0}; 
 
-    if (!sendEventFirst)
-      send(colonyEventMsg);
 
     foreach (Player p in players)
     {
       for (int r=0; r<4; r++) 
-       p.res[r] += p.produced[CRYSTITE] = 0; 
+       p.res[r] += p.produced[r]; 
     }
+
+    var keyArray = rkeys.ToArray();
+    rand.Shuffle(keyArray);
+
+    bool beforeProd = new[]{ 0, 2, 3, 5, 6 }.Contains(colonyEvent);
+
+    send(new ColonyEvent(fullMsg, colonyEvent, lotKey, beforeProd));
+    send(new Production(keyArray));
   }
 
   public void send(Msg m)
@@ -564,7 +578,7 @@ class Game
 /*10*/"A distant relative died and left you a vast fortune٬ but after taxes you only got (₿) ?.",  //200 r6
 /*11*/"You found a dead moose rat and sold the hide for (₿) ?.",  //50 r1
 /*12*/"You received an extra lot of land to encourage colony development.",
-// above are good٬ below are bad
+// above are good, below are bad
 /*13*/"Mischievous glac-elves broke into your storage shed and stole half your food.",
 /*14*/"One of your MULEs lost a bolt. Repairs cost you (₿) ?.", //225 r9
 /*15*/"Your mining MULEs have deteriorated from heavy use and cost (₿) 1? each to repair. The total cost is (₿) 2?.",

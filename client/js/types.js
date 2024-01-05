@@ -50,10 +50,11 @@
  @property {boolean} isGood
  @property {string} _mt
 
-@typedef ColonoyEvent
+@typedef ColonyEvent
  @property {string} fullMsg
  @property {number} eventType
  @property {string?} lotKey
+ @property {boolean} beforeProd
  @property {string} _mt
 
 @typedef Production
