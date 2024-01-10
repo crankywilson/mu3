@@ -93,7 +93,7 @@ async function AddModelIfNeeded(/**@type {string}*/ color, /**@type {number?}*/ 
 
 let month = 1;
 
-export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
+export async function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
 {
   show(ui.boardview);
   hide(ui.pendinggame);
@@ -122,6 +122,8 @@ export function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
     r.stopAnimating();
   else
     r.startAnimating();
+  
+  await g.init3DComplete;
   
   UpdateGameState({gs:g.state, _mt:""});
   month = msg.g.month;

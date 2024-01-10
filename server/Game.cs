@@ -381,8 +381,6 @@ class Game
         landlots[k] = new();
         if (col != 0)
           availMoundPlots.Add(k);
-        else
-          landlots[k].owner = PlayerColor.COLONY;  // use this to prevent asteroid here
         availHCPlots.Add(k);
       }
     }
@@ -445,14 +443,19 @@ class Game
   }
 
   delegate bool LLCond(LandLot ll);
-  string RandomLotWithCondition(LLCond lldelegate)
+  string RandomLotWithCondition(LLCond? lldelegate)
   {
     List<LandLotID> candidates = new();
-    foreach (var pair in landlots) 
-      if (lldelegate(pair.Value)) candidates.Add(pair.Key);
-    if (candidates.Count == 0) {
+    foreach (var pair in landlots)
+    { 
+      if (lldelegate is null) { if (pair.Key.e != 0) candidates.Add(pair.Key); }
+      else if (lldelegate(pair.Value)) candidates.Add(pair.Key);
+    }
+    if (candidates.Count == 0) 
+    {
       colonyEvent = -1;
-      return "?"; }
+      return "?"; 
+    }
     else
       return candidates[rand.Next(candidates.Count)].str();
   }
@@ -496,7 +499,7 @@ class Game
     }
     else if (colonyEvent == ASTEROID)
     {
-      lotKey = RandomLotWithCondition(ll=>ll.owner != PlayerColor.COLONY);
+      lotKey = RandomLotWithCondition(null);
       LL(lotKey).res = -1;
       LL(lotKey).crys = 4;
     }

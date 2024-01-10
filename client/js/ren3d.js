@@ -1202,7 +1202,19 @@ function setPosForProdBox(box, e, s, n)
   box.position.set(x,y,z);
 }
 
-let beep = new Audio("/sound/beep.wav");
+let ba = [
+ new Audio("/sound/beep.wav"),
+ new Audio("/sound/beep.wav"),
+ new Audio("/sound/beep.wav"), 
+ new Audio("/sound/beep.wav"), 
+ new Audio("/sound/beep.wav")];
+let bi = 0;
+async function beep()
+{
+  ba[bi%ba.length].play();
+  bi++;
+}
+
 
 /** @param {string[]} keys */
 export async function addProdUnits(keys)
@@ -1213,7 +1225,7 @@ export async function addProdUnits(keys)
   {
     let pc = g.landlots[k].owner;
     if (pc == null) continue;
-    beep.play();
+    beep();
     
     let box = new THREE.BoxGeometry(.2,.2,.2);
     let mesh = new THREE.Mesh(box, g.materials.lotColor[pc]);
@@ -1224,7 +1236,7 @@ export async function addProdUnits(keys)
       prodCounts[k] = 0;
     prodCounts[k]++;
 
-    setPosForProdBox(mesh, getE(k), getN(k), prodCounts[k]);
+    setPosForProdBox(mesh, getE(k), -getN(k), prodCounts[k]);
     
     await sleep(140);
   }
@@ -1240,7 +1252,7 @@ export async function Production(/**@type {t.Production}*/msg, /**@type {t.Colon
     // change geom for rad, asteroid
   }
   
-  await sleep(4000);
+  await sleep(6000);
   addProdUnits(msg.lotKeys);
   await sleep(2500);
   
