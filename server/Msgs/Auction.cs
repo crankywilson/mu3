@@ -12,8 +12,41 @@ record PreAuctionStat (
 
 record CurrentAuction (
   int auctionType,
-  int month
+  int month,
+  int resPrice,
+  int avail
 ) : Msg;
+
+record AuctionStart (
+  int auctionType,
+  int month,
+  int resPrice,
+  int avail
+) : Msg;
+
+record BuySell (
+  PlayerColor pc,
+  bool buy
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    p.buying = buy;
+    new Continue().OnRecv(p, g);
+    g.send(this);
+  }
+}
+
+record AuctionTargetBid (
+  int target
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    p.target = target;
+  }
+}
+
 /*
 def hmBuy(g:Game, p:Player, msg:dict):
   p.buying = True
@@ -56,10 +89,8 @@ def hmTradeConfirmed(g:Game, p:Player, msg:dict):
 */
 
 static class AuctionConstants {
-  public const int BUY = -2;
-  public const int BUY1 = -1;
+  public const int BUY = 0;
   public const int SELL = 9999;
-  public const int SELL1 = 9998;
 };
 
 

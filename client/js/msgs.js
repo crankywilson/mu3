@@ -422,13 +422,18 @@ function UpdateAuctionUIElems()
   for (let pc in g.players)
   {
     if (g.players[pc] == null)
+    {
+      hide(ui.cb(pc));
+      hide(ui.cbl(pc));
       continue;
+    }
 
     show(ui.pab(pc));
-
+    show(ui.pabbs(pc));
     let plboxleftPct =  Number(ui.plbox(pc).style.left.replace('%',''))
     ui.pab(pc).style.left = plboxleftPct + '%';
     ui.cb(pc).style.left = (plboxleftPct + 3.5) + '%';
+    ui.cbl(pc).style.left = (plboxleftPct + 3.5) + '%';
 
     if (g.myColor == pc) myLeftPct = plboxleftPct;
   }
@@ -471,5 +476,58 @@ export function CurrentAuction(/**@type {t.CurrentAuction}*/ msg)
   if (msg.auctionType == 1) ui.aname.innerText = "ENERGY Auction";
   if (msg.auctionType == 2) ui.aname.innerText = "SMITHORE Auction";
   if (msg.auctionType == 3) ui.aname.innerText = "CRYSTITE Auction";
+  if (msg.auctionType == 4) ui.aname.innerText = "LAND Auction";
   ui.mnum.innerText = msg.month.toString();
+
+
+  if (msg.auctionType == 4)
+    ui.msg.innerHTML = "(Bidding starts at \u20BF <span>" + msg.resPrice + "</span>)";
+  else
+    ui.msg.innerHTML = "(Store has <span>" + msg.avail + "</span> units.  Store buys for \u20BF <span>" + msg.resPrice + "</span>)";
+
+  ui.msg.style.backgroundColor = "";
+  ui.storeunits.innerText = msg.avail.toString();
+  ui.storesell.style.visibility =  (msg.avail < 1) ? "hidden" : "inherit";
+  ui.storesell1.style.visibility =  (msg.avail < 1) ? "hidden" : "inherit";
+  ui.storesell2.style.visibility =  (msg.avail < 1) ? "hidden" : "inherit";
+  ui.sellline.style.visibility =  (msg.avail < 1) ? "hidden" : "inherit";
+  ui.sellline.style.bottom = "81%";
+  ui.storebuy.style.visibility = "inherit";
+  ui.storebuy1.style.visibility = "inherit";
+  ui.buyline.style.bottom = "11%";
+  ui.buyline.style.visibility = "inherit";
+  ui.pab(g.myColor).style.visibility = "inherit";
+
+  ui.aucdone.style.visibility = "inherit";
+  ui.targetline.style.visibility = "inherit";
+  ui.target.style.visibility = "inherit";
+  ui.targetval.style.visibility = "inherit";
+}
+
+export function BuySell(/**@type {t.BuySell}*/msg)
+{
+  let img = ui.cb(msg.pc);
+  let letter = msg.pc.toLowerCase();
+  if (msg.buy)
+  {
+    if (img instanceof HTMLImageElement) img.src = "img/" + letter + "buy.png";
+    if (g.state == "AUCTIONPREP") setPlboxSpanText(msg.pc, BOTTOMSPAN, "(Buying)");
+    img.style.bottom = "0%";
+    ui.target.style.bottom = "5%";
+    ui.aucbuy.style.visibility = "hidden";
+    ui.aucsell.style.visibility = "inherit";
+    g.buying = true;
+    ui.targetval.innerText = "(Drag)";
+  }
+  else
+  {
+    if (img instanceof HTMLImageElement) img.src = "img/" + letter + "sell.png";
+    if (g.state == "AUCTIONPREP") setPlboxSpanText(msg.pc, BOTTOMSPAN, "(Selling)");
+    img.style.bottom = "86%";
+    ui.target.style.bottom = "91%";
+    ui.aucbuy.style.visibility = "inherit";
+    ui.aucsell.style.visibility = "hidden";
+    g.buying = false;
+    ui.targetval.innerText = "(Drag)";
+  }
 }

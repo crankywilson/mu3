@@ -199,6 +199,24 @@
 @typedef CurrentAuction
  @property {number} auctionType
  @property {number} month
+ @property {number} resPrice
+ @property {number} avail
+ @property {string} _mt
+
+@typedef AuctionStart
+ @property {number} auctionType
+ @property {number} month
+ @property {number} resPrice
+ @property {number} avail
+ @property {string} _mt
+
+@typedef BuySell
+ @property {string} pc
+ @property {boolean} buy
+ @property {string} _mt
+
+@typedef AuctionTargetBid
+ @property {number} target
  @property {string} _mt
 
 @typedef ConfirmTrade
@@ -299,7 +317,7 @@
  @property {number[]} mg
  @property {number} res
 
-@typedef ?
+@typedef Game
  @property {LandLotDict} landlots
  @property {number} month
  @property {string} name
@@ -309,7 +327,6 @@
  @property {number} mules
  @property {number} mulePrice
  @property {number[]} resPrice
- @property {string} _mt
 
 @typedef {(
  'WAITINGFORALLJOIN'|
@@ -450,6 +467,18 @@ export let GAMESTATE = {
  /**@type {number}*/ n,
 ) { return { _mt: 'AuctionLot' , e: e
  , n: n
+};}
+
+/**@returns {BuySell}*/ export function BuySell(
+ /**@type {string}*/ pc,
+ /**@type {boolean}*/ buy,
+) { return { _mt: 'BuySell' , pc: pc
+ , buy: buy
+};}
+
+/**@returns {AuctionTargetBid}*/ export function AuctionTargetBid(
+ /**@type {number}*/ target,
+) { return { _mt: 'AuctionTargetBid' , target: target
 };}
 
 /**@returns {CreateGame}*/ export function CreateGame(

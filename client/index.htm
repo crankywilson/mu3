@@ -93,7 +93,7 @@ Spoiled:<BR><span id="rspoiled">?</span><P>
 Produced:<BR><span id="rprod">?</span><P>
 Current:<BR><span id="rcurr">?</span><P>
 <span id="rsl" style="color:#5f4c28">SURPLUS:</span><BR><span id="rsurplus">?</span> 
-<div id="rpab" style="width:100%">
+<div id="rpabbs" style="width:100%">
 <input type="radio" name="rbuysell" value="Sell" id="rbss"><label for="bs1s">Sell</label><BR>
 <input type="radio" name="rbuysell" value="Buy" id="rbsb"><label for="bs1b">Buy</label></input><P>
 <button id="rbtnbuysell" style="position:static">OK</button>
@@ -110,7 +110,7 @@ Spoiled:<BR><span id="yspoiled">?</span><P>
 Produced:<BR><span id="yprod">?</span><P>
 Current:<BR><span id="ycurr">?</span><P>
 <span id="ysl" style="color:#5f4c28">SURPLUS:</span><BR><span id="ysurplus">?</span> 
-<div id="ypab" style="width:100%">
+<div id="ypabbs" style="width:100%">
 <input type="radio" name="ybuysell" value="Sell" id="ybss"><label for="bs1s">Sell</label><BR>
 <input type="radio" name="ybuysell" value="Buy" id="ybsb"><label for="bs1b">Buy</label></input><P>
 <button id="ybtnbuysell" style="position:static">OK</button></div>
@@ -126,7 +126,7 @@ Spoiled:<BR><span id="gspoiled">?</span><P>
 Produced:<BR><span id="gprod">?</span><P>
 Current:<BR><span id="gcurr">?</span><P>
 <span id="gsl" style="color:#5f4c28">SURPLUS:</span><BR><span id="gsurplus">?</span> 
-<div id="gpab" style="width:100%">
+<div id="gpabbs" style="width:100%">
 <input type="radio" name="gbuysell" value="Sell" id="gbss"><label for="bs1s">Sell</label><BR>
 <input type="radio" name="gbuysell" value="Buy" id="gbsb"><label for="bs1b">Buy</label></input><P>
 <button id="gbtnbuysell" style="position:static">OK</button></div>
@@ -142,7 +142,7 @@ Spoiled:<BR><span id="bspoiled">?</span><P>
 Produced:<BR><span id="bprod">?</span><P>
 Current:<BR><span id="bcurr">?</span><P>
 <span id="bsl" style="color:#5f4c28">SURPLUS:</span><BR><span id="bsurplus">?</span> 
-<div id="bpab" style="width:100%">
+<div id="bpabbs" style="width:100%">
 <input type="radio" name="bbuysell" value="Sell" id="bbss"><label for="bs1s">Sell</label><BR>
 <input type="radio" name="bbuysell" value="Buy" id="bbsb"><label for="bs1b">Buy</label></input><P>
 <button id="bbtnbuysell" style="position:static">OK</button></div>
@@ -169,10 +169,9 @@ Current:<BR><span id="bcurr">?</span><P>
 <div id ="bcbl" style="left:80.5%; bottom:100%;">Ask: <span id="cbv4">45</span></div>
 <!-- bottom = ((bid - min) * 2 + 11)% -->
 <!-- targetline at 20, 45 70, 89 -->
-<div id="targetline" style="left:45%; width:.5%; height:90%; top:5%; background-color: gray; cursor:pointer">
-  <!-- onpointerdown="beginSliding(event, true); slide(event);"--> </div>
+<div id="targetline" style="left:45%; width:.5%; height:90%; top:5%; background-color: gray; cursor:pointer"></div>
 <div id="target" style="left:44.5%; width:1.5%; height:24px; bottom:81%; background-color: red; cursor: grab;"
-onmouseenter="this.style.opacity=.5" onmouseleave="this.style.opacity=1"></div>
+     onmouseenter="this.style.opacity=.5" onmouseleave="this.style.opacity=1"></div>
 <div id="targetval" style="left:41.25%; width:8%; top:.5%; text-align: center; white-space: nowrap;">(Drag)</div>
 </div>    
 </div>

@@ -185,7 +185,21 @@ export let g =
   /** @type {WebSocket} */ // @ts-ignore
   ws: null,
 
-  init3DComplete: new Promise(get3DInitResolver)
+  init3DComplete: new Promise(get3DInitResolver),
+
+  /* Auction stuff */
+  minBid: 10,
+  bidIncr: 1,
+  maxBid: 45,
+  passVal: 7,
+  passThresh: 8,
+  outVal: 50,   // this val used to take seller out as well as buyer to increase max bid if store has no units left
+  outThresh: 49,
+  buying: true,
+  selloffers: true,
+  target: 0,
+  curbid: 0,
+  auctionRes: ""
 };
 
 export function send(/**@type {t.Msg}*/ msg)
@@ -226,6 +240,7 @@ export let ui =
   rcurr: e('rcurr'),
   rsl: e('rsl'),
   rsurplus: e('rsurplus'),
+  rpabbs: div('rpabbs'),
   rbss: inp('rbss'),
   rbsb: inp('rbsb'),
   rbtnbuysell: btn('rbtnbuysell'),
@@ -237,6 +252,7 @@ export let ui =
   ycurr: e('ycurr'),
   ysl: e('ysl'),
   ysurplus: e('ysurplus'),
+  ypabbs: div('ypabbs'),
   ybss: inp('ybss'),
   ybsb: inp('ybsb'),
   ybtnbuysell: btn('ybtnbuysell'),
@@ -248,6 +264,7 @@ export let ui =
   gcurr: e('gcurr'),
   gsl: e('gsl'),
   gsurplus: e('gsurplus'),
+  gpabbs: div('gpabbs'),
   gbss: inp('gbss'),
   gbsb: inp('gbsb'),
   gbtnbuysell: btn('gbtnbuysell'),
@@ -259,6 +276,7 @@ export let ui =
   bcurr: e('bcurr'),
   bsl: e('bsl'),
   bsurplus: e('bsurplus'),
+  bpabbs: div('bpabbs'),
   bbss: inp('bbss'),
   bbsb: inp('bbsb'),
   bbtnbuysell: btn('bbtnbuysell'),
@@ -355,6 +373,7 @@ export let ui =
   curr: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rcurr; if (clr == 'Y') return ui.ycurr; if (clr == 'G') return ui.gcurr; return ui.bcurr; },
   sl: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rsl; if (clr == 'Y') return ui.ysl; if (clr == 'G') return ui.gsl; return ui.bsl; },
   surplus: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rsurplus; if (clr == 'Y') return ui.ysurplus; if (clr == 'G') return ui.gsurplus; return ui.bsurplus; },
+  pabbs: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rpabbs; if (clr == 'Y') return ui.ypabbs; if (clr == 'G') return ui.gpabbs; return ui.bpabbs; },
   bss: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rbss; if (clr == 'Y') return ui.ybss; if (clr == 'G') return ui.gbss; return ui.bbss; },
   bsb: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rbsb; if (clr == 'Y') return ui.ybsb; if (clr == 'G') return ui.gbsb; return ui.bbsb; },
   btnbuysell: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rbtnbuysell; if (clr == 'Y') return ui.ybtnbuysell; if (clr == 'G') return ui.gbtnbuysell; return ui.bbtnbuysell; },
@@ -574,3 +593,80 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
     send(t.Continue());
   }
 }
+
+
+
+let coffy = 0;
+
+export function beginSliding(/**@type {PointerEvent}*/e, fromLine=false) 
+{
+  let slider = ui.target;
+  slider.style.cursor = 'grabbing';
+  slider.onpointermove = slide;
+  slider.setPointerCapture(e.pointerId);
+  if (!fromLine)
+    coffy = (e.y - slider.getBoundingClientRect().y);
+}
+
+export function stopSliding(/**@type {PointerEvent}*/e) 
+{
+  let slider = ui.target;
+  slider.style.cursor = 'grab';
+  slider.onpointermove = null;
+  slider.releasePointerCapture(e.pointerId);
+}
+
+let _lastTarget = -1;
+function sendIfDifferent(/**@type {Number} */targ)
+{
+  if (targ != _lastTarget)
+    send(t.AuctionTargetBid(targ));
+
+  _lastTarget = targ;
+}
+
+export function slide(/**@type {PointerEvent}*/e) 
+{
+  let slider = ui.target;
+  let t = ui.targetval;
+  let divRect = new DOMRect();
+  if (slider.parentElement != null)
+    divRect = slider.parentElement.getBoundingClientRect();
+  slider.style.top = (e.y - divRect.y - coffy) + 'px';
+  let pct = (divRect.bottom - slider.getBoundingClientRect().bottom)/divRect.height*100;
+
+  let targ = Math.round((pct - 11)/2) * g.bidIncr + g.minBid;
+  if (targ < g.minBid)
+  {
+    if (targ < g.passThresh && g.buying) targ = g.passVal;
+    else targ = g.minBid;
+  }
+  else if (targ > g.maxBid)
+  {
+    if (targ >= g.outThresh && (!g.buying || !g.selloffers)) targ = g.outVal;
+    else targ = g.maxBid;
+  }
+  slider.style.top = '';
+  slider.style.bottom = ((targ - g.minBid) * 2 / g.bidIncr + 11) + '%';
+  //console.log(slider.style.bottom);
+  if (targ == g.passVal) 
+  { 
+    t.innerText = 'Target: Pass'; 
+    sendIfDifferent(0); 
+    g.target = 0;
+  }
+  else if (targ == g.outVal) 
+  { 
+    t.innerText = (g.buying ? '+++' : 'Target: Out'); 
+    sendIfDifferent(9999); 
+    g.target = 9999;
+  }
+  else 
+  {
+    t.innerText = 'Target: ' + targ;
+    sendIfDifferent(targ);
+    g.target = targ;
+  }
+}
+
+

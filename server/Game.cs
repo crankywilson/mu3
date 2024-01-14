@@ -19,7 +19,8 @@ enum GameState {
   /*GS*/ AUCTION                
 }
 
-partial class Game
+partial
+class Game
 {
   [JsonInclude] public LandLotDict     landlots  = new();
   [JsonInclude] public int             month     = 1;
@@ -277,7 +278,13 @@ partial class Game
       
   }
   
-  public void StartNextAuction()
+  public void StartAuction()
+  {
+
+    UpdateGameState(GameState.AUCTION);
+  }
+
+  public void StartNextAuctionPrep()
   {
     if (auctionType == CRYSTITE)
     {
@@ -305,7 +312,9 @@ partial class Game
         p.res[auctionType], surplus));
     }
 
-    send(new CurrentAuction(auctionType, month));
+    send(new CurrentAuction(auctionType, month, 
+        resPrice[auctionType], colony.res[auctionType]));
+
     UpdateGameState(GameState.AUCTIONPREP);
   }
 
@@ -458,7 +467,7 @@ partial class Game
     state = GameState.SCORE;
     send(new CurrentGameState(this));
     // get rid of this when done auction dev:
-    StartNextAuction();
+    StartNextAuctionPrep();
   }
 
   public void UpdateScores()

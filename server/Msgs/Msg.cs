@@ -41,9 +41,9 @@ record Continue (
           g.UpdateGameState(GameState.PROD); g.DoProduction(); break;
         case GameState.PROD:
         case GameState.AUCTION:
-          g.StartNextAuction(); break;
+          g.StartNextAuctionPrep(); break;
         case GameState.AUCTIONPREP:
-          g.UpdateGameState(GameState.AUCTION); break;
+          g.StartAuction(); break;
           
       }
     }

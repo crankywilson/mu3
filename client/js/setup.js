@@ -1,6 +1,7 @@
 
 import { g, ui, mark3DInitialized, send,
-         mouseMove, mouseClick, LandLotStr 
+         mouseMove, mouseClick, LandLotStr,
+         beginSliding, stopSliding, slide
        } from "./game.js";
 import * as t from "./types.js";
 import { initWS } from "./websock.js";
@@ -455,6 +456,25 @@ function setupPending()
   document.onkeydown = debug;
 }
 
+/** @this {GlobalEventHandlers} */
+function btnBuySellClick()
+{
+  if (!(this instanceof HTMLButtonElement)) return;
+  let pc = this.id[0].toUpperCase();
+  send(t.BuySell(pc, ui.bsb(pc).checked));
+  ui.pabbs(pc).style.visibility = "hidden";
+}
+
+function setupAuctions()
+{
+  const slider = ui.target;
+  slider.onpointerdown = beginSliding;
+  slider.onpointerup = stopSliding;
+  ui.targetline.onpointerdown = (e)=>{ beginSliding(e, true); slide(e); };
+
+  ui.rbtnbuysell.onclick = btnBuySellClick;
+}
+
 function onWindowResize() 
 {
   g.camera.aspect = 2;
@@ -475,6 +495,7 @@ function setup()
 
   setup3d();
   setupPending();
+  setupAuctions();
   sync_rygb();
 }
 
