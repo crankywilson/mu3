@@ -74,9 +74,6 @@ function showScores(/**@type {t.Player[]}*/ players, /**@type {number}*/ month)
 
   ui.msgblink.innerText = 'Click anywhere to continue.';
 
-  ui.aucbg.style.left = "-100%";
-  ui.boardview.style.left = "0px";
-
   g.prepSound.play();
 }
 
@@ -92,6 +89,7 @@ async function AddModelIfNeeded(/**@type {string}*/ color, /**@type {number?}*/ 
 }
 
 let month = 1;
+let showScoresCalled = false;
 
 export async function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
 {
@@ -118,7 +116,7 @@ export async function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
     r.SetupMounds();
   r.SyncLandGeom();
 
-  if (g.state.indexOf("AUCTION") > 0)
+  if (g.state.indexOf("AUCTION") > -1)
     r.stopAnimating();
   else
     r.startAnimating();
@@ -128,6 +126,12 @@ export async function CurrentGameState(/**@type {t.CurrentGameState}*/ msg)
   UpdateGameState({gs:g.state, _mt:""});
   month = msg.g.month;
   showScores(msg.g.players, month);
+
+  // hack for page reload during auction
+  if (!showScoresCalled && g.state.indexOf("AUCTION") > -1)
+    UpdateAuctionUIElems();
+
+  showScoresCalled = true;
 }
 
 export function PlayerRejoined(/**@type {t.PlayerRejoined}*/ msg)
@@ -143,6 +147,7 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   }
 
   ui.msg.innerText = "";
+  ui.msgblink.innerText = "";
   g.waitingForServerResponse = false;
   g.state = msg.gs;
 
@@ -174,6 +179,28 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   {
     ui.msg.innerText = "Development for month #" + month + " to begin...";
     ui.msgblink.innerText = 'Click anywhere to continue.';
+  }
+
+  if (g.state.indexOf("AUCTION") >= 0)
+  {
+    ui.aucbg.style.left = "0px";
+    ui.boardview.style.left = "100%";
+    if (g.state == "AUCTIONPREP")
+    {
+      hide(ui.ablock);
+      show(ui.preblock);
+    }
+    else
+    {
+      show(ui.ablock);
+      hide(ui.preblock);
+    }
+    UpdateAuctionUIElems();
+  }
+  else
+  {
+    ui.aucbg.style.left = "-100%";
+    ui.boardview.style.left = "0px";
   }
 }
 
@@ -387,4 +414,62 @@ export function ColonyEvent(/**@type {t.ColonyEvent}*/msg)
 export function Production(/**@type {t.Production}*/msg)
 {
   r.Production(msg, colonyEvent);
+}
+
+function UpdateAuctionUIElems()
+{
+  let myLeftPct = 0;
+  for (let pc in g.players)
+  {
+    if (g.players[pc] == null)
+      continue;
+
+    show(ui.pab(pc));
+
+    let plboxleftPct =  Number(ui.plbox(pc).style.left.replace('%',''))
+    ui.pab(pc).style.left = plboxleftPct + '%';
+    ui.cb(pc).style.left = (plboxleftPct + 3.5) + '%';
+
+    if (g.myColor == pc) myLeftPct = plboxleftPct;
+  }
+
+  ui.aucbuy.style.left = (myLeftPct + 4.5) + "%";
+  ui.aucsell.style.left = (myLeftPct + 4.5) + "%";
+  ui.aucdone.style.left = (myLeftPct + 14.5) + "%";
+  ui.targetline.style.left = (myLeftPct + 15) + "%";
+  ui.target.style.left = (myLeftPct + 14.5) + "%";
+  ui.targetval.style.left = (myLeftPct + 11.25) + "%";
+}
+
+export function PreAuctionStat(/**@type {t.PreAuctionStat}*/ msg)
+{
+  ui.start(msg.pc).innerText = msg.start.toString();
+  ui.used(msg.pc).innerText = msg.used.toString();
+  ui.spoiled(msg.pc).innerText = msg.spoiled.toString();
+  ui.prod(msg.pc).innerText = msg.produced.toString();
+  ui.curr(msg.pc).innerText = msg.current.toString();
+  if (msg.surplus >= 0)
+  {
+    ui.sl(msg.pc).innerText = "SURPLUS:";
+    ui.surplus(msg.pc).innerHTML = "&nbsp;&nbsp + " + msg.surplus + " &nbsp;&nbsp; ";
+    ui.surplus(msg.pc).style.backgroundColor = "green";
+  }
+  else
+  {
+    ui.sl(msg.pc).innerText = "SHORTAGE:";
+    ui.surplus(msg.pc).innerHTML = "&nbsp;&nbsp - " + msg.surplus + " &nbsp;&nbsp; ";
+    ui.surplus(msg.pc).style.backgroundColor = "red";
+  }
+
+  if (msg.surplus > 0) ui.bss(msg.pc).checked = true;
+  else ui.bsb(msg.pc).checked = true;
+}
+
+export function CurrentAuction(/**@type {t.CurrentAuction}*/ msg)
+{
+  if (msg.auctionType == 0) ui.aname.innerText = "FOOD Auction";
+  if (msg.auctionType == 1) ui.aname.innerText = "ENERGY Auction";
+  if (msg.auctionType == 2) ui.aname.innerText = "SMITHORE Auction";
+  if (msg.auctionType == 3) ui.aname.innerText = "CRYSTITE Auction";
+  ui.mnum.innerText = msg.month.toString();
 }

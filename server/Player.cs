@@ -47,9 +47,17 @@ class Player
 
   [JsonInclude] public int          rank    = 1;
   
-  public int[] used     = new[]{ 0, 0, 0, 0 };
-  public int[] spoiled  = new[]{ 0, 0, 0, 0 };
-  public int[] produced = new[]{ 0, 0, 0, 0 };
+  public int  criticalLevel   = 0;
+  public bool buying          = true;
+  public int  target          = 0;
+  public int  current         = 0;
+
+  public int[] startingRes = new[]{ 5, 2, 0, 0 };
+  public int[] used        = new[]{ 0, 0, 0, 0 };
+  public int[] spoiled     = new[]{ 0, 0, 0, 0 };
+  public int[] produced    = new[]{ 0, 0, 0, 0 };
+  
+  public bool  energyShort = false; // I think this should be calculated before dev
 
   public WebSocket? ws = null;
 
@@ -102,6 +110,7 @@ class Player
   {
     string msg = "\"", Send = recv ? "Recv" : "Send";
     msg = Encoding.UTF8.GetString(buf);
+    if (recv) msg = msg.TrimEnd('\0');
     if (msg.Contains("Dest")) return;
     msg = RemoveLandLots(msg);
     Console.WriteLine($"{DateTime.Now:h:mm:ss} {Send} {color.ToString()[0]} {msg}");

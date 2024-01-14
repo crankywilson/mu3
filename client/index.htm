@@ -83,72 +83,69 @@ background-color: tan; left:0px;">
 <span id="aname">? Auction</span><BR>
 Month #<span id="mnum">?</span><BR>
 <div id="preblock" style="width:100%; top:7%; height:90%">
-<div id="pa1" 
+<div id="rpab" 
 style="top: 1%;left: 5%; width: 15%; height: 90%; background-color: rgba(255,0,0,.2); visibility: hidden;">
 <br><img style="position:static" src="img/rsell.png">
 <P>
-Started With:<BR><span id="start1">?</span><P>
-Used:<BR><span id="used1">?</span><P>
-Spoiled:<BR><span id="spoiled1">?</span><P>
-Produced:<BR><span id="prod1">?</span><P>
-Current:<BR><span id="curr1">?</span><P>
-Require:<BR><span id="req1">?</span> <span id="diff1" style="color:lightgreen">(+0)</span><P>
-<div id="pab1" style="visibility:hidden; width:100%">
-<input type="radio" name="buysell1" value="Sell" id="bs1s"><label for="bs1s">Sell</label><BR>
-<input type="radio" name="buysell1" value="Buy" id="bs1b"><label for="bs1b">Buy</label></input><P>
-<button style="position:static" onclick="preaucclick()">OK</button>
+Started With:<BR><span id="rstart">?</span><P>
+Used:<BR><span id="rused">?</span><P>
+Spoiled:<BR><span id="rspoiled">?</span><P>
+Produced:<BR><span id="rprod">?</span><P>
+Current:<BR><span id="rcurr">?</span><P>
+<span id="rsl" style="color:#5f4c28">SURPLUS:</span><BR><span id="rsurplus">?</span> 
+<div id="rpab" style="width:100%">
+<input type="radio" name="rbuysell" value="Sell" id="rbss"><label for="bs1s">Sell</label><BR>
+<input type="radio" name="rbuysell" value="Buy" id="rbsb"><label for="bs1b">Buy</label></input><P>
+<button id="rbtnbuysell" style="position:static">OK</button>
 </div>
 </div>
 
-<div id="pa2" 
+<div id="ypab" 
 style="top: 1%;left: 30%; width: 15%; height: 90%; background-color: rgba(255,255,0,.2); visibility: hidden;">
 <br><img style="position:static" src="img/ysell.png">
 <P>
-Started With:<BR><span id="start2">?</span><P>
-Used:<BR><span id="used2">?</span><P>
-Spoiled:<BR><span id="spoiled2">?</span><P>
-Produced:<BR><span id="prod2">?</span><P>
-Current:<BR><span id="curr2">?</span><P>
-Require:<BR><span id="req2">?</span> <span id="diff2" style="color:lightgreen">(+0)</span><P>
-<div id="pab2" style="visibility:hidden; width:100%">
-<input type="radio" name="buysell2" value="Sell" id="bs2s"><label for="bs2s">Sell</label></input><BR>
-<input type="radio" name="buysell2" value="Buy" id="bs2b"><label for="bs2b">Buy</label></input><P>
-<button style="position:static" onclick="preaucclick()">OK</button>
-</div>
+Started With:<BR><span id="ystart">?</span><P>
+Used:<BR><span id="yused">?</span><P>
+Spoiled:<BR><span id="yspoiled">?</span><P>
+Produced:<BR><span id="yprod">?</span><P>
+Current:<BR><span id="ycurr">?</span><P>
+<span id="ysl" style="color:#5f4c28">SURPLUS:</span><BR><span id="ysurplus">?</span> 
+<div id="ypab" style="width:100%">
+<input type="radio" name="ybuysell" value="Sell" id="ybss"><label for="bs1s">Sell</label><BR>
+<input type="radio" name="ybuysell" value="Buy" id="ybsb"><label for="bs1b">Buy</label></input><P>
+<button id="ybtnbuysell" style="position:static">OK</button></div>
 </div>
 
-<div id="pa3" 
+<div id="gpab" 
 style="top: 1%;left: 55%; width: 15%; height: 90%; background-color: rgba(0,255,0,.2); visibility: hidden;">
 <br><img style="position:static" src="img/gsell.png">
 <P>
-Started With:<BR><span id="start3">?</span><P>
-Used:<BR><span id="used3">?</span><P>
-Spoiled:<BR><span id="spoiled3">?</span><P>
-Produced:<BR><span id="prod3">?</span><P>
-Current:<BR><span id="curr3">?</span><P>
-Require:<BR><span id="req3">?</span> <span id="diff3" style="color:lightgreen">(+0)</span><P>
-<div id="pab3" style="visibility:hidden; width:100%">
-<input type="radio" name="buysell3" value="Sell" id="bs3s"><label for="bs3s">Sell</label></input><BR>
-<input type="radio" name="buysell3" value="Buy" id="bs3b"><label for="bs3b">Buy</label></input><P>
-<button style="position:static" onclick="preaucclick()">OK</button>
-</div>
+Started With:<BR><span id="gstart">?</span><P>
+Used:<BR><span id="gused">?</span><P>
+Spoiled:<BR><span id="gspoiled">?</span><P>
+Produced:<BR><span id="gprod">?</span><P>
+Current:<BR><span id="gcurr">?</span><P>
+<span id="gsl" style="color:#5f4c28">SURPLUS:</span><BR><span id="gsurplus">?</span> 
+<div id="gpab" style="width:100%">
+<input type="radio" name="gbuysell" value="Sell" id="gbss"><label for="bs1s">Sell</label><BR>
+<input type="radio" name="gbuysell" value="Buy" id="gbsb"><label for="bs1b">Buy</label></input><P>
+<button id="gbtnbuysell" style="position:static">OK</button></div>
 </div>
 
-<div id="pa4" 
+<div id="bpab" 
 style="top: 1%;left: 80%; width: 15%; height: 90%; background-color: rgba(0,0,255,.2); visibility: hidden;">
 <br><img style="position:static" src="img/bsell.png">
 <P>
-Started With:<BR><span id="start4">?</span><P>
-Used:<BR><span id="used4">?</span><P>
-Spoiled:<BR><span id="spoiled4">?</span><P>
-Produced:<BR><span id="prod4">?</span><P>
-Current:<BR><span id="curr4">?</span><P>
-Require:<BR><span id="req4">?</span> <span id="diff4" style="color:lightgreen">(+0)</span><P>
-<div id="pab4" style="visibility:hidden; width:100%">
-<input type="radio" name="buysell4" value="Sell" id="bs4s"><label for="bs4s">Sell</label></input><BR>
-<input type="radio" name="buysell4" value="Buy"  id="bs4b"><label for="bs4b">Buy</label></input><P>
-<button style="position:static" onclick="preaucclick()">OK</button>
-</div>
+Started With:<BR><span id="bstart">?</span><P>
+Used:<BR><span id="bused">?</span><P>
+Spoiled:<BR><span id="bspoiled">?</span><P>
+Produced:<BR><span id="bprod">?</span><P>
+Current:<BR><span id="bcurr">?</span><P>
+<span id="bsl" style="color:#5f4c28">SURPLUS:</span><BR><span id="bsurplus">?</span> 
+<div id="bpab" style="width:100%">
+<input type="radio" name="bbuysell" value="Sell" id="bbss"><label for="bs1s">Sell</label><BR>
+<input type="radio" name="bbuysell" value="Buy" id="bbsb"><label for="bs1b">Buy</label></input><P>
+<button id="bbtnbuysell" style="position:static">OK</button></div>
 </div>
 </div> <!-- /preblock -->
 <div id="ablock" style="width:100%; top:7%; height:90%;">
@@ -162,14 +159,14 @@ Require:<BR><span id="req4">?</span> <span id="diff4" style="color:lightgreen">(
 <button id="aucdone" style="left:42%; bottom:-2%" onclick="aucdone()">DONE</button>
 <hr id="sellline" style="bottom:81%">
 <hr id="buyline" style="bottom:11%">
-<img id="cb1" src="img/rbuy.png" style="left:10%; bottom:81%;">
-<div id ="cbl1" style="left:10.5%; bottom:77%;">Bid: <span id="cbv1">45</span></div>
-<img id="cb2" src="img/ybuy.png" style="left:35%; bottom:11%; background-color: rgba(255, 255, 255, 0.0);">
-<div id ="cbl2" style="left:35.5%; bottom:7%;">Bid: <span id="cbv2">10</span></div>
-<img id="cb3" src="img/gsell.png" style="left:60%; bottom:81%">
-<div id ="cbl3" style="left:60.5%; bottom:96%;">Ask: <span id="cbv3">45</span></div>
-<img id="cb4" src="img/bsell.png" style="left:81%">
-<div id ="cbl4" style="left:80.5%; bottom:100%;">Ask: <span id="cbv4">45</span></div>
+<img id="rcb" src="img/rbuy.png" style="left:10%; bottom:81%;">
+<div id ="rcbl" style="left:10.5%; bottom:77%;">Bid: <span id="cbv1">45</span></div>
+<img id="ycb" src="img/ybuy.png" style="left:35%; bottom:11%; background-color: rgba(255, 255, 255, 0.0);">
+<div id ="ycbl" style="left:35.5%; bottom:7%;">Bid: <span id="cbv2">10</span></div>
+<img id="gcb" src="img/gsell.png" style="left:60%; bottom:81%">
+<div id ="gcbl" style="left:60.5%; bottom:96%;">Ask: <span id="cbv3">45</span></div>
+<img id="bcb" src="img/bsell.png" style="left:81%">
+<div id ="bcbl" style="left:80.5%; bottom:100%;">Ask: <span id="cbv4">45</span></div>
 <!-- bottom = ((bid - min) * 2 + 11)% -->
 <!-- targetline at 20, 45 70, 89 -->
 <div id="targetline" style="left:45%; width:.5%; height:90%; top:5%; background-color: gray; cursor:pointer">

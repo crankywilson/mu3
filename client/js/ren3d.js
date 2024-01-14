@@ -1163,9 +1163,9 @@ export async function CantinaWinnings(/**@type {t.CantinaResult}*/ msg)
   {
     cantinaSound.play();
     tempBlink("You won (\u20BF)" + msg.winnings + " gambling at the Cantina.", 5500);
+    g.waitingForServerResponse = true;
     await sleep(4000);
     switchCamView(false);
-    g.waitingForServerResponse = true;
   }
   
   g.scene.remove(g.models.player[msg.pc]);

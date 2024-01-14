@@ -1,5 +1,6 @@
 
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 using System.Threading.Channels;
 
@@ -18,7 +19,7 @@ enum GameState {
   /*GS*/ AUCTION                
 }
 
-class Game
+partial class Game
 {
   [JsonInclude] public LandLotDict     landlots  = new();
   [JsonInclude] public int             month     = 1;
@@ -31,7 +32,7 @@ class Game
   [JsonInclude] public int[]           resPrice  = new int[4] { 15, 10, 40, 100 };
        public HashSet<LandLotID> plLotsToAuction = new();
 
-  List<int> possibleColonyEvents = new(){-1,0,1,2,3,4,5,6,7,8,0,1,2,3,4,5,6,7,0,1,2,3,-1};
+  List<int> possibleColonyEvents = new(){-1,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,-1};
   List<int> possibleGoodPlayerEvents = Enumerable.Range(0, 13).ToList();
   List<int> possibleBadPlayerEvents  = Enumerable.Range(13, 9).ToList();
   
@@ -69,6 +70,11 @@ class Game
   const int ENERGY = (int) ResourceType.ENERGY;
   const int SMITHORE = (int) ResourceType.SMITHORE;
   const int CRYSTITE = (int) ResourceType.CRYSTITE;
+
+  const int LAND = CRYSTITE + 1;
+  const int NONE = -1;
+
+  int auctionType = NONE;
 
   public void SendPlayerEvents()
   {
@@ -271,6 +277,38 @@ class Game
       
   }
   
+  public void StartNextAuction()
+  {
+    if (auctionType == CRYSTITE)
+    {
+      auctionType = NONE;
+      UpdateScores();
+      UpdateGameState(GameState.SCORE);
+      return;
+    }
+
+    auctionType++;
+    int amtFoodNeeded = AmountFoodNeeded(month + 1);
+
+    foreach (var p in players)
+    {
+      int surplus = p.res[auctionType];
+
+      if (auctionType == FOOD)
+        surplus = p.res[FOOD] - amtFoodNeeded;
+      else if (auctionType == ENERGY)
+        surplus = p.res[ENERGY] - AmtEnergyNeeded(p);
+
+      send(new PreAuctionStat(p.color, 
+        p.startingRes[auctionType], p.used[auctionType], 
+        p.spoiled[auctionType], p.produced[auctionType], 
+        p.res[auctionType], surplus));
+    }
+
+    send(new CurrentAuction(auctionType, month));
+    UpdateGameState(GameState.AUCTIONPREP);
+  }
+
   // each game having its own channel allows synchronicity within a game, but multiple games
   //  to be processed concurrently in parallel
   public Channel<ReceivedMsg> channel = 
@@ -419,6 +457,8 @@ class Game
     UpdateScores();
     state = GameState.SCORE;
     send(new CurrentGameState(this));
+    // get rid of this when done auction dev:
+    StartNextAuction();
   }
 
   public void UpdateScores()
@@ -468,6 +508,28 @@ class Game
     return landlots[llid];
   }
 
+  public int AmountFoodNeeded(int month)
+  {
+    if (month >= 8)
+      return 5;
+    if (month >= 4)
+      return 4;
+    return 3;
+  }
+
+  public int AmtEnergyNeeded(Player p)
+  {
+    int amtEnergyNeeded = 0;
+    foreach (var ll in landlots)
+    {
+      if (ll.Value.owner != p) continue;
+      if (ll.Value.res > -1 && ll.Value.res != ENERGY)
+        amtEnergyNeeded++;
+    }
+
+    return amtEnergyNeeded;
+  }
+
   public void DoProduction()
   {
     const int QUAKE = 0;
@@ -479,8 +541,59 @@ class Game
     const int MULERAD = 6;
     const int PIRATES = 7;
 
+    List<LandLotID> lotsWithoutEnergy = new();
+    int amtFoodNeeded = AmountFoodNeeded(month);
+
     foreach (Player p in players)
+    {
+      for (int i=0; i<4; i++)
+        p.startingRes[i] = p.res[i];
+
+      p.used[FOOD] -= Math.Min(amtFoodNeeded, p.res[FOOD]);
+      p.res[FOOD] -= p.used[FOOD];
+      p.spoiled[FOOD] = p.res[FOOD] / 2;
+      p.res[FOOD] -= p.spoiled[FOOD];
+
+      List<LandLotID> nonEnergyLots = new();
+      int amtEnergyNeeded = 0;
+      foreach (var ll in landlots)
+      {
+        if (ll.Value.owner != p) continue;
+        if (ll.Value.res > -1 && ll.Value.res != ENERGY)
+        {
+          amtEnergyNeeded++;
+          if (p.energyShort) nonEnergyLots.Add(ll.Key);
+        }
+      }
+
+      if (p.energyShort)
+      {
+        int shortage = amtEnergyNeeded - p.res[ENERGY];
+        while (shortage > 0 && nonEnergyLots.Count > 0)
+        {
+          int r = rand.Next(nonEnergyLots.Count);
+          var k = nonEnergyLots[r];
+          nonEnergyLots.RemoveAt(r);
+          lotsWithoutEnergy.Add(k);
+          shortage--;
+        }
+      }
+
+      p.used[ENERGY] -= Math.Min(amtEnergyNeeded, p.res[ENERGY]);
+      p.res[ENERGY] -= p.used[ENERGY];
+      p.spoiled[ENERGY] = p.res[ENERGY] / 4;
+      p.res[ENERGY] -= p.spoiled[ENERGY];
+
+      p.spoiled[SMITHORE] = p.res[SMITHORE] < 50 ? 0 : p.res[SMITHORE] - 50;
+      p.res[SMITHORE] -= p.spoiled[SMITHORE];
+
+      p.spoiled[CRYSTITE] = p.res[CRYSTITE] < 50 ? 0 : p.res[CRYSTITE] - 50;
+      p.res[CRYSTITE] -= p.spoiled[CRYSTITE];
+
       p.produced = new[] {0,0,0,0};
+    }
+
+
 
     colonyEvent = PopRandom(possibleColonyEvents);
   
@@ -507,13 +620,17 @@ class Game
     if (lotKey != null)
       fullMsg = fullMsg.Replace("?", lotKey);
 
+
     List<string> rkeys = new(); // each element in here will be a production dot
     foreach (var pair in landlots)
     {
+      if (lotsWithoutEnergy.Contains(pair.Key))
+        continue;
+
       var k = pair.Key;
       var res = pair.Value.res;
       Player? p = Get(pair.Value.owner ?? PlayerColor.NONE);
-      if (p != null)
+      if (p != null && res > -1)
       {      
         int numResProduced = 8;
         if (colonyEvent == RAIN)
@@ -529,24 +646,27 @@ class Game
         for (int i=0; i<numResProduced; i++) rkeys.Add(pair.Key.str());
 
         bool thisWasPestAttack = (colonyEvent == PEST) && (k.str() == lotKey);
-
-        if (!thisWasPestAttack)
+        bool thisWasStolenCrys = (colonyEvent == PIRATES) && (res == CRYSTITE);
+        
+        if (res >= 0 && !thisWasPestAttack && !thisWasStolenCrys)
+        {
           p.produced[res] += numResProduced;
+          p.res[res] += numResProduced;
+        }
       }
     }
 
     if (colonyEvent == PIRATES)
-      foreach (Player p in players) p.produced[CRYSTITE] = 0;
+    {
+      foreach (Player p in players)
+      { 
+        p.startingRes[CRYSTITE] = 0;
+        p.spoiled[CRYSTITE] = 0;
+      }
+    }
 
     if (colonyEvent == FIRE)
       colony.res = new[] {0,0,0,0}; 
-
-
-    foreach (Player p in players)
-    {
-      for (int r=0; r<4; r++) 
-       p.res[r] += p.produced[r]; 
-    }
 
     var keyArray = rkeys.ToArray();
     rand.Shuffle(keyArray);

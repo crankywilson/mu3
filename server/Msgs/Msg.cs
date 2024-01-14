@@ -39,6 +39,12 @@ record Continue (
           g.UpdateGameState(GameState.IMPROVE); break;
         case GameState.IMPROVE:
           g.UpdateGameState(GameState.PROD); g.DoProduction(); break;
+        case GameState.PROD:
+        case GameState.AUCTION:
+          g.StartNextAuction(); break;
+        case GameState.AUCTIONPREP:
+          g.UpdateGameState(GameState.AUCTION); break;
+          
       }
     }
   }

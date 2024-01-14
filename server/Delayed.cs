@@ -1,11 +1,11 @@
 ﻿class DelayedEvent
 {
-  Task? t;
-  CancellationTokenSource? cts;
-  int milliseconds;
-  Player? p;
+  protected Task? t;
+  protected CancellationTokenSource? cts;
+  protected int milliseconds;
+  protected Player? p;
 
-  public bool Schedule(int milliseconds, Player p)
+  public virtual bool Schedule(int milliseconds, Player p)
   {
     if (p.pendingEvents.ContainsKey(GetType()))
     {
@@ -32,7 +32,7 @@
     return cts != null && cts.IsCancellationRequested;
   }
 
-  async void DelayThenQueue()
+  protected async void DelayThenQueue()
   {
     await Task.Delay(milliseconds);
     if (p != null && p.game != null && cts != null && !cts.IsCancellationRequested)
@@ -57,7 +57,7 @@ record DoDelayedEvent(DelayedEvent e) : Msg
   }
 }
 
-class AcutionOver : DelayedEvent { 
+class AuctionOver : DelayedEvent { 
   public override void OnTimeElapsed(Player p, Game g) {
     // schedule this with g.colony 'player'
   }
@@ -68,3 +68,21 @@ class ImprovementTimeUp : DelayedEvent {
     ;
   }
 }
+
+class AuctionEvent : DelayedEvent
+{
+  public override bool Schedule(int milliseconds, Player p)
+  {
+    cts = new CancellationTokenSource();
+    this.milliseconds = milliseconds;
+    this.p = p;
+    t = Task.Run(DelayThenQueue, cts.Token);
+    return true;
+  }
+
+  public void Schedule(int milliseconds, Game g)
+  {
+    Schedule(milliseconds, g.colony);
+  }
+}
+

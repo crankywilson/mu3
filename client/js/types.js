@@ -186,6 +186,39 @@
  @property {number} n
  @property {string} _mt
 
+@typedef PreAuctionStat
+ @property {string} pc
+ @property {number} start
+ @property {number} used
+ @property {number} spoiled
+ @property {number} produced
+ @property {number} current
+ @property {number} surplus
+ @property {string} _mt
+
+@typedef CurrentAuction
+ @property {number} auctionType
+ @property {number} month
+ @property {string} _mt
+
+@typedef ConfirmTrade
+ @property {number} tradeID
+ @property {string} _mt
+
+@typedef BuyerReset
+ @property {string} msg
+ @property {string} pc
+ @property {number} target
+ @property {number} bid
+ @property {string} _mt
+
+@typedef SellerReset
+ @property {string} msg
+ @property {string} pc
+ @property {number} target
+ @property {number} bid
+ @property {string} _mt
+
 @typedef AvailableGames
  @property {string[]} games
  @property {string} _mt
@@ -266,7 +299,7 @@
  @property {number[]} mg
  @property {number} res
 
-@typedef Game
+@typedef ?
  @property {LandLotDict} landlots
  @property {number} month
  @property {string} name
@@ -276,6 +309,7 @@
  @property {number} mules
  @property {number} mulePrice
  @property {number[]} resPrice
+ @property {string} _mt
 
 @typedef {(
  'WAITINGFORALLJOIN'|
