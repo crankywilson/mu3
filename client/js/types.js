@@ -219,6 +219,20 @@
  @property {number} target
  @property {string} _mt
 
+@typedef Bid
+ @property {string} pc
+ @property {number} amt
+ @property {boolean} buying
+ @property {string} _mt
+
+@typedef Bids
+ @property {Bid[]} current
+ @property {number} lowestSellPrice
+ @property {number} highestBuyPrice
+ @property {boolean} storeBuy
+ @property {number} minBid
+ @property {string} _mt
+
 @typedef ConfirmTrade
  @property {number} tradeID
  @property {string} _mt

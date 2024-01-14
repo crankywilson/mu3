@@ -47,6 +47,20 @@ record AuctionTargetBid (
   }
 }
 
+record Bid (
+  PlayerColor pc,
+  int amt,
+  bool buying
+) : Msg;
+
+record Bids (
+  Bid[] current,
+  int lowestSellPrice,
+  int highestBuyPrice,
+  bool storeBuy,
+  int minBid
+) : Msg;
+
 /*
 def hmBuy(g:Game, p:Player, msg:dict):
   p.buying = True

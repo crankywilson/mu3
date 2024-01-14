@@ -531,3 +531,161 @@ export function BuySell(/**@type {t.BuySell}*/msg)
     ui.targetval.innerText = "(Drag)";
   }
 }
+
+let ssa = [
+  new Audio("/sound/step.mp3"),
+  new Audio("/sound/step.mp3"),
+  new Audio("/sound/step.mp3")];
+ let ssi = 0;
+ async function stepSound()
+ {
+   ssa[ssi%ssa.length].play();
+   ssi++;
+ }
+
+export function Bids(/**@type {t.Bids}*/m)
+{
+  let anyRealBids = false;
+
+  g.minBid = m.minBid;
+  g.maxBid = m.minBid + (35 * g.bidIncr);
+  g.passVal = m.minBid - (3 * g.bidIncr);
+  g.passThresh = g.passVal + g.bidIncr;
+  g.outVal = g.maxBid + (5 * g.bidIncr);
+  g.outThresh = g.outVal - g.bidIncr;
+
+  for (let bid of m.current)
+  {
+    let img = ui.cb(bid.pc);
+    let lbl = ui.cbl(bid.pc);
+    let newBid = bid.amt;
+
+    if (newBid == 0)
+    { 
+      img.style.bottom = "0%";
+      lbl.style.visibility = "hidden";
+    }
+    else if (newBid == 9999)
+    {
+      img.style.bottom = "86%";
+      lbl.style.visibility = "hidden";
+    }
+    else
+    {
+      anyRealBids = true;
+      img.style.bottom = ((newBid - g.minBid) * 2 / g.bidIncr + 11) + '%';
+      ui.cbv(bid.pc).innerText = newBid.toString();
+      let r = img.getBoundingClientRect();
+      let p = r;
+      if (img.parentElement != null)
+        r = img.parentElement.getBoundingClientRect();
+
+      lbl.style.left = r.left + 5 + "px";
+      lbl.style.top = r.bottom - p.top + "px";
+      lbl.style.visibility = "visible";
+      lbl.innerHTML = (bid.buying ? "Bid" : "Ask") + lbl.innerHTML.substring(3);
+    }
+  
+    if (bid.pc == g.myColor)
+      g.curbid = newBid;
+
+    //if (img instanceof HTMLImageElement) 
+    //  img.src = "img/" + imgprefix[char] + (m.buying[char] ? "buy.png" : "sell.png");
+  }
+
+  if (m.highestBuyPrice > 0 && m.highestBuyPrice < 9999)
+  {
+    ui.buyline.style.bottom = ((m.highestBuyPrice - g.minBid) * 2 / g.bidIncr + 11) + '%'; 
+    ui.buyline.style.visibility = "inherit";
+  }
+  else
+    ui.buyline.style.visibility = "hidden";
+
+  if (m.lowestSellPrice > 0 && m.lowestSellPrice < 9999)
+  {
+    ui.sellline.style.bottom = ((m.lowestSellPrice - g.minBid) * 2 / g.bidIncr + 11) + '%'; 
+    ui.sellline.style.visibility = "inherit";
+    g.selloffers = true;
+  }
+  else
+  {
+    ui.sellline.style.visibility = "hidden";
+    g.selloffers = false;
+  }
+
+  ui.storebuy.style.visibility = (m.storeBuy) ? "inherit" : "hidden";
+  ui.storebuy1.style.visibility = (m.storeBuy) ? "inherit" : "hidden";
+
+  if (anyRealBids)
+    stepSound();
+}
+/*
+function hmConfirmTrade(m)
+{
+  if (m.buyer == g.myChar)
+  {
+    if (m.price == g.curbid && g.target >= m.price)
+    {
+      send('TradeConfirmed', {tradeID:m.tradeID});
+      return;
+    }
+  }
+
+  else if (m.seller == g.myChar)
+  {
+    if (m.price == g.curbid && g.target <= m.price)
+    {
+      send('TradeConfirmed', {tradeID:m.tradeID});
+      return;
+    }
+  }
+
+  send('Target', {target:g.target}); 
+}
+
+function hmBeginTrade(m)
+{
+  if (m.buyer > 0)
+    e("cb" + m.buyer).className = 'trading';
+  else
+    e("storebuy").className = 'trading';
+
+  if (m.seller > 0)
+    e("cb" + m.seller).className = 'trading';
+  else
+    e("storesell").className = 'trading';
+}
+
+function hmEndTrade(m)
+{
+  e("cb1").className = '';
+  e("cb2").className = '';
+  e("cb3").className = '';
+  e("cb4").className = '';
+  e("storebuy").className = '';
+  e("storesell").className = '';
+}
+
+function hmUnitsTraded(m)
+{
+  e("msg").innerText = "Units Traded: " + m.units;
+  for (let char in m.res)
+    if (Number(char) > 0)
+      setBtmText(char, g.auctionRes + ": " + m.res[char]);
+    else
+      e("storeunits").innerText = m.res[char];
+  for (let char in m.money)
+    if (Number(char) > 0)
+    setMoney(char, m.money[char]);
+
+  beepSound.play();
+}
+
+function hmStoreOut(m)
+{
+  e("msg").innerText = "Store has no more units to trade."
+  e("storesell").style.visibility =  "hidden";
+  e("storesell1").style.visibility = "hidden";
+  e("storesell2").style.visibility = "hidden";
+}
+*/
