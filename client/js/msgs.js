@@ -1,7 +1,7 @@
 export * from './msgs_pregame.js';
 import * as t from "./types.js";
 import * as r from "./ren3d.js";
-import { g, ui } from "./game.js";
+import { g, ui, send } from "./game.js";
 
 function show(/**@type {HTMLElement}*/e)
 {
@@ -578,12 +578,13 @@ export function Bids(/**@type {t.Bids}*/m)
       let r = img.getBoundingClientRect();
       let p = r;
       if (img.parentElement != null)
-        r = img.parentElement.getBoundingClientRect();
+        p = img.parentElement.getBoundingClientRect();
 
-      lbl.style.left = r.left + 5 + "px";
+      //lbl.style.left = r.left + 5 + "px";
       lbl.style.top = r.bottom - p.top + "px";
       lbl.style.visibility = "visible";
-      lbl.innerHTML = (bid.buying ? "Bid" : "Ask") + lbl.innerHTML.substring(3);
+      lbl.innerText = (bid.buying ? "Bid: " : "Ask: ");
+      lbl.appendChild(ui.cbv(bid.pc));  // some hackery to avoid creating separate span for lbl innerText
     }
   
     if (bid.pc == g.myColor)
@@ -619,32 +620,10 @@ export function Bids(/**@type {t.Bids}*/m)
   if (anyRealBids)
     stepSound();
 }
-/*
-function hmConfirmTrade(m)
+
+export function HighlightTrade(/**@type {t.HighlightTrade}*/m)
 {
-  if (m.buyer == g.myChar)
-  {
-    if (m.price == g.curbid && g.target >= m.price)
-    {
-      send('TradeConfirmed', {tradeID:m.tradeID});
-      return;
-    }
-  }
-
-  else if (m.seller == g.myChar)
-  {
-    if (m.price == g.curbid && g.target <= m.price)
-    {
-      send('TradeConfirmed', {tradeID:m.tradeID});
-      return;
-    }
-  }
-
-  send('Target', {target:g.target}); 
-}
-
-function hmBeginTrade(m)
-{
+  /*
   if (m.buyer > 0)
     e("cb" + m.buyer).className = 'trading';
   else
@@ -654,20 +633,25 @@ function hmBeginTrade(m)
     e("cb" + m.seller).className = 'trading';
   else
     e("storesell").className = 'trading';
+  */
 }
 
-function hmEndTrade(m)
+
+export function TradeEnd(/**@type {t.TradeEnd}*/m)
 {
+  /*
   e("cb1").className = '';
   e("cb2").className = '';
   e("cb3").className = '';
   e("cb4").className = '';
   e("storebuy").className = '';
   e("storesell").className = '';
+  */
 }
 
-function hmUnitsTraded(m)
-{
+ export function UnitsTraded(/**@type {t.UnitsTraded}*/m)
+ {
+  /*
   e("msg").innerText = "Units Traded: " + m.units;
   for (let char in m.res)
     if (Number(char) > 0)
@@ -679,13 +663,52 @@ function hmUnitsTraded(m)
     setMoney(char, m.money[char]);
 
   beepSound.play();
+  */
+ }
+
+ export function AuctionTime(/**@type {t.AuctionTime}*/m)
+ {
+ }
+
+export function ConfirmTrade(/**@type {t.ConfirmTrade}*/m)
+{
+  if (m.buyer == g.myColor)
+  {
+    if (m.price == g.curbid && g.target >= m.price)
+    {
+      send(t.TradeConfirmed(m.tradeID));
+      return;
+    }
+  }
+
+  else if (m.seller == g.myColor)
+  {
+    if (m.price == g.curbid && g.target <= m.price)
+    {
+      send(t.TradeConfirmed(m.tradeID));
+      return;
+    }
+  }
+
+  console.log("out of sync confirmation requested...");
 }
 
-function hmStoreOut(m)
+export function SellerReset(/**@type {t.SellerReset}*/m)
 {
-  e("msg").innerText = "Store has no more units to trade."
-  e("storesell").style.visibility =  "hidden";
-  e("storesell1").style.visibility = "hidden";
-  e("storesell2").style.visibility = "hidden";
+  if (m.pc == "COLONY")
+  {/*
+    e("storesell").style.visibility =  "hidden";
+    e("storesell1").style.visibility = "hidden";
+    e("storesell2").style.visibility = "hidden";*/
+  }
+
+  ui.msg.innerText = m.msg;
 }
-*/
+
+export function BuyerReset(/**@type {t.BuyerReset}*/m)
+{
+  ui.msg.innerText = m.msg;
+}
+
+
+

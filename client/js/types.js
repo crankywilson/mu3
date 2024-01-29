@@ -233,8 +233,32 @@
  @property {number} minBid
  @property {string} _mt
 
+@typedef HighlightTrade
+ @property {string} buyer
+ @property {string} seller
+ @property {number} price
+ @property {string} _mt
+
+@typedef TradeEnd
+ @property {string} _mt
+
+@typedef UnitsTraded
+ @property {number} num
+ @property {string} _mt
+
+@typedef AuctionTime
+ @property {number} num
+ @property {string} _mt
+
+@typedef TradeConfirmed
+ @property {number} tradeID
+ @property {string} _mt
+
 @typedef ConfirmTrade
  @property {number} tradeID
+ @property {string} buyer
+ @property {string} seller
+ @property {number} price
  @property {string} _mt
 
 @typedef BuyerReset
@@ -493,6 +517,11 @@ export let GAMESTATE = {
 /**@returns {AuctionTargetBid}*/ export function AuctionTargetBid(
  /**@type {number}*/ target,
 ) { return { _mt: 'AuctionTargetBid' , target: target
+};}
+
+/**@returns {TradeConfirmed}*/ export function TradeConfirmed(
+ /**@type {number}*/ tradeID,
+) { return { _mt: 'TradeConfirmed' , tradeID: tradeID
 };}
 
 /**@returns {CreateGame}*/ export function CreateGame(

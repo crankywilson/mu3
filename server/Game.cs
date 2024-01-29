@@ -75,7 +75,7 @@ class Game
   const int LAND = CRYSTITE + 1;
   const int NONE = -1;
 
-  int auctionType = NONE;
+  public int auctionType = NONE;
 
   public void SendPlayerEvents()
   {
@@ -274,16 +274,9 @@ class Game
     send(new UpdateGameState(gs));
 
     if (gs == GameState.PLAYEREVENT)
-      SendPlayerEvents();
-      
+      SendPlayerEvents();      
   }
   
-  public void StartAuction()
-  {
-
-    UpdateGameState(GameState.AUCTION);
-  }
-
   public void StartNextAuctionPrep()
   {
     if (auctionType == CRYSTITE)
@@ -462,6 +455,9 @@ class Game
       DistributeCrystitie(k, 3);
     }
 
+    colony.game = this;
+    colony.color = PlayerColor.COLONY;
+    colony.rank = 0;
     started = true;
     UpdateScores();
     state = GameState.SCORE;
