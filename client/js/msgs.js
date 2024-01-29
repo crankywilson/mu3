@@ -502,6 +502,23 @@ export function CurrentAuction(/**@type {t.CurrentAuction}*/ msg)
   ui.targetline.style.visibility = "inherit";
   ui.target.style.visibility = "inherit";
   ui.targetval.style.visibility = "inherit";
+
+  g.minBid = msg.resPrice;
+  ui.storebuyprice.innerText = g.minBid.toString();
+  g.maxBid = g.minBid + 35;
+  if (msg.avail < 1)
+    g.maxBid = -1; 
+  else
+    ui.storesellprice.innerText = g.maxBid.toString();
+
+  g.passVal = g.minBid - (3 * g.bidIncr);
+  g.passThresh = g.passVal + g.bidIncr;
+  g.outVal = g.maxBid + (5 * g.bidIncr);
+  g.outThresh = g.outVal - g.bidIncr;
+  ui.rcbl.style.visibility = "hidden";
+  ui.ycbl.style.visibility = "hidden";
+  ui.gcbl.style.visibility = "hidden";
+  ui.bcbl.style.visibility = "hidden";
 }
 
 export function BuySell(/**@type {t.BuySell}*/msg)

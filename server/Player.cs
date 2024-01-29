@@ -111,7 +111,7 @@ class Player
     string msg = "\"", Send = recv ? "Recv" : "Send";
     msg = Encoding.UTF8.GetString(buf);
     if (recv) msg = msg.TrimEnd('\0');
-    if (msg.Contains("Dest")) return;
+    if (msg.Contains("Dest") || msg.Contains("Time")) return;
     msg = RemoveLandLots(msg);
     Console.WriteLine($"{DateTime.Now:h:mm:ss} {Send} {color.ToString()[0]} {msg}");
   }
@@ -126,6 +126,11 @@ class Player
     if (game != null && game.active && game.started)
     {
       send(new CurrentGameState(game));
+      
+      if (game.state == GameState.AUCTION) 
+        send(new CurrentAuction(game.auctionType, game.month, 
+          game.resPrice[game.auctionType], game.colony.res[game.auctionType]));
+      
       game.send(new PlayerRejoined(this));
       return true;
     }

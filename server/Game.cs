@@ -305,6 +305,9 @@ class Game
         p.res[auctionType], surplus));
     }
 
+    minBid = resPrice[auctionType];
+    maxBid = minBid + 35;
+    
     send(new CurrentAuction(auctionType, month, 
         resPrice[auctionType], colony.res[auctionType]));
 

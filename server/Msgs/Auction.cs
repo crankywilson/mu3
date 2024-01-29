@@ -269,13 +269,10 @@ partial class Game
   // case, only that player is supposed to have active bid immediately moved
   public void UpdateBids(object param) // UpdateBids or Player
   {
-    int lowestSellPrice = SELL;
-    int highestBuyPrice = BUY;
+    int lowestSellPrice = colony.res[auctionType] > 0 ? maxBid : SELL;
+    int highestBuyPrice = minBid == resPrice[auctionType] ? minBid : BUY;
 
     bidChangeThisCycle = false;
-
-    if (colony.res[auctionType] > 0)
-      lowestSellPrice = resPrice[auctionType];
 
     foreach (Player p in players)
     {
@@ -416,7 +413,9 @@ partial class Game
       }
     }
     
-    UpdateBids(new UpdateBids());  // starts 250 millisec loop
     UpdateGameState(GameState.AUCTION);
+    UpdateBids(new UpdateBids());  // starts 250 millisec loop
+   
+
   }
 }
