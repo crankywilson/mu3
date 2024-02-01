@@ -444,6 +444,10 @@ function UpdateAuctionUIElems()
   ui.targetline.style.left = (myLeftPct + 15) + "%";
   ui.target.style.left = (myLeftPct + 14.5) + "%";
   ui.targetval.style.left = (myLeftPct + 11.25) + "%";
+
+  /** @type {Object.<string, string>} */
+  let colorStr = {R:'#ff0000',Y:'#ffff00',G:'#00ff00',B:'#0000ff'};
+  ui.target.style.backgroundColor = colorStr[g.myColor];
 }
 
 export function PreAuctionStat(/**@type {t.PreAuctionStat}*/ msg)
@@ -640,36 +644,36 @@ export function Bids(/**@type {t.Bids}*/m)
 
 export function HighlightTrade(/**@type {t.HighlightTrade}*/m)
 {
-  /*
-  if (m.buyer > 0)
-    e("cb" + m.buyer).className = 'trading';
+  TradeEnd();
+  if (m.buyer.length == 1)
+    ui.cb(m.buyer).className = 'trading';
   else
-    e("storebuy").className = 'trading';
+    ui.storebuy.className = 'trading';
 
-  if (m.seller > 0)
-    e("cb" + m.seller).className = 'trading';
+  if (m.seller.length == 1)
+    ui.cb(m.seller).className = 'trading';
   else
-    e("storesell").className = 'trading';
-  */
+    ui.storesell.className = 'trading';
 }
 
 
 export function TradeEnd(/**@type {t.TradeEnd}*/m)
 {
-  /*
-  e("cb1").className = '';
-  e("cb2").className = '';
-  e("cb3").className = '';
-  e("cb4").className = '';
-  e("storebuy").className = '';
-  e("storesell").className = '';
-  */
+  ui.rcb.className = '';
+  ui.gcb.className = '';
+  ui.ycb.className = '';
+  ui.bcb.className = '';
+
+  ui.storebuy.className = '';
+  ui.storesell.className = '';
 }
 
  export function UnitsTraded(/**@type {t.UnitsTraded}*/m)
  {
+  ui.msg.innerText = "Units Traded: " + m.num;
+  r.beep();
+
   /*
-  e("msg").innerText = "Units Traded: " + m.units;
   for (let char in m.res)
     if (Number(char) > 0)
       setBtmText(char, g.auctionRes + ": " + m.res[char]);
@@ -678,8 +682,6 @@ export function TradeEnd(/**@type {t.TradeEnd}*/m)
   for (let char in m.money)
     if (Number(char) > 0)
     setMoney(char, m.money[char]);
-
-  beepSound.play();
   */
  }
 
@@ -713,18 +715,30 @@ export function ConfirmTrade(/**@type {t.ConfirmTrade}*/m)
 export function SellerReset(/**@type {t.SellerReset}*/m)
 {
   if (m.pc == "COLONY")
-  {/*
-    e("storesell").style.visibility =  "hidden";
-    e("storesell1").style.visibility = "hidden";
-    e("storesell2").style.visibility = "hidden";*/
+  {
+    ui.storesell.style.visibility =  "hidden";
+    ui.storesell1.style.visibility = "hidden";
+    ui.storesell2.style.visibility = "hidden";
   }
 
   ui.msg.innerText = m.msg;
+  if (m.pc == g.myColor)
+  {
+    let targ = g.outVal;
+    ui.target.style.bottom = ((targ - g.minBid) * 2 / g.bidIncr + 11) + '%';
+    ui.targetval.innerText = 'Target: Out'; 
+  }
 }
 
 export function BuyerReset(/**@type {t.BuyerReset}*/m)
 {
   ui.msg.innerText = m.msg;
+  if (m.pc == g.myColor)
+  {
+    let targ = g.passVal;
+    ui.target.style.bottom = ((targ - g.minBid) * 2 / g.bidIncr + 11) + '%';
+    ui.targetval.innerText = 'Target: Pass'; 
+  }
 }
 
 

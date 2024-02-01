@@ -1209,7 +1209,7 @@ let ba = [
  new Audio("/sound/beep.wav"), 
  new Audio("/sound/beep.wav")];
 let bi = 0;
-async function beep()
+export async function beep()
 {
   ba[bi%ba.length].play();
   bi++;

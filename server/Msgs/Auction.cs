@@ -118,24 +118,42 @@ record TradeConfirmed (
     
     g.send(new UnitsTraded(t.unitsTraded));
 
+    string? sellerResetStr = null;
+
     if (t.seller.res[g.auctionType] <= 0)
+      sellerResetStr = "Seller has no units left";
+    else if (t.seller.res[g.auctionType] == t.seller.criticalLevel)
+      sellerResetStr = "Seller at critical level";
+
+    if (sellerResetStr is not null)
     {
-      g.send(new SellerReset("Seller has no units left", t.seller.color, t.seller.target, t.seller.current));
+      t.seller.current = SELL;
+      t.seller.target = SELL;
+      g.send(new SellerReset(sellerResetStr, t.seller.color, t.seller.target, t.seller.current));
       g.send(new TradeEnd());
       g.activeTrade = null;
-      g.tradeID++;
-      return;
+      g.UpdateBids(t.seller);
     }
-    if (t.seller.res[g.auctionType] == t.seller.criticalLevel)
+    
+    string? buyerResetStr = null;
+    if (t.buyer.money < g.resPrice[g.auctionType])
+      buyerResetStr = "Buyer strapped for cash";
+
+    if (buyerResetStr is not null)
     {
-      g.send(new SellerReset("Seller at critical level", t.seller.color, t.seller.target, t.seller.current));
+      t.buyer.current = BUY;
+      t.buyer.target = BUY;
+      g.send(new SellerReset(buyerResetStr, t.buyer.color, t.buyer.target, t.buyer.current));
       g.send(new TradeEnd());
       g.activeTrade = null;
-      g.tradeID++;
-      return;
+      g.UpdateBids(t.buyer);
     }
 
     g.tradeID++;
+
+    if (g.activeTrade is null)
+      return;
+
     g.activeTrade = new(g.tradeID, t.buyer, t.seller, t.price, t.unitsTraded + 1);
     int delay = Math.Max(100, 1000 - (t.unitsTraded * 150));
     new ConfirmTradeAfterDelay(g.activeTrade).Schedule(delay, g);
@@ -243,8 +261,8 @@ class ConfirmTradeAfterDelay : AuctionEvent
   public override void OnTimeElapsed(Player p, Game g) {
     if (activeTrade == g.activeTrade)
     {
-      g.buyerConfirmed = false;
-      g.sellerConfirmed = false;
+      g.buyerConfirmed = activeTrade.buyer == g.colony;
+      g.sellerConfirmed = activeTrade.buyer == g.colony;
       var ct = new ConfirmTrade(activeTrade.tradeID,
         activeTrade.buyer.color,
         activeTrade.seller.color, activeTrade.price);
@@ -306,7 +324,8 @@ partial class Game
         bidChangeThisCycle = true;
       }
 
-      if (p.buying && p.current > p.money) p.current = p.money;
+      if (p.buying && p.current > p.money) p.current = p.money >= minBid ? p.money : BUY;
+      if (!p.buying && p.res[auctionType] <= 0) p.current = SELL;
       if (p.buying && p.current > highestBuyPrice) highestBuyPrice = p.current;
       if (!p.buying && p.current < lowestSellPrice) lowestSellPrice = p.current;
     }
@@ -337,7 +356,7 @@ partial class Game
       maxBid = highestBuyPrice;
     }
     
-    if (bidChangeThisCycle)
+    if (bidChangeThisCycle || param is Player)
       sendBids(lowestSellPrice, highestBuyPrice);
 
     startNewTradeIfNeeded(lowestSellPrice, highestBuyPrice);
@@ -356,7 +375,7 @@ partial class Game
       send(new AuctionTime(auctionTime/5000.0));
       if (auctionTime > 0)
         updBidsEvt.Schedule(250, this);
-      }
+    }
   }
 
   public void sendBids(int lowestSellPrice, int highestBuyPrice)
