@@ -461,6 +461,7 @@ class Game
     colony.game = this;
     colony.color = PlayerColor.COLONY;
     colony.rank = 0;
+    colony.money = int.MaxValue / 2;
     started = true;
     UpdateScores();
     state = GameState.SCORE;
@@ -536,6 +537,16 @@ class Game
     }
 
     return amtEnergyNeeded;
+  }
+
+  public int AmtResNeeded(Player p)
+  {
+    if (auctionType == FOOD)
+      return AmountFoodNeeded(month);
+    else if (auctionType == ENERGY)
+      return AmtEnergyNeeded(p);
+    
+    return -1;
   }
 
   public void DoProduction()

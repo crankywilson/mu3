@@ -242,8 +242,18 @@
 @typedef TradeEnd
  @property {string} _mt
 
+@typedef Res
+ @property {string} pc
+ @property {number} res
+ @property {number} money
+ @property {number} needed
+ @property {string} label
+ @property {string} _mt
+
 @typedef UnitsTraded
  @property {number} num
+ @property {Res} seller
+ @property {Res} buyer
  @property {string} _mt
 
 @typedef AuctionTime

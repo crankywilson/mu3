@@ -86,8 +86,24 @@ record HighlightTrade (
 record TradeEnd (
 ) : Msg;
 
+record Res (
+  PlayerColor pc,
+  int res,
+  int money,
+  int needed,
+  string label
+) : Msg
+{
+  public Res(Player p, Game g) : this(p.color, p.res[g.auctionType],
+                                      p.money,  p.criticalLevel, 
+          Enum.GetName(typeof(ResourceType), g.auctionType) ?? "") {}
+}
+
+
 record UnitsTraded (
-  int num
+  int num,
+  Res seller,
+  Res buyer
 ) : Msg;
 
 record AuctionTime (
@@ -116,7 +132,7 @@ record TradeConfirmed (
     t.buyer.res[g.auctionType] += 1;
     t.seller.res[g.auctionType] -= 1;
     
-    g.send(new UnitsTraded(t.unitsTraded));
+    g.send(new UnitsTraded(t.unitsTraded, new Res(t.buyer, g), new Res(t.seller, g)));
 
     string? sellerResetStr = null;
 
@@ -433,8 +449,15 @@ partial class Game
     }
     
     UpdateGameState(GameState.AUCTION);
-    UpdateBids(new UpdateBids());  // starts 250 millisec loop
-   
 
+    foreach (var p in players) 
+    {
+      p.criticalLevel = AmtResNeeded(p);
+      send(new Res(p.color, p.res[auctionType], p.money, p.criticalLevel, 
+                   Enum.GetName(typeof(ResourceType), auctionType) ?? ""));
+    }
+
+    UpdateBids(new UpdateBids());  // starts 250 millisec loop
+    
   }
 }

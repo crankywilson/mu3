@@ -15,6 +15,13 @@ function show(/**@type {HTMLElement}*/e)
 function hide(/**@type {HTMLElement}*/e)
 {
   e.style.visibility = 'hidden';
+  if (e instanceof HTMLInputElement)
+  {
+    if (e.labels != null)
+    {
+      for (let l of e.labels) l.style.visibility = 'hidden';
+    }
+  }
 }
 
 const NAMESPAN=0;
@@ -436,6 +443,12 @@ function UpdateAuctionUIElems()
     ui.cbl(pc).style.left = (plboxleftPct + 3.5) + '%';
 
     if (g.myColor == pc) myLeftPct = plboxleftPct;
+    if (g.myColor != pc)
+    {
+      hide(ui.bsb(pc));
+      hide(ui.bss(pc));
+      hide(ui.btnbuysell(pc))
+    }
   }
 
   ui.aucbuy.style.left = (myLeftPct + 4.5) + "%";
@@ -457,6 +470,7 @@ export function PreAuctionStat(/**@type {t.PreAuctionStat}*/ msg)
   ui.spoiled(msg.pc).innerText = msg.spoiled.toString();
   ui.prod(msg.pc).innerText = msg.produced.toString();
   ui.curr(msg.pc).innerText = msg.current.toString();
+  
   if (msg.surplus >= 0)
   {
     ui.sl(msg.pc).innerText = "SURPLUS:";
@@ -671,18 +685,9 @@ export function TradeEnd(/**@type {t.TradeEnd}*/m)
  export function UnitsTraded(/**@type {t.UnitsTraded}*/m)
  {
   ui.msg.innerText = "Units Traded: " + m.num;
+  Res(m.buyer);
+  Res(m.seller);
   r.beep();
-
-  /*
-  for (let char in m.res)
-    if (Number(char) > 0)
-      setBtmText(char, g.auctionRes + ": " + m.res[char]);
-    else
-      e("storeunits").innerText = m.res[char];
-  for (let char in m.money)
-    if (Number(char) > 0)
-    setMoney(char, m.money[char]);
-  */
  }
 
  export function AuctionTime(/**@type {t.AuctionTime}*/m)
@@ -738,6 +743,22 @@ export function BuyerReset(/**@type {t.BuyerReset}*/m)
     let targ = g.passVal;
     ui.target.style.bottom = ((targ - g.minBid) * 2 / g.bidIncr + 11) + '%';
     ui.targetval.innerText = 'Target: Pass'; 
+  }
+}
+
+export function Res(/**@type {t.Res}*/m)
+{
+  if (m.pc.length == 1)
+  {
+    let suffix = '';
+    if (m.needed > m.res) suffix = ' [/ ' + m.needed + ']';
+    setPlboxSpanText(m.pc, BOTTOMSPAN, m.label + ": " + m.res + suffix);
+    setPlboxSpanText(m.pc, MONEYSPAN, m.money);
+  }
+
+  if (m.pc == 'COLONY')
+  {
+    ui.storeunits.innerText = m.res.toString();
   }
 }
 
