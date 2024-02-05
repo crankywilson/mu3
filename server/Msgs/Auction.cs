@@ -32,8 +32,15 @@ record BuySell (
   public override void OnRecv(Player p, Game g)
   {
     p.buying = buy;
-    new Continue().OnRecv(p, g);
     g.send(this);
+    if (g.state == GameState.AUCTIONPREP)
+      new Continue().OnRecv(p, g);
+    else
+    {
+      p.current = buy ? BUY : SELL;
+      p.target = buy ? BUY : SELL;
+      g.UpdateBids(p);
+    }
   }
 }
 
@@ -278,7 +285,7 @@ class ConfirmTradeAfterDelay : AuctionEvent
     if (activeTrade == g.activeTrade)
     {
       g.buyerConfirmed = activeTrade.buyer == g.colony;
-      g.sellerConfirmed = activeTrade.buyer == g.colony;
+      g.sellerConfirmed = activeTrade.seller == g.colony;
       var ct = new ConfirmTrade(activeTrade.tradeID,
         activeTrade.buyer.color,
         activeTrade.seller.color, activeTrade.price);
@@ -301,7 +308,7 @@ partial class Game
   // iteration...  this is also called with a Player object when a bid change
   // is received during trading which immediately ends the trade...  In this
   // case, only that player is supposed to have active bid immediately moved
-  public void UpdateBids(object param) // UpdateBids or Player
+  public void UpdateBids(object param, bool init=false) // UpdateBids or Player
   {
     int lowestSellPrice = colony.res[auctionType] > 0 ? maxBid : SELL;
     int highestBuyPrice = minBid == resPrice[auctionType] ? minBid : BUY;
@@ -372,7 +379,7 @@ partial class Game
       maxBid = highestBuyPrice;
     }
     
-    if (bidChangeThisCycle || param is Player)
+    if (bidChangeThisCycle || param is Player || init)
       sendBids(lowestSellPrice, highestBuyPrice);
 
     startNewTradeIfNeeded(lowestSellPrice, highestBuyPrice);
@@ -380,7 +387,7 @@ partial class Game
     if (param is UpdateBids)
     {
       UpdateBids updBidsEvt = (UpdateBids)param;
-      if (false) // (activeTrade is null)
+      if (false) // !init && (activeTrade is null)
       {
         if (!bidChangeThisCycle)
           auctionTime -= 200;
@@ -457,7 +464,7 @@ partial class Game
                    Enum.GetName(typeof(ResourceType), auctionType) ?? ""));
     }
 
-    UpdateBids(new UpdateBids());  // starts 250 millisec loop
+    UpdateBids(new UpdateBids(), true);  // starts 250 millisec loop
     
   }
 }

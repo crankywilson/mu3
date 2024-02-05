@@ -548,22 +548,28 @@ export function BuySell(/**@type {t.BuySell}*/msg)
     if (img instanceof HTMLImageElement) img.src = "img/" + letter + "buy.png";
     if (g.state == "AUCTIONPREP") setPlboxSpanText(msg.pc, BOTTOMSPAN, "(Buying)");
     img.style.bottom = "0%";
-    ui.target.style.bottom = "5%";
-    ui.aucbuy.style.visibility = "hidden";
-    ui.aucsell.style.visibility = "inherit";
-    g.buying = true;
-    ui.targetval.innerText = "(Drag)";
+    if (msg.pc == g.myColor)
+    {
+      ui.target.style.bottom = "5%";
+      ui.aucbuy.style.visibility = "hidden";
+      ui.aucsell.style.visibility = "inherit";
+      g.buying = true;
+      ui.targetval.innerText = "(Drag)";
+    }
   }
   else
   {
     if (img instanceof HTMLImageElement) img.src = "img/" + letter + "sell.png";
     if (g.state == "AUCTIONPREP") setPlboxSpanText(msg.pc, BOTTOMSPAN, "(Selling)");
-    img.style.bottom = "86%";
-    ui.target.style.bottom = "91%";
-    ui.aucbuy.style.visibility = "inherit";
-    ui.aucsell.style.visibility = "hidden";
-    g.buying = false;
-    ui.targetval.innerText = "(Drag)";
+    if (msg.pc == g.myColor)
+    {
+      img.style.bottom = "86%";
+      ui.target.style.bottom = "91%";
+      ui.aucbuy.style.visibility = "inherit";
+      ui.aucsell.style.visibility = "hidden";
+      g.buying = false;
+      ui.targetval.innerText = "(Drag)";
+    }
   }
 }
 

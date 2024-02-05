@@ -465,6 +465,26 @@ function btnBuySellClick()
   ui.pabbs(pc).style.visibility = "hidden";
 }
 
+function btnDoneClick()
+{
+  send(t.Continue());
+  ui.target.style.visibility = "hidden";
+  ui.targetline.style.visibility = "hidden";
+  ui.aucdone.style.visibility = "hidden";
+  ui.aucbuy.style.visibility = "hidden";
+  ui.aucsell.style.visibility = "hidden";
+}
+
+function btnSellClick()
+{
+  send(t.BuySell(g.myColor, false));
+}
+
+function btnBuyClick()
+{
+  send(t.BuySell(g.myColor, true));
+}
+
 function setupAuctions()
 {
   const slider = ui.target;
@@ -473,6 +493,9 @@ function setupAuctions()
   ui.targetline.onpointerdown = (e)=>{ beginSliding(e, true); slide(e); };
 
   ui.rbtnbuysell.onclick = btnBuySellClick;
+  ui.aucdone.onclick = btnDoneClick;
+  ui.aucbuy.onclick = btnBuyClick;
+  ui.aucsell.onclick = btnSellClick;
 }
 
 function onWindowResize() 
