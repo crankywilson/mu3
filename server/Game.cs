@@ -282,8 +282,15 @@ class Game
     if (auctionType == CRYSTITE)
     {
       auctionType = NONE;
+      month++;
+      if (month == 13)
+      {
+        /* do end game stuff here */
+      }
+
       UpdateScores();
       UpdateGameState(GameState.SCORE);
+      send(new CurrentGameState(this));
       return;
     }
 
@@ -466,8 +473,8 @@ class Game
     UpdateScores();
     state = GameState.SCORE;
     send(new CurrentGameState(this));
-    // get rid of this when done auction dev:
-    StartNextAuctionPrep();
+    // BMW get rid of this when done auction dev:
+    // StartNextAuctionPrep();
   }
 
   public void UpdateScores()

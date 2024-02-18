@@ -313,6 +313,14 @@ partial class Game
   // case, only that player is supposed to have active bid immediately moved
   public void UpdateBids(object param, bool init=false) // UpdateBids or Player
   {
+    if (param is UpdateBids)
+    {
+      UpdateBids updBidsEvt = (UpdateBids)param;
+      if (state != GameState.AUCTION ||
+          auctionType != updBidsEvt.auctionType)
+        return;  // this should effectively end the loop for updBidsEvt
+    }
+
     int lowestSellPrice = colony.res[auctionType] > 0 ? maxBid : SELL;
     int highestBuyPrice = minBid == resPrice[auctionType] ? minBid : BUY;
 
@@ -399,9 +407,7 @@ partial class Game
       }
 
       send(new AuctionTime(auctionTime/5000.0));
-      if (auctionTime > 0 && 
-          state == GameState.AUCTION &&
-          auctionType == updBidsEvt.auctionType)
+      if (auctionTime > 0) 
         updBidsEvt.Schedule(250, this);
     }
   }
