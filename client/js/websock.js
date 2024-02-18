@@ -32,6 +32,9 @@ export function initWS()
     if (host == "localhost" || host.startsWith("192") || host.startsWith("127"))
         prot = "ws://";
     
+    if (window.location.port == '8000')
+        host = 'localhost:8001';
+
     let qstring = "";
     
     if (document.location.search.length > 1)
@@ -43,7 +46,7 @@ export function initWS()
     if (c != null)
         g.myColor = c;
     
-    let ws = new WebSocket(prot + window.location.hostname + "/wss/" + qstring);
+    let ws = new WebSocket(prot + host + "/wss/" + qstring);
     
     ws.onmessage = handleWSMsg;
     ws.onerror = handlerWSError;
