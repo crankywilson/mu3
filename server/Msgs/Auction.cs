@@ -301,7 +301,10 @@ class UpdateBids : AuctionEvent {
   public override void OnTimeElapsed(Player p, Game g) {
      g.UpdateBids(this); 
   }
+  public int auctionType = -1;
+  public UpdateBids(int auctionType) { this.auctionType = auctionType; }
 }
+
 partial class Game
 {
   // param is typically an UpdateBids object which is used to schedule next
@@ -396,7 +399,9 @@ partial class Game
       }
 
       send(new AuctionTime(auctionTime/5000.0));
-      if (auctionTime > 0)
+      if (auctionTime > 0 && 
+          state == GameState.AUCTION &&
+          auctionType == updBidsEvt.auctionType)
         updBidsEvt.Schedule(250, this);
     }
   }
@@ -464,7 +469,7 @@ partial class Game
                    Enum.GetName(typeof(ResourceType), auctionType) ?? ""));
     }
 
-    UpdateBids(new UpdateBids(), true);  // starts 250 millisec loop
+    UpdateBids(new UpdateBids(this.auctionType), true);  // starts 250 millisec loop
     
   }
 }

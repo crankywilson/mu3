@@ -190,6 +190,7 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
 
   if (g.state.indexOf("AUCTION") >= 0)
   {
+    r.stopAnimating();
     ui.aucbg.style.left = "0px";
     ui.boardview.style.left = "100%";
     if (g.state == "AUCTIONPREP")
@@ -206,6 +207,7 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   }
   else
   {
+    r.startAnimating();
     ui.aucbg.style.left = "-100%";
     ui.boardview.style.left = "0px";
   }
