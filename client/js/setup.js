@@ -438,6 +438,15 @@ function debug(/**@type {KeyboardEvent} */ev)
 }
 
 
+/** @param {any} _ */
+async function StartGameClick(_)
+{
+  ui.startgame.disabled = true;
+  ui.startgame.innerText = "Waiting for game init";
+  await g.init3DComplete;
+  send(t.StartGame());
+}
+
 function setupPending()
 {
   ui.joingame.onclick = joinGameClick;
@@ -451,7 +460,7 @@ function setupPending()
   ui.rdesiredimg.onclick   = ui.rdesiredbtn.onclick;
   ui.rchangecolor.onchange = handleColorChange;
   ui.rkick.onclick         = (e)=>{ send(t.Kick(targetID(e)[0].toUpperCase())); };
-  ui.startgame.onclick     = (_)=>{ send(t.StartGame()); };
+  ui.startgame.onclick     = StartGameClick;
 
   document.onkeydown = debug;
 }

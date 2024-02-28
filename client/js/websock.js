@@ -29,7 +29,7 @@ export function initWS()
 {
     let prot = "wss://";
     let host = window.location.hostname;
-    if (host == "localhost" || host.startsWith("192") || host.startsWith("127"))
+    if (host == "localhost" || host.startsWith("192") || host.startsWith("127") || host == "potato")
         prot = "ws://";
     
     if (window.location.port == '8000')
