@@ -519,6 +519,9 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
     ui.msgblink.innerText = "";
     let o = getLandLotObjForMouse(x, y);
 
+    if (o.e < -4 || o.e > 4 || o.n < -2 || o.n > 2)
+      return;
+
     let dest = {x: o.e * 4, z: o.n * -4, spd: 2.5};
     if (dest.x == g.myModel().position.x &&
         dest.z == g.myModel().position.z)
@@ -571,6 +574,10 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
 
       g.destCallback = goInSettlement;
     }
+    else if ( g.destCallback == goInSettlement)
+      g.destCallback = null;  // unset previous set --
+                              // this implies user clicked on settlement, then clicked somewhere else
+                              // before character actually got there
 
     send(t.NewDest(g.myColor, g.myModel().position.x,
       g.myModel().position.z, dest.x, dest.z, dest.spd));

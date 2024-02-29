@@ -225,13 +225,28 @@ export function stopAnimating()
   animating = false;
 }
 
+function equalXZ(/**@type {Object3D}*/obj, /**@type {Vector3}*/ dest)
+{
+  return obj.position.x == dest.x && obj.position.z == dest.z;
+}
+
+function distanceXZ(/**@type {Object3D}*/obj, /**@type {Vector3}*/ dest)
+{
+  let dx = obj.position.x - dest.x;
+  let dz = obj.position.z - dest.z;
+  return Math.sqrt( dx * dx + dz * dz );
+}
+
 function moveTowards(
 /**@type {Object3D}*/ obj,
 /**@type {Vector3}*/  dest,
 /**@type {number}*/   dist )
 {
-  if (obj.position.equals(dest)) return true;
-  if (obj.position.distanceTo(dest) <= dist)
+  // undo AdjustYForRiver
+  //obj.position.y = 0;
+
+  if (equalXZ(obj, dest)) return true;
+  if (distanceXZ(obj, dest) <= dist)
   {
     obj.position.copy(dest);
     return true;
@@ -243,6 +258,7 @@ function moveTowards(
   _mov.multiplyScalar(dist);
 
   obj.position.add(_mov);
+
   return false;
 }
 
@@ -372,6 +388,14 @@ export async function SyncLandGeom()
   }
 }
 
+function AdjustYForRiver(/**@type {Object3D}*/ obj)
+{
+  // let's sink the player if he is in the river
+  let objInRiver = (obj.position.x > -2 && obj.position.x < 2) &&
+                   (obj.position.z > 2 || obj.position.z < -2);
+  obj.position.y = objInRiver ? -.15 : 0;
+}
+
 const playerstilltime = .55;
 const mulestilltime = 7;
 
@@ -412,6 +436,9 @@ function AnimatePlayerAndMule(
         cb();
       }
     }
+
+    AdjustYForRiver(playerModel);
+
     // this moves the mule with the player
     if (p.mule != null && p.mule.dest == null)
     {
@@ -431,6 +458,8 @@ function AnimatePlayerAndMule(
       muleModel.rotation.y = Math.atan2(
         dest.x - muleModel.position.x,
         muleModel.position.z - dest.z);
+
+      AdjustYForRiver(muleModel);
     }   
   }
   // this is for mule movement independent of the player
