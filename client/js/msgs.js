@@ -1,7 +1,7 @@
 export * from './msgs_pregame.js';
 import * as t from "./types.js";
 import * as r from "./ren3d.js";
-import { g, ui, send } from "./game.js";
+import { g, ui, send, fakeMouseMove } from "./game.js";
 
 function show(/**@type {HTMLElement}*/e)
 {
@@ -154,7 +154,8 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   }
 
   ui.msg.innerText = "";
-  ui.msgblink.innerText = "";
+  if (!ui.msgblink.innerText.startsWith("You won"))
+    ui.msgblink.innerText = "";
   g.waitingForServerResponse = false;
   g.state = msg.gs;
 
@@ -168,6 +169,7 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   {
     ui.msg.innerText = "Land Grant for month #" + month +
       ". Click on a land lot to claim.";
+    fakeMouseMove();
   }
 
   if (g.state == "IMPROVE")

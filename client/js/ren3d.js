@@ -169,7 +169,7 @@ export function TurnOnMuleLight(/** @type {string}*/playerColor , /** @type {num
 
 function outfittedMuleReturned()
 {
-  ui.msgblink.innerText = "";
+  ui.msgblink.innerText = ""; 
   g.myModel().rotation.y = 0;
   settlementClearOperation();
 }
@@ -517,7 +517,13 @@ function render()
       if (cptarget != cpfar)
         switchCamView(false);
 
-  moveTowards(g.camera, cptarget, delta * 60);
+  let moveCamComplete = moveTowards(g.camera, cptarget, delta * 60);
+  if (g.shouldCallProdReady && moveCamComplete && cptarget == cpfar)
+  {
+    g.setProdReady();
+    g.shouldCallProdReady = false;
+  }
+
   rotateCameraX();
   animFlags(delta);
 
@@ -1190,11 +1196,13 @@ export async function CantinaWinnings(/**@type {t.CantinaResult}*/ msg)
 {
   if (msg.pc == g.myColor)
   {
+    g.startNewProdReadyPromise();
     cantinaSound.play();
     tempBlink("You won (\u20BF)" + msg.winnings + " gambling at the Cantina.", 5500);
     g.waitingForServerResponse = true;
     await sleep(4000);
     switchCamView(false);
+    g.shouldCallProdReady = true;
   }
   
   g.scene.remove(g.models.player[msg.pc]);
@@ -1273,16 +1281,19 @@ export async function addProdUnits(keys)
 
 export async function Production(/**@type {t.Production}*/msg, /**@type {t.ColonyEvent}*/ colonyEvent)
 {
+  await g.readyToShowProduction;
+
   if (colonyEvent.eventType > -1 && colonyEvent.beforeProd)
   {
     ui.msg.innerText = colonyEvent.fullMsg;
     // do sounds?
     // highlight if colonyEvent.lotKey not null?
     // change geom for rad, asteroid
+    await sleep(4000);
   }
   
-  await sleep(6000);
-  addProdUnits(msg.lotKeys);
+  await sleep(1000);
+  await addProdUnits(msg.lotKeys);
   await sleep(2500);
   
   if (colonyEvent.eventType > -1 && !colonyEvent.beforeProd)
@@ -1290,8 +1301,8 @@ export async function Production(/**@type {t.Production}*/msg, /**@type {t.Colon
     ui.msg.innerText = colonyEvent.fullMsg;
     // remove prod units for pest attack, pirates
     // probably highlight for pest attack
+    await sleep(2000);
   }
 
-  await sleep(2000);
   ui.msgblink.innerText = 'Click anywhere to continue.';
 }

@@ -34,6 +34,11 @@ function get3DInitResolver(/** @type { function } */ resolve, /** @type { functi
   mark3DInitialized = resolve;
 }
 
+function developmentEndFunc(/** @type { (function) } */ resolve, /** @type { function } */ unused)
+{
+  g.setProdReady = resolve;
+}
+
 export let g = 
 {
   /** @type {Object.<string, t.Player?>} */ 
@@ -181,6 +186,21 @@ export let g =
   state: "?",
 
   waitingForServerResponse: false,
+
+  /* so the idea here is you call g.startNewProdReadyPromise() at the end of a turn
+     (going to cantina), and await g.readyToShowProduction before showing prod related events.
+     (This allows time for the music to play and the camera to go back to the high view)
+     the camera code will check if g.shouldCallProdReady is set, if so, call
+     g.setProdReady() which will mark g.readyToShowProduction as completed */
+
+  shouldCallProdReady: false,
+  startNewProdReadyPromise: function()
+  { 
+    g.readyToShowProduction = new Promise(developmentEndFunc); 
+    g.shouldCallProdReady = true;
+  },
+  readyToShowProduction: new Promise(developmentEndFunc),
+  setProdReady: new Function(),
 
   /** @type {WebSocket} */ // @ts-ignore
   ws: null,
@@ -449,12 +469,15 @@ function highlightPlot(/**@type {string}*/k)
   }
 }
 
+let rememberX = 0;
+let rememberY = 0;
+
 export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
 {
   if (g.waitingForServerResponse) return;
 
-  let x = mouseEvent.pageX;
-  let y = mouseEvent.pageY;
+  let x = rememberX = mouseEvent.pageX;
+  let y = rememberY = mouseEvent.pageY;
 
   x *= window.devicePixelRatio;
   y *= window.devicePixelRatio;
@@ -483,6 +506,14 @@ export function mouseMove(/**@type {PointerEvent}*/ mouseEvent)
   }
 }
 
+export function fakeMouseMove()
+{
+  let e = { ... new PointerEvent("pointermove") };
+  e.pageX = rememberX;
+  e.pageY = rememberY;
+  mouseMove(e);
+}
+
 function llocolor(/**@type {string}*/s)
 {
   if (s=="R") return 0xff0000;
@@ -495,8 +526,8 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
 {
   if (g.waitingForServerResponse) return;
 
-  let x = mouseEvent.pageX;
-  let y = mouseEvent.pageY;
+  let x = rememberX = mouseEvent.pageX;
+  let y = rememberY = mouseEvent.pageY;
 
   x *= window.devicePixelRatio;
   y *= window.devicePixelRatio;
@@ -658,7 +689,7 @@ export function slide(/**@type {PointerEvent}*/e)
   }
   slider.style.top = '';
   slider.style.bottom = ((targ - g.minBid) * 2 / g.bidIncr + 11) + '%';
-  //console.log(slider.style.bottom);
+
   if (targ == g.passVal) 
   { 
     t.innerText = 'Target: Pass'; 
