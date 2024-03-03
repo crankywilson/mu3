@@ -30,7 +30,7 @@ class Game
   [JsonInclude] public GameState       state     = GameState.WAITINGFORALLJOIN;
   [JsonInclude] public int             mules     = 14;
   [JsonInclude] public int             mulePrice = 100;
-  [JsonInclude] public int[]           resPrice  = new int[4] { 15, 10, 40, 100 };
+  [JsonInclude] public int[]           resPrice  = { 15, 10, 40, 100, 0 };
        public HashSet<LandLotID> plLotsToAuction = new();
 
   List<int> possibleColonyEvents = new(){-1,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,-1};
@@ -306,6 +306,8 @@ class Game
 
   public void AnnounceLandAuction()
   {
+    auctionType = LAND;
+
     if (playerLotsForAuction.Count > 0)
       currentLotForAuction = Pop(playerLotsForAuction);
     else

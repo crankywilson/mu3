@@ -34,7 +34,7 @@ class Player
   [JsonInclude] public string       name    = "";
   [JsonInclude] public string       ip      = "?";
   [JsonInclude] public int          money   = 1000;
-  [JsonInclude] public int[]        res     = new[]{ 5, 2, 0, 0 };
+  [JsonInclude] public int[]        res     = new[]{ 5, 2, 0, 0, 0 };
   [JsonInclude] public PlayerColor  color   = PlayerColor.NONE;
   [JsonInclude] public bool         isBot   = false;
   [JsonInclude] public PlayerColor  colrReq = PlayerColor.NONE;
