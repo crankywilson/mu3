@@ -199,7 +199,7 @@ export let g =
     g.readyToShowProduction = new Promise(developmentEndFunc); 
     g.shouldCallProdReady = true;
   },
-  readyToShowProduction: new Promise(developmentEndFunc),
+  readyToShowProduction: new Promise((_res, _rej) => {}),
   setProdReady: new Function(),
 
   /** @type {WebSocket} */ // @ts-ignore
@@ -627,7 +627,7 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
     }
     return;
   }
-  else if (g.state == "PROD")
+  else if (g.state == "PROD" || g.state == "SHOWLANDFORSALE")
   {
     ui.msgblink.innerText = "";
     g.waitingForServerResponse = true;

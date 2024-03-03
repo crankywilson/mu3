@@ -534,6 +534,13 @@ function render()
     AnimatePlayerAndMule(p, c, delta);
   }
 
+  if (g.state == 'SHOWLANDFORSALE' && g.landlotOverlay != null)
+  { 
+    let m = g.landlotOverlay.material;
+    if (m instanceof THREE.MeshPhongMaterial)
+      m.opacity = Math.floor(g.clock.elapsedTime * 2) % 2 ? .5 : .2;
+  }
+
   g.renderer.render( g.scene, g.camera );
 }
 

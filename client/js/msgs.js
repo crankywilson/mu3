@@ -1,7 +1,7 @@
 export * from './msgs_pregame.js';
 import * as t from "./types.js";
 import * as r from "./ren3d.js";
-import { g, ui, send, fakeMouseMove } from "./game.js";
+import { g, ui, send, fakeMouseMove, LandLotStr } from "./game.js";
 
 function show(/**@type {HTMLElement}*/e)
 {
@@ -770,6 +770,15 @@ export function Res(/**@type {t.Res}*/m)
   {
     ui.storeunits.innerText = m.res.toString();
   }
+}
+
+export function LotAuction(/**@type {t.LotAuction}*/ l)
+{
+  ui.msg.innerText = "Lot " + LandLotStr(l.e, l.n) + " for sale.";
+  ui.msgblink.innerText = 'Click anywhere to continue.'; 
+  g.landlotOverlay.position.x = l.e * 4;
+  g.landlotOverlay.position.z = l.n * -4;
+  g.landlotOverlay.visible = true;
 }
 
 

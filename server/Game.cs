@@ -10,7 +10,7 @@ enum GameState {
   /*GS*/ WAITINGFORALLJOIN      ,
   /*GS*/ SCORE                  ,
   /*GS*/ LANDGRANT              ,
-  /*GS*/ WAITINGFORLANDAUCTION  ,
+  /*GS*/ SHOWLANDFORSALE        ,
   /*GS*/ LANDAUCTION            ,
   /*GS*/ PLAYEREVENT            ,
   /*GS*/ IMPROVE                ,
@@ -268,6 +268,53 @@ class Game
     }
   }
 
+  List<LandLotID> playerLotsForAuction = new();
+  List<LandLotID> colonyLotsForAuction = new();
+  LandLotID currentLotForAuction = new();
+  
+  public int GetNumberOfAuctionPlots()
+  {
+    if (state == GameState.LANDGRANT)
+    {
+      List<LandLotID> potentialLotsForAuction = new();
+      foreach (var (k,lot) in landlots)
+        if (lot.owner is null) potentialLotsForAuction.Add(k);
+
+      int numColonyLots = 0;
+      int r = 3;//rand.Next(10);
+      if (r >= 8) numColonyLots = 2;
+      else if (r >= 2) numColonyLots = 1;
+      while (numColonyLots > 0 && potentialLotsForAuction.Count > 0)
+      {
+        var l = potentialLotsForAuction;
+        LandLotID k = l[rand.Next(l.Count)];
+        colonyLotsForAuction.Add(k);
+        l.Remove(k);
+        numColonyLots--;
+      }
+    }
+
+    return playerLotsForAuction.Count + colonyLotsForAuction.Count;
+  }  
+
+  LandLotID Pop(List<LandLotID> l)
+  {
+    LandLotID k = l[0];
+    l.RemoveAt(0);
+    return k;
+  }
+
+  public void AnnounceLandAuction()
+  {
+    if (playerLotsForAuction.Count > 0)
+      currentLotForAuction = Pop(playerLotsForAuction);
+    else
+      currentLotForAuction = Pop(colonyLotsForAuction);
+    
+    UpdateGameState(GameState.SHOWLANDFORSALE);
+    send(new LotAuction(currentLotForAuction.e, currentLotForAuction.n));
+  }
+
   public void UpdateGameState(GameState gs)
   {
     state = gs;
@@ -465,6 +512,8 @@ class Game
       DistributeCrystitie(k, 3);
     }
 
+    landlots.Remove(new LandLotID(0,0));
+
     colony.game = this;
     colony.color = PlayerColor.COLONY;
     colony.rank = 0;
@@ -473,8 +522,9 @@ class Game
     UpdateScores();
     state = GameState.SCORE;
     send(new CurrentGameState(this));
+
     // BMW get rid of this when done auction dev:
-    // StartNextAuctionPrep();
+    // StartNextAuctionPrep(); // could put any init state here...
   }
 
   public void UpdateScores()

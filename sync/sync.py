@@ -16,6 +16,7 @@ typemappings = {
   'string': 'string',
   'bool': 'boolean',
   'PlayerColor': 'string',
+  'LandLotID': 'string'
 }
 
 types = {}

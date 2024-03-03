@@ -24,6 +24,11 @@
  @property {Player} p
  @property {string} _mt
 
+@typedef LotAuction
+ @property {number} e
+ @property {number} n
+ @property {string} _mt
+
 @typedef ClaimLot
  @property {number} e
  @property {number} n
@@ -380,7 +385,7 @@
  'WAITINGFORALLJOIN'|
  'SCORE'|
  'LANDGRANT'|
- 'WAITINGFORLANDAUCTION'|
+ 'SHOWLANDFORSALE'|
  'LANDAUCTION'|
  'PLAYEREVENT'|
  'IMPROVE'|
@@ -396,7 +401,7 @@ export let GAMESTATE = {
  WAITINGFORALLJOIN: "WAITINGFORALLJOIN",
  SCORE: "SCORE",
  LANDGRANT: "LANDGRANT",
- WAITINGFORLANDAUCTION: "WAITINGFORLANDAUCTION",
+ SHOWLANDFORSALE: "SHOWLANDFORSALE",
  LANDAUCTION: "LANDAUCTION",
  PLAYEREVENT: "PLAYEREVENT",
  IMPROVE: "IMPROVE",

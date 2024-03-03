@@ -398,7 +398,7 @@ partial class Game
     if (param is UpdateBids)
     {
       UpdateBids updBidsEvt = (UpdateBids)param;
-      if (false) // !init && (activeTrade is null)
+      if (!init && (activeTrade is null))
       {
         if (!bidChangeThisCycle)
           auctionTime -= 200;

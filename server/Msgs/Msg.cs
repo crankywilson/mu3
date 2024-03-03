@@ -31,10 +31,19 @@ record Continue (
         case GameState.SCORE:
           g.UpdateGameState(GameState.LANDGRANT); break;
         case GameState.LANDGRANT:
-          // possible auction... or...
-          g.UpdateGameState(GameState.PLAYEREVENT); break;
+          if (g.GetNumberOfAuctionPlots() > 0)
+            g.AnnounceLandAuction();
+          else
+            g.UpdateGameState(GameState.PLAYEREVENT); 
+          break;
+        case GameState.SHOWLANDFORSALE:
+          g.StartAuction(); break;
         case GameState.LANDAUCTION:
-          g.UpdateGameState(GameState.PLAYEREVENT); break;
+          if (g.GetNumberOfAuctionPlots() > 0)
+            g.AnnounceLandAuction();
+          else
+           g.UpdateGameState(GameState.PLAYEREVENT); 
+          break;
         case GameState.PLAYEREVENT:
           g.UpdateGameState(GameState.IMPROVE); break;
         case GameState.IMPROVE:
@@ -62,6 +71,11 @@ record CurrentGameState (
 record PlayerRejoined (
   Player p
 ) : Msg;
+
+record LotAuction (
+  int e,
+  int n
+ ) : Msg;
 
 record ClaimLot (
   int e,
