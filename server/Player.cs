@@ -45,8 +45,8 @@ class Player
   [JsonInclude] public Dest?        dest    = null;
   [JsonInclude] public MuleData?    mule    = null;
 
-  [JsonInclude] public int          rank    = 1;
-  
+  [JsonInclude] public int          rank    = 1;  // probably should be called 'place'
+                                                  // lowest ranked player is in the lead
   public int  criticalLevel   = 0;
   public bool buying          = true;
   public int  target          = 0;

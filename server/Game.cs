@@ -281,7 +281,7 @@ class Game
         if (lot.owner is null) potentialLotsForAuction.Add(k);
 
       int numColonyLots = 0;
-      int r = 3;//rand.Next(10);
+      int r = rand.Next(10);
       if (r >= 8) numColonyLots = 2;
       else if (r >= 2) numColonyLots = 1;
       while (numColonyLots > 0 && potentialLotsForAuction.Count > 0)
@@ -338,7 +338,10 @@ class Game
     send(new UpdateGameState(gs));
 
     if (gs == GameState.PLAYEREVENT)
-      SendPlayerEvents();      
+    {
+      auctionType = -1;
+      SendPlayerEvents();    
+    }  
   }
   
   public void StartNextAuctionPrep()

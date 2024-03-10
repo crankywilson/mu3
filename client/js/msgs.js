@@ -153,6 +153,12 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
     spans[NAMESPAN].style.color = 'white';
   }
 
+  TradeEnd();
+  hide(ui.time(g.myColor));
+
+  g.prodGroup.children
+  g.prodGroup.clear();
+
   ui.msg.innerText = "";
   if (!ui.msgblink.innerText.startsWith("You won"))
     ui.msgblink.innerText = "";
@@ -709,8 +715,54 @@ export function TradeEnd(/**@type {t.TradeEnd}*/m)
   r.beep();
  }
 
+ export function CurrentLeader(/**@type {t.CurrentLeader}*/m)
+ {
+  if (m.anyBidders)
+  {
+    if (ui.cb(m.p).className != 'trading')
+    {
+      TradeEnd();
+      ui.cb(m.p).className = 'trading';
+    }
+  }
+  else
+  {
+    TradeEnd();
+  }
+ }
+
  export function AuctionTime(/**@type {t.AuctionTime}*/m)
  {
+   let timeEl = ui.time(g.myColor);
+   show(timeEl);
+   timeEl.style.width = (m.num * 100) + "%";
+ }
+
+ export function AuctionResult(/**@type {t.AuctionResult}*/m)
+ {
+    hide(ui.aucdone);
+    hide(ui.target);
+    hide(ui.targetval);
+    hide(ui.targetline);
+    hide(ui.time(g.myColor));
+
+    let mat = g.landlotOverlay.material;
+    // @ts-ignore
+    mat.opacity =.5;
+    g.landlotOverlay.visible = false;
+
+    if (m.sold)
+    {
+      ui.msg.innerText = "Lot sold";
+      r.ClaimLot(m.winner, m.lot);
+      setPlboxSpanText(m.winner, MONEYSPAN, m.newMoney);
+    }
+    else if (ui.aname.innerText.startsWith("LAND"))
+    {
+      ui.msg.innerText = "Lot didn't sell.";
+    }
+
+    new Audio("/sound/bell.mp3").play();
  }
 
 export function ConfirmTrade(/**@type {t.ConfirmTrade}*/m)
@@ -789,6 +841,7 @@ export function LotAuction(/**@type {t.LotAuction}*/ l)
   g.landlotOverlay.position.x = l.e * 4;
   g.landlotOverlay.position.z = l.n * -4;
   g.landlotOverlay.visible = true;
+  hide(ui.aucdone);
 }
 
 

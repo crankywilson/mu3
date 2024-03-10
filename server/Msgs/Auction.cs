@@ -117,6 +117,17 @@ record AuctionTime (
   double num
 ) : Msg;
 
+record CurrentLeader (
+  bool anyBidders,
+  PlayerColor p
+) : Msg;
+
+record AuctionResult (
+  bool sold,
+  PlayerColor winner,
+  int newMoney,
+  LandLotID lot
+) : Msg;
 
 record TradeConfirmed (
   int tradeID
@@ -393,7 +404,10 @@ partial class Game
     if (bidChangeThisCycle || param is Player || init)
       sendBids(lowestSellPrice, highestBuyPrice);
 
-    startNewTradeIfNeeded(lowestSellPrice, highestBuyPrice);
+    if (auctionType == LAND)
+      sendCurrentLeader(highestBuyPrice);
+    else
+      startNewTradeIfNeeded(lowestSellPrice, highestBuyPrice);
 
     if (param is UpdateBids)
     {
@@ -414,8 +428,41 @@ partial class Game
       }
       else
       {
-        Console.WriteLine("Time's up!");
-        Environment.Exit(0); 
+        if (auctionType == LAND)
+        {
+          state = GameState.LANDAUCTION;  // I don't know how this got set to normal auction...
+
+          Player winner = sendCurrentLeader(highestBuyPrice);
+
+          if (winner != colony)
+          {
+            landlots[currentLotForAuction].owner = winner.color;
+            winner.money -= highestBuyPrice;
+          }
+
+          send(new AuctionResult(winner != colony, 
+                                 winner.color, winner.money,
+                                 currentLotForAuction));
+        }
+        else
+          send(new AuctionResult(false, PlayerColor.NONE, 0, new LandLotID(0,0)));
+
+        Thread.Sleep(3000);
+
+        if ((state != GameState.AUCTION && state != GameState.LANDAUCTION)
+            || (auctionType != updBidsEvt.auctionType))
+        return;  // this should effectively end the loop for updBidsEvt
+
+        List<Player> contPlayers = new();
+
+        foreach (Player p in players)
+        {
+          if (!continueRecvd.Contains(p.color))
+            contPlayers.Add(p);
+        }
+
+        foreach (Player p in contPlayers)
+          new Continue().OnRecv(p, this);
       }
     }
   }
@@ -431,6 +478,22 @@ partial class Game
     }
 
     send(new Bids(curBids, lowestSellPrice, highestBuyPrice, storeBuy, minBid));
+  }
+
+  public Player sendCurrentLeader(int highestBuyPrice)
+  {
+    if (highestBuyPrice == BUY)
+    {
+      send(new CurrentLeader(false, PlayerColor.NONE));
+      return colony;
+    }
+
+    Player buyer = colony;
+    foreach (Player p in players)
+      if (p.buying && p.current == highestBuyPrice && p.rank > buyer.rank) 
+        buyer = p; 
+    send(new CurrentLeader(buyer.color != PlayerColor.COLONY, buyer.color));
+    return buyer;
   }
 
   public void startNewTradeIfNeeded(int lowestSellPrice, int highestBuyPrice)

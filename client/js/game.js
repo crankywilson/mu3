@@ -219,7 +219,7 @@ export let g =
   selloffers: true,
   target: 0,
   curbid: 0,
-  auctionRes: ""
+  auctionRes: "",
 };
 
 export function send(/**@type {t.Msg}*/ msg)
@@ -330,9 +330,13 @@ export let ui =
   target: div('target'),
   targetval: div('targetval'),
   rplbox: div('rplbox'),
+  rtime: e('rtime'),
   yplbox: div('yplbox'),
+  ytime: e('ytime'),
   gplbox: div('gplbox'),
+  gtime: e('gtime'),
   bplbox: div('bplbox'),
+  btime: e('btime'),
   msg: e('msg'),
   msgblink: e('msgblink'),
   availgamesdiv: div('availgamesdiv'),
@@ -403,6 +407,7 @@ export let ui =
   cbl: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rcbl; if (clr == 'Y') return ui.ycbl; if (clr == 'G') return ui.gcbl; return ui.bcbl; },
   cbv: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rcbv; if (clr == 'Y') return ui.ycbv; if (clr == 'G') return ui.gcbv; return ui.bcbv; },
   plbox: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rplbox; if (clr == 'Y') return ui.yplbox; if (clr == 'G') return ui.gplbox; return ui.bplbox; },
+  time: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rtime; if (clr == 'Y') return ui.ytime; if (clr == 'G') return ui.gtime; return ui.btime; },
   col: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rcol; if (clr == 'Y') return ui.ycol; if (clr == 'G') return ui.gcol; return ui.bcol; },
   namespan: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rnamespan; if (clr == 'Y') return ui.ynamespan; if (clr == 'G') return ui.gnamespan; return ui.bnamespan; },
   nameinput: function(/**@type {string}*/clr) { if (clr == 'R') return ui.rnameinput; if (clr == 'Y') return ui.ynameinput; if (clr == 'G') return ui.gnameinput; return ui.bnameinput; },

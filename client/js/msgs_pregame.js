@@ -40,7 +40,7 @@ export function JoinedGameStats(/**@type {t.JoinedGameStats}*/ msg)
 
   let switchedColor = (g.myColor != msg.currentColor);
   g.myColor = msg.currentColor;
-  
+
   for (let c of ['R','Y','G','B'])
   {
     ui.namespan(c).innerText = "";

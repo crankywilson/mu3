@@ -265,6 +265,18 @@
  @property {number} num
  @property {string} _mt
 
+@typedef CurrentLeader
+ @property {boolean} anyBidders
+ @property {string} p
+ @property {string} _mt
+
+@typedef AuctionResult
+ @property {boolean} sold
+ @property {string} winner
+ @property {number} newMoney
+ @property {string} lot
+ @property {string} _mt
+
 @typedef TradeConfirmed
  @property {number} tradeID
  @property {string} _mt
