@@ -30,7 +30,7 @@ class Game
   [JsonInclude] public GameState       state     = GameState.WAITINGFORALLJOIN;
   [JsonInclude] public int             mules     = 14;
   [JsonInclude] public int             mulePrice = 100;
-  [JsonInclude] public int[]           resPrice  = { 15, 10, 40, 100, 0 };
+  [JsonInclude] public int[]           resPrice  = { 15, 10, 40, 100, 500 };
        public HashSet<LandLotID> plLotsToAuction = new();
 
   List<int> possibleColonyEvents = new(){-1,0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7,0,1,2,3,-1};
@@ -314,6 +314,21 @@ class Game
       currentLotForAuction = Pop(colonyLotsForAuction);
     
     UpdateGameState(GameState.SHOWLANDFORSALE);
+    auctionType = LAND;
+    bidIncrement = 4;
+
+    minBid = 500;
+    maxBid = minBid + 35 * 4;
+
+    send(new CurrentAuction(auctionType, month, 
+        resPrice[auctionType], colony.res[auctionType]));
+
+    foreach (var p in players)
+    {
+      p.buying = true;
+      send(new BuySell(p.color, true));
+    }
+
     send(new LotAuction(currentLotForAuction.e, currentLotForAuction.n));
   }
 
@@ -344,6 +359,7 @@ class Game
     }
 
     auctionType++;
+    bidIncrement = (auctionType >= CRYSTITE) ? 4 : 1;
     int amtFoodNeeded = AmountFoodNeeded(month + 1);
 
     foreach (var p in players)

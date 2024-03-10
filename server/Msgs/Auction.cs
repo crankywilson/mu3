@@ -408,7 +408,15 @@ partial class Game
 
       send(new AuctionTime(auctionTime/5000.0));
       if (auctionTime > 0) 
+      {
+        Console.WriteLine($"auction time: {auctionTime}");
         updBidsEvt.Schedule(250, this);
+      }
+      else
+      {
+        Console.WriteLine("Time's up!");
+        Environment.Exit(0); 
+      }
     }
   }
 
@@ -452,6 +460,8 @@ partial class Game
   {
     auctionTime = 5000;
 
+    storeBuy = (auctionType < 4);
+    
     foreach (var p in players)
     {
       if (p.buying)

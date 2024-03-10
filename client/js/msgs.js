@@ -498,7 +498,15 @@ export function CurrentAuction(/**@type {t.CurrentAuction}*/ msg)
   if (msg.auctionType == 1) ui.aname.innerText = "ENERGY Auction";
   if (msg.auctionType == 2) ui.aname.innerText = "SMITHORE Auction";
   if (msg.auctionType == 3) ui.aname.innerText = "CRYSTITE Auction";
-  if (msg.auctionType == 4) ui.aname.innerText = "LAND Auction";
+  if (msg.auctionType == 4) 
+  {
+    ui.aname.innerText = "LAND Auction";
+    hide(ui.aucsell);
+    hide(ui.aucbuy);
+    hide(ui.storebuy);
+    hide(ui.storebuy1);
+  }
+
   ui.mnum.innerText = msg.month.toString();
 
 
@@ -528,6 +536,7 @@ export function CurrentAuction(/**@type {t.CurrentAuction}*/ msg)
   g.minBid = msg.resPrice;
   ui.storebuyprice.innerText = g.minBid.toString();
   g.maxBid = g.minBid + 35;
+  g.bidIncr = msg.auctionType > 2 ? 4 : 1;
   if (msg.avail < 1)
     g.maxBid = -1; 
   else
@@ -556,7 +565,7 @@ export function BuySell(/**@type {t.BuySell}*/msg)
     {
       ui.target.style.bottom = "5%";
       ui.aucbuy.style.visibility = "hidden";
-      ui.aucsell.style.visibility = "inherit";
+      ui.aucsell.style.visibility = g.auctionRes.length ? "inherit" : "hidden";
       g.buying = true;
       ui.targetval.innerText = "(Drag)";
     }
@@ -762,7 +771,8 @@ export function Res(/**@type {t.Res}*/m)
   {
     let suffix = '';
     if (m.needed > m.res) suffix = ' [/ ' + m.needed + ']';
-    setPlboxSpanText(m.pc, BOTTOMSPAN, m.label + ": " + m.res + suffix);
+    if (m.label.length > 0)
+      setPlboxSpanText(m.pc, BOTTOMSPAN, m.label + ": " + m.res + suffix);
     setPlboxSpanText(m.pc, MONEYSPAN, m.money);
   }
 
