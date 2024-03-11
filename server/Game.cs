@@ -395,6 +395,8 @@ class Game
 
     minBid = resPrice[auctionType];
     maxBid = minBid + 35;
+    if (auctionType == CRYSTITE)
+      maxBid += 35 * 3;
     
     send(new CurrentAuction(auctionType, month, 
         resPrice[auctionType], colony.res[auctionType]));

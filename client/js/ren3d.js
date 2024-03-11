@@ -1396,15 +1396,8 @@ export async function Production(/**@type {t.Production}*/msg, /**@type {t.Colon
       }
     }
 
-    if (colonyEvent.eventType == 7 /* PIRATES */ && colonyEvent.lotKey != null)
-    {
-      let e = getE(colonyEvent.lotKey);
-      let n = getN(colonyEvent.lotKey);
-      if (e > -5 && e < 5 && n > -3 && n < 3) {
-        g.landlotOverlay.visible = true;
-        g.landlotOverlay.position.set(e * 4, .01, n * -4);
-      }
-      
+    if (colonyEvent.eventType == 7 /* PIRATES */)
+    {   
       let children = [...g.prodGroup.children];
       for (let ch of children)
       {
