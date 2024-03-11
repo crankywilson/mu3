@@ -1,3 +1,19 @@
+record StartTimer (
+  int pct,
+  int fullTimeMilliSecs
+) : Msg;
+
+record TimeUp (
+  PlayerColor pc
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    p.send(this);
+    p.mule = null;
+    new Continue().OnRecv(p, g);
+  }
+}
 
 record MuleRequest (
 ) : Msg

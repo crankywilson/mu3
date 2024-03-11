@@ -207,6 +207,9 @@ export let g =
 
   init3DComplete: new Promise(get3DInitResolver),
 
+  developStopTime: 0,
+  developStartTime: 0,
+
   /* Auction stuff */
   minBid: 10,
   bidIncr: 1,

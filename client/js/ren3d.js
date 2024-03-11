@@ -87,6 +87,9 @@ function nowInBottomBuilding()
   if (currentOp == "Cantina")
   {
     send(t.Cantina());
+    g.developStopTime = 0;
+    g.developStartTime = 0;
+    ui.time(g.myColor).style.visibility = "hidden";
     return;
   }
 
@@ -504,6 +507,45 @@ function animFlags(/**@type {number}*/delta)
     flagMixer[k].update(delta);
 }
 
+export function removePlayerAndMule(/**@type {string}*/pc)
+{
+  g.scene.remove(g.models.player[pc]);
+  let p = g.players[pc];
+  if (p == null) return;
+  let mule = p.mule;
+  if (mule != null) {
+    p.mule = null;
+    g.scene.remove(g.models.playerMule[pc]);
+  }
+}
+
+function handleTimer()
+{
+  let tt = ui.time(g.myColor);
+  let now = Date.now();
+  let msRemaining = g.developStopTime - now;
+  if (msRemaining <= 0)
+  {
+    g.developStopTime = 0;
+    g.developStartTime = 0;
+    g.waitingForServerResponse = true;
+    g.landlotOverlay.visible = false;
+    tt.style.visibility = "hidden";
+    g.startNewProdReadyPromise();
+    g.setProdReady();
+    removePlayerAndMule(g.myColor);
+    switchCamView(false);
+    g.destCallback = null;
+    bell.play();
+    tempBlink("You have run out of time.", 4000); 
+    send(t.TimeUp(g.myColor));
+    return;
+  }
+
+  tt.style.visibility = "visible";
+  tt.style.width = (g.developStopTime - now) * 100 / (g.developStopTime - g.developStartTime) + "%";
+}
+
 function render()
 {
   if (!readyToRender) return;
@@ -526,6 +568,9 @@ function render()
 
   rotateCameraX();
   animFlags(delta);
+
+  if (g.developStopTime > 0)
+    handleTimer();
 
   for (let c in g.players)
   {
@@ -1198,6 +1243,7 @@ export function sellMuleConfirmed()
 
 
 let cantinaSound = new Audio("/sound/cantina.mp3");
+let bell = new Audio("/sound/bell.mp3");
 
 export async function CantinaWinnings(/**@type {t.CantinaResult}*/ msg)
 {

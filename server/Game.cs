@@ -304,6 +304,19 @@ class Game
     return k;
   }
 
+  public void StartImproveTimer()
+  {
+    int fullFood = AmountFoodNeeded(month);
+    int pct;
+
+    foreach (Player p in players)
+    {
+      if (p.res[FOOD] >= fullFood) pct = 100;
+      else pct = 100 * (p.res[FOOD] + 1) / (fullFood + 1);
+      send(new StartTimer(pct, 30000));
+    }
+  }
+
   public void AnnounceLandAuction()
   {
     auctionType = LAND;

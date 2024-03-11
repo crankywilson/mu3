@@ -66,6 +66,15 @@
  @property {string[]} lotKeys
  @property {string} _mt
 
+@typedef StartTimer
+ @property {number} pct
+ @property {number} fullTimeMilliSecs
+ @property {string} _mt
+
+@typedef TimeUp
+ @property {string} pc
+ @property {string} _mt
+
 @typedef MuleRequest
  @property {string} _mt
 
@@ -430,6 +439,11 @@ export let GAMESTATE = {
  /**@type {number}*/ n,
 ) { return { _mt: 'ClaimLot' , e: e
  , n: n
+};}
+
+/**@returns {TimeUp}*/ export function TimeUp(
+ /**@type {string}*/ pc,
+) { return { _mt: 'TimeUp' , pc: pc
 };}
 
 /**@returns {MuleRequest}*/ export function MuleRequest(

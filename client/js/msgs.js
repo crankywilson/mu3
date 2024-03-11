@@ -145,6 +145,13 @@ export function PlayerRejoined(/**@type {t.PlayerRejoined}*/ msg)
 {
 }
 
+export function StartTimer(/**@type {t.StartTimer}*/ msg)
+{
+  let now = Date.now();
+  g.developStopTime = now + ((msg.pct / 100) * msg.fullTimeMilliSecs);
+  g.developStartTime = g.developStopTime - msg.fullTimeMilliSecs;
+}
+
 export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
 {
   for (let p in g.players)  // this include non-playing players, but it doesn't matter
@@ -366,6 +373,11 @@ export function CantinaResult(/**@type {t.CantinaResult}*/msg)
   let spans = ui.plbox(msg.pc).getElementsByTagName('span');
   spans[MONEYSPAN].innerText = msg.newMoney.toString();
   ShowWaiting(msg);
+}
+
+export function TimeUp(/**@type {t.TimeUp}*/msg)
+{
+  r.removePlayerAndMule(msg.pc);
 }
 
 export function ShowWaiting(/**@type {t.ShowWaiting}*/msg)

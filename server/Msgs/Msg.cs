@@ -45,7 +45,9 @@ record Continue (
            g.UpdateGameState(GameState.PLAYEREVENT); 
           break;
         case GameState.PLAYEREVENT:
-          g.UpdateGameState(GameState.IMPROVE); break;
+          g.UpdateGameState(GameState.IMPROVE); 
+          g.StartImproveTimer();
+          break;
         case GameState.IMPROVE:
           g.UpdateGameState(GameState.PROD); g.DoProduction(); break;
         case GameState.PROD:
