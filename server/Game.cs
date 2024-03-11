@@ -281,7 +281,7 @@ class Game
         if (lot.owner is null) potentialLotsForAuction.Add(k);
 
       int numColonyLots = 0;
-      int r = rand.Next(10);
+      int r = 0;// BMW rand.Next(10);
       if (r >= 8) numColonyLots = 2;
       else if (r >= 2) numColonyLots = 1;
       while (numColonyLots > 0 && potentialLotsForAuction.Count > 0)
@@ -659,7 +659,7 @@ class Game
       for (int i=0; i<4; i++)
         p.startingRes[i] = p.res[i];
 
-      p.used[FOOD] -= Math.Min(amtFoodNeeded, p.res[FOOD]);
+      p.used[FOOD] = Math.Min(amtFoodNeeded, p.res[FOOD]);
       p.res[FOOD] -= p.used[FOOD];
       p.spoiled[FOOD] = p.res[FOOD] / 2;
       p.res[FOOD] -= p.spoiled[FOOD];

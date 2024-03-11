@@ -162,12 +162,11 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
 
   TradeEnd();
   hide(ui.time(g.myColor));
-
-  g.prodGroup.children
   g.prodGroup.clear();
 
   ui.msg.innerText = "";
-  if (!ui.msgblink.innerText.startsWith("You won"))
+  if (!ui.msgblink.innerText.startsWith("You won") && 
+      !ui.msgblink.innerText.includes("time"))
     ui.msgblink.innerText = "";
   g.waitingForServerResponse = false;
   g.state = msg.gs;
@@ -502,7 +501,7 @@ export function PreAuctionStat(/**@type {t.PreAuctionStat}*/ msg)
   else
   {
     ui.sl(msg.pc).innerText = "SHORTAGE:";
-    ui.surplus(msg.pc).innerHTML = "&nbsp;&nbsp - " + msg.surplus + " &nbsp;&nbsp; ";
+    ui.surplus(msg.pc).innerHTML = "&nbsp;&nbsp " + msg.surplus + " &nbsp;&nbsp; ";
     ui.surplus(msg.pc).style.backgroundColor = "red";
   }
 

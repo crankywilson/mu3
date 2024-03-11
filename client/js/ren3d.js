@@ -1320,6 +1320,7 @@ export async function addProdUnits(keys)
     let box = new THREE.BoxGeometry(.2,.2,.2);
     let mesh = new THREE.Mesh(box, g.materials.lotColor[pc]);
     mesh.userData = g.landlots[k];
+    mesh.userData["lotKey"] = k;
     g.prodGroup.add(mesh);
     
     if (prodCounts[k] == undefined)
@@ -1340,20 +1341,47 @@ export async function Production(/**@type {t.Production}*/msg, /**@type {t.Colon
   {
     ui.msg.innerText = colonyEvent.fullMsg;
     // do sounds?
-    // highlight if colonyEvent.lotKey not null?
+    
+    if (colonyEvent.lotKey != null)
+    {
+      let e = getE(colonyEvent.lotKey);
+      let n = getN(colonyEvent.lotKey);
+      if (e > -5 && e < 5 && n > -3 && n < 3) {
+        g.landlotOverlay.visible = true;
+        g.landlotOverlay.position.set(e * 4, .01, n * -4);
+      }
+    }
+
     // change geom for rad, asteroid
-    await sleep(4000);
+    await sleep(2000);
   }
   
   await sleep(1000);
   await addProdUnits(msg.lotKeys);
-  await sleep(2500);
+  await sleep(1500);
   
   if (colonyEvent.eventType > -1 && !colonyEvent.beforeProd)
   {
     ui.msg.innerText = colonyEvent.fullMsg;
     // remove prod units for pest attack, pirates
-    // probably highlight for pest attack
+    
+    if (colonyEvent.eventType == 1 /* PEST */ && colonyEvent.lotKey != null)
+    {
+      let e = getE(colonyEvent.lotKey);
+      let n = getN(colonyEvent.lotKey);
+      if (e > -5 && e < 5 && n > -3 && n < 3) {
+        g.landlotOverlay.visible = true;
+        g.landlotOverlay.position.set(e * 4, .01, n * -4);
+      }
+      
+      let children = [...g.prodGroup.children];
+      for (let ch of children)
+      {
+        if (ch.userData["lotKey"] == colonyEvent.lotKey)
+          g.prodGroup.remove(ch);
+      }
+    }
+
     await sleep(2000);
   }
 
