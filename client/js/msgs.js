@@ -81,6 +81,7 @@ function showScores(/**@type {t.Player[]}*/ players, /**@type {number}*/ month)
 
   ui.msgblink.innerText = 'Click anywhere to continue.';
 
+  g.landlotOverlay.visible = false;
   g.prepSound.play();
 }
 
@@ -194,7 +195,11 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   }
 
   if (g.state == "PLAYEREVENT" || g.state == "PROD")
+  {
     g.markers.clear();
+    if (g.state == "PROD")
+      g.didProd = false;
+  }
 
   if (g.state == "PLAYEREVENT")
   {

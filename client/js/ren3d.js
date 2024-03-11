@@ -1352,7 +1352,21 @@ export async function Production(/**@type {t.Production}*/msg, /**@type {t.Colon
       }
     }
 
-    // change geom for rad, asteroid
+    /* asteroid, radiation */
+    if (colonyEvent.eventType == 5 || colonyEvent.eventType == 6)
+    {
+      if (colonyEvent.lotKey != null)
+      {
+        deleteLandModelIfExists(
+          LandLotStr(getE(colonyEvent.lotKey),
+            getN(colonyEvent.lotKey)));
+        g.landlots[colonyEvent.lotKey].res = -1;
+        let e = getE(colonyEvent.lotKey);
+        let n = getN(colonyEvent.lotKey);
+        syncLinesFlags(e, n);
+      }
+    }
+
     await sleep(2000);
   }
   
@@ -1382,8 +1396,26 @@ export async function Production(/**@type {t.Production}*/msg, /**@type {t.Colon
       }
     }
 
+    if (colonyEvent.eventType == 7 /* PIRATES */ && colonyEvent.lotKey != null)
+    {
+      let e = getE(colonyEvent.lotKey);
+      let n = getN(colonyEvent.lotKey);
+      if (e > -5 && e < 5 && n > -3 && n < 3) {
+        g.landlotOverlay.visible = true;
+        g.landlotOverlay.position.set(e * 4, .01, n * -4);
+      }
+      
+      let children = [...g.prodGroup.children];
+      for (let ch of children)
+      {
+        if (ch.userData["res"] == 3 /* CRYSTITE */)
+          g.prodGroup.remove(ch);
+      }
+    }
+
     await sleep(2000);
   }
 
   ui.msgblink.innerText = 'Click anywhere to continue.';
+  g.didProd = true;
 }

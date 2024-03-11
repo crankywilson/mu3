@@ -281,7 +281,7 @@ class Game
         if (lot.owner is null) potentialLotsForAuction.Add(k);
 
       int numColonyLots = 0;
-      int r = 0;// BMW rand.Next(10);
+      int r = rand.Next(10);
       if (r >= 8) numColonyLots = 2;
       else if (r >= 2) numColonyLots = 1;
       while (numColonyLots > 0 && potentialLotsForAuction.Count > 0)
@@ -689,7 +689,7 @@ class Game
         }
       }
 
-      p.used[ENERGY] -= Math.Min(amtEnergyNeeded, p.res[ENERGY]);
+      p.used[ENERGY] = Math.Min(amtEnergyNeeded, p.res[ENERGY]);
       p.res[ENERGY] -= p.used[ENERGY];
       p.spoiled[ENERGY] = p.res[ENERGY] / 4;
       p.res[ENERGY] -= p.spoiled[ENERGY];
@@ -702,8 +702,6 @@ class Game
 
       p.produced = new[] {0,0,0,0};
     }
-
-
 
     colonyEvent = PopRandom(possibleColonyEvents);
   

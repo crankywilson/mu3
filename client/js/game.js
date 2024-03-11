@@ -201,7 +201,8 @@ export let g =
   },
   readyToShowProduction: new Promise((_res, _rej) => {}),
   setProdReady: new Function(),
-
+  didProd: false,
+  
   /** @type {WebSocket} */ // @ts-ignore
   ws: null,
 
@@ -637,6 +638,8 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
   }
   else if (g.state == "PROD" || g.state == "SHOWLANDFORSALE")
   {
+    if (g.state == "PROD" && !g.didProd)
+      return;
     ui.msgblink.innerText = "";
     g.waitingForServerResponse = true;
     send(t.Continue());
