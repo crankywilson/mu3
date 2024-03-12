@@ -276,6 +276,9 @@ class Game
   {
     if (state == GameState.LANDGRANT)
     {
+      playerLotsForAuction = plLotsToAuction.ToList();
+      plLotsToAuction.Clear();
+
       List<LandLotID> potentialLotsForAuction = new();
       foreach (var (k,lot) in landlots)
         if (lot.owner is null) potentialLotsForAuction.Add(k);

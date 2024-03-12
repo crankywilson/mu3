@@ -448,6 +448,14 @@ partial class Game
 
           if (winner != colony)
           {
+            PlayerColor? originalOwner = landlots[currentLotForAuction].owner;
+            if (originalOwner != null)
+            {
+              foreach (Player p in players)
+                if (p.color == originalOwner)
+                  p.money += highestBuyPrice;
+            }
+
             landlots[currentLotForAuction].owner = winner.color;
             winner.money -= highestBuyPrice;
           }
