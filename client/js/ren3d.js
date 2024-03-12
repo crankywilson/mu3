@@ -1329,7 +1329,7 @@ export async function addProdUnits(keys)
 
     setPosForProdBox(mesh, getE(k), -getN(k), prodCounts[k]);
     
-    await sleep(140);
+    await sleep(80);
   }
 }
 

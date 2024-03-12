@@ -319,6 +319,8 @@ class Game
 
   public void AnnounceLandAuction()
   {
+   try
+   {
     auctionType = LAND;
 
     if (playerLotsForAuction.Count > 0)
@@ -334,7 +336,7 @@ class Game
     maxBid = minBid + 35 * 4;
 
     send(new CurrentAuction(auctionType, month, 
-        resPrice[auctionType], colony.res[auctionType]));
+        resPrice[LAND], 0));
 
     foreach (var p in players)
     {
@@ -343,6 +345,13 @@ class Game
     }
 
     send(new LotAuction(currentLotForAuction.e, currentLotForAuction.n));
+    auctionType = LAND;
+   }
+   catch (Exception e)
+   {
+    Console.WriteLine(e.Message);
+    Console.WriteLine(e.StackTrace);
+   }
   }
 
   public void UpdateGameState(GameState gs)
