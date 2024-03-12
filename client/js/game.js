@@ -589,8 +589,15 @@ export function mouseClick(/**@type {PointerEvent}*/ mouseEvent)
         return;
       }
 
-      if (g.me().mule != null)
+      let myMule = g.me().mule;
+      if (myMule != null)
       {
+        if (myMule.resOutfit < 0)
+        {
+          tempBlink("You must outfit the mule to install.");
+          return;
+        }
+        
         g.lloMaterial.color.set(llocolor(g.myColor)); 
         g.waitingForServerResponse = true;
         send(t.InstallMule(o.e, o.n));

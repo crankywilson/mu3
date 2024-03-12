@@ -11,7 +11,11 @@ record TimeUp (
   {
     p.send(this);
     p.mule = null;
+    p.dest = null;
+    p.x = 0;
+    p.z = 0;
     new Continue().OnRecv(p, g);
+    g.send(this);
   }
 }
 

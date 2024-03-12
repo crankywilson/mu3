@@ -382,6 +382,13 @@ export function CantinaResult(/**@type {t.CantinaResult}*/msg)
 export function TimeUp(/**@type {t.TimeUp}*/msg)
 {
   r.removePlayerAndMule(msg.pc);
+  let p = g.players[msg.pc];
+  if (p != null)
+  {
+    p.dest = null;
+    p.x = 0;
+    p.z = 0;
+  }
 }
 
 export function ShowWaiting(/**@type {t.ShowWaiting}*/msg)
@@ -514,14 +521,19 @@ export function PreAuctionStat(/**@type {t.PreAuctionStat}*/ msg)
   else ui.bsb(msg.pc).checked = true;
 }
 
+let currentAuctionIsLand = false;
+
 export function CurrentAuction(/**@type {t.CurrentAuction}*/ msg)
 {
+  currentAuctionIsLand = (msg.auctionType == 4);
+
   if (msg.auctionType == 0) ui.aname.innerText = "FOOD Auction";
   if (msg.auctionType == 1) ui.aname.innerText = "ENERGY Auction";
   if (msg.auctionType == 2) ui.aname.innerText = "SMITHORE Auction";
   if (msg.auctionType == 3) ui.aname.innerText = "CRYSTITE Auction";
   if (msg.auctionType == 4) 
   {
+    currentAuctionIsLand = true;
     ui.aname.innerText = "LAND Auction";
     hide(ui.aucsell);
     hide(ui.aucbuy);
@@ -587,7 +599,7 @@ export function BuySell(/**@type {t.BuySell}*/msg)
     {
       ui.target.style.bottom = "5%";
       ui.aucbuy.style.visibility = "hidden";
-      ui.aucsell.style.visibility = g.auctionRes.length ? "inherit" : "hidden";
+      ui.aucsell.style.visibility = currentAuctionIsLand ? "hidden" : "inherit";
       g.buying = true;
       ui.targetval.innerText = "(Drag)";
     }
