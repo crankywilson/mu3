@@ -318,6 +318,22 @@ class UpdateBids : AuctionEvent {
 
 partial class Game
 {
+  void DetermineHighestAndLowestBids(out int lowestSellPrice, out int highestBuyPrice)
+  {
+    lowestSellPrice = colony.res[auctionType] > 0 ? maxBid : SELL;
+    highestBuyPrice = minBid == resPrice[auctionType] ? minBid : BUY;
+
+    foreach (Player p in players)
+    {
+      if (p == colony) continue;
+      if (p.buying)
+        highestBuyPrice = Math.Max(highestBuyPrice, p.current);
+      else
+        lowestSellPrice = Math.Min(lowestSellPrice, p.current);
+    }
+  }
+
+
   // param is typically an UpdateBids object which is used to schedule next
   // iteration...  this is also called with a Player object when a bid change
   // is received during trading which immediately ends the trade...  In this
@@ -332,8 +348,7 @@ partial class Game
         return;  // this should effectively end the loop for updBidsEvt
     }
 
-    int lowestSellPrice = colony.res[auctionType] > 0 ? maxBid : SELL;
-    int highestBuyPrice = minBid == resPrice[auctionType] ? minBid : BUY;
+    DetermineHighestAndLowestBids(out int lowestSellPrice, out int highestBuyPrice);
 
     bidChangeThisCycle = false;
 
@@ -352,6 +367,9 @@ partial class Game
         if (!p.buying && p.current > maxBid)
           p.current = SELL;
 
+        if (p.buying && p.current > lowestSellPrice)
+          p.current = lowestSellPrice;
+
         bidChangeThisCycle = true;
       }
       else if (p.current > p.target && !skip)
@@ -366,32 +384,26 @@ partial class Game
         if (p.buying && p.current < minBid)
           p.current = BUY;
 
+        if (!p.buying && p.current < highestBuyPrice)
+          p.current = highestBuyPrice;
+
         bidChangeThisCycle = true;
       }
 
       if (p.buying && p.current > p.money) p.current = p.money >= minBid ? p.money : BUY;
       if (!p.buying && p.res[auctionType] <= 0) p.current = SELL;
-      if (p.buying && p.current > highestBuyPrice) highestBuyPrice = p.current;
-      if (!p.buying && p.current < lowestSellPrice) lowestSellPrice = p.current;
     }
 
-    // now adjust to make sure buyers didn't outbid sellers
-    // for the following case, meet in the middle
-    if (highestBuyPrice == lowestSellPrice + (bidIncrement * 2))
+    DetermineHighestAndLowestBids(out lowestSellPrice, out highestBuyPrice);
+    if (highestBuyPrice > lowestSellPrice )
     {
-      highestBuyPrice--;
-      lowestSellPrice++;
-    }
-    // otherwise, favor the seller
-    else if (highestBuyPrice > lowestSellPrice)
-    {
-      lowestSellPrice = highestBuyPrice;
-    }
-
-    foreach (Player p in players)
-    {
-      if (p.buying && p.current > highestBuyPrice) p.current = highestBuyPrice;
-      if (!p.buying && p.current < lowestSellPrice) p.current = lowestSellPrice;
+      highestBuyPrice = lowestSellPrice;
+      foreach (Player p in players)
+      {
+        if (p == colony) continue;
+        if (p.buying && p.current > highestBuyPrice)
+          p.current = highestBuyPrice;
+      }
     }
 
     if (highestBuyPrice > maxBid)
