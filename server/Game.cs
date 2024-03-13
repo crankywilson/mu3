@@ -16,7 +16,8 @@ enum GameState {
   /*GS*/ IMPROVE                ,
   /*GS*/ PROD                   ,
   /*GS*/ AUCTIONPREP            ,
-  /*GS*/ AUCTION                
+  /*GS*/ AUCTION                ,
+  /*GS*/ END
 }
 
 partial
@@ -37,6 +38,8 @@ class Game
   List<int> possibleGoodPlayerEvents = Enumerable.Range(0, 13).ToList();
   List<int> possibleBadPlayerEvents  = Enumerable.Range(13, 9).ToList();
   
+  public List<int>[] tradePrices = [new(75),new(75),new(100),new(150)];
+
   public int colonyEvent = -1;
 
   public bool started = true;     // this gets set to false when created on web, but is true by default for deserialization
@@ -316,7 +319,7 @@ class Game
     {
       if (p.res[FOOD] >= fullFood) pct = 100;
       else pct = 100 * (p.res[FOOD] + 1) / (fullFood + 1);
-      send(new StartTimer(pct, 30000));
+      send(new StartTimer(pct, 45000));
     }
   }
 
@@ -369,20 +372,113 @@ class Game
     }  
   }
   
+  void BuildMules()
+  {
+    while (mules < 14 && colony.res[SMITHORE] > 2)
+    {
+      mules++;
+      colony.res[SMITHORE] -= 2;
+    }
+  }
+  
+  int Avg(List<int> l)
+  {
+    int sum = 0;
+    foreach(int i in l) sum += i;
+    return sum/l.Count;
+  }
+
+  void UpdateResPrices()
+  {
+    mulePrice = (resPrice[SMITHORE] * 2) + 10;
+    mulePrice = ((int)Math.Ceiling(mulePrice / 10.0))*10;
+    if (mules < 5)
+      mulePrice += 50;
+
+    for (int res=FOOD; res<CRYSTITE; res++)
+    {
+      if (tradePrices[res].Count == 0)
+        resPrice[res] = (int)Math.Ceiling(resPrice[res] * 1.15);
+      else
+      {
+        int avg = Avg(tradePrices[res]);
+
+        if (avg < resPrice[res] + 5)
+          resPrice[res] -= tradePrices[res].Count;
+
+        else if (avg > resPrice[res] + 20)
+          resPrice[res] = avg + (tradePrices[res].Count * 2);
+      }
+
+      if (colony.res[res] == 0)
+        resPrice[res] = (int)Math.Ceiling(resPrice[res] * 1.15);
+
+      tradePrices[res].Clear();
+    }
+
+    resPrice[FOOD] = Math.Max(resPrice[FOOD], 15);
+    resPrice[ENERGY] = Math.Max(resPrice[ENERGY], 10);
+    resPrice[SMITHORE] = Math.Max(resPrice[SMITHORE], 45);
+    tradePrices[CRYSTITE].Clear();
+ 
+    int r = rand.Next(200);
+    if (r < 40) r += 40;
+
+    resPrice[CRYSTITE] = r;
+  }
+
+  void StartNextMonth()
+  {
+    month++;
+
+    UpdateScores();
+    if (month < 13)
+      UpdateGameState(GameState.SCORE);
+    send(new CurrentGameState(this));
+
+    if (month > 12)
+    {
+      UpdateGameState(GameState.END);
+      int colonyScore = 0;
+      foreach (Player p in players)
+      {
+        if (p == colony) continue;
+        colonyScore += p.score;
+      }
+      int scoreKey = 0;
+      foreach (int k in et.Keys)
+        if (colonyScore >= k) scoreKey = k;
+
+      send(new EndMsg(et[scoreKey]));
+    }
+    else
+    {
+      List<string> resourceShortages = new();
+      if (colony.res[FOOD] == 0) resourceShortages.Add("food");
+      if (colony.res[ENERGY] == 0) resourceShortages.Add("energy");
+      if (colony.res[SMITHORE] < 2) resourceShortages.Add("smithore");
+      if (resourceShortages.Count > 0)
+      {
+        string resList = resourceShortages[0];
+        if (resourceShortages.Count == 2)
+          resList += " and " + resourceShortages[1];
+        else if (resourceShortages.Count > 2)
+          resList = "food, energy, and smithore";
+
+        send(new ShortageMsg("The colony has a shortage of " + resList + "!"));
+      }
+      BuildMules();
+      UpdateResPrices();
+      send(new MulesBuilt(mules, mulePrice));
+    }
+  }
+
   public void StartNextAuctionPrep()
   {
     if (auctionType == CRYSTITE)
     {
       auctionType = NONE;
-      month++;
-      if (month == 13)
-      {
-        /* do end game stuff here */
-      }
-
-      UpdateScores();
-      UpdateGameState(GameState.SCORE);
-      send(new CurrentGameState(this));
+      StartNextMonth();
       return;
     }
 
@@ -566,6 +662,9 @@ class Game
     colony.color = PlayerColor.COLONY;
     colony.rank = 0;
     colony.money = int.MaxValue / 2;
+    colony.res[FOOD] = 8;
+    colony.res[ENERGY] = 8;
+    colony.res[SMITHORE] = 8;
     started = true;
     UpdateScores();
     state = GameState.SCORE;
@@ -654,6 +753,46 @@ class Game
     return -1;
   }
 
+  bool sameLot(int e, int n, LandLot ll)
+  {
+    LandLotID k = new(e,n);
+    if (landlots.TryGetValue(k, out LandLot? llcomp))
+      return llcomp.owner == ll.owner && llcomp.res == ll.res;
+
+    return false;
+  }
+
+  int GetProdValue(LandLotID k, LandLot ll)
+  {
+    int v = 0;
+    switch (ll.res) {
+     case FOOD: if (k.e == 0) v = 4; else if (ll.mNum == 0) v = 2; else v = 1; break;
+     case ENERGY: if (k.e == 0) v = 2; else if (ll.mNum == 0) v = 3; else v = 1; break;
+     case SMITHORE: v = ll.mNum + 1; break;
+     case CRYSTITE: v = ll.crys; break;
+    }
+
+    if (sameLot(k.e+1, k.n, ll)) v += 1;
+    if (sameLot(k.e-1, k.n, ll)) v += 1;
+    if (sameLot(k.e, k.n+1, ll)) v += 1;
+    if (sameLot(k.e, k.n-1, ll)) v += 1;
+
+    int totalNumLotsOutfittedSame = 0;
+    foreach (var llcomp in landlots.Values)
+      if (llcomp.owner == ll.owner && llcomp.res == ll.res)
+        totalNumLotsOutfittedSame++;
+    
+    v += totalNumLotsOutfittedSame/3;
+
+    int r = rand.Next(7);
+    if (r == 0) v-=2;
+    if (r == 1) v-=1;
+    if (r == 5) v+=1;
+    if (r == 6) v+=2;
+
+    return v;
+  }
+
   public void DoProduction()
   {
     const int QUAKE = 0;
@@ -721,7 +860,7 @@ class Game
   
     string fullMsg = "";
     string? lotKey = null;
-    int rainRow = -3;
+    //int rainRow = -3;
 
     if (colonyEvent > -1)
       fullMsg = ce[colonyEvent];
@@ -754,17 +893,22 @@ class Game
       Player? p = Get(pair.Value.owner ?? PlayerColor.NONE);
       if (p != null && res > -1)
       {      
-        int numResProduced = 8;
+        int numResProduced = GetProdValue(k, pair.Value);
         if (colonyEvent == RAIN)
         {
-          if (pair.Key.n == rainRow) {}
+          if (res == FOOD) numResProduced += 3;
+          if (res == ENERGY) numResProduced -= 2;
         }
-        if (colonyEvent == SUNSPOT)
+        if (colonyEvent == SUNSPOT && res == ENERGY)
         {
+          numResProduced += 3;
         }
-        if (colonyEvent == QUAKE)
+        if (colonyEvent == QUAKE && (res == SMITHORE || res == CRYSTITE))
         {
+          numResProduced /= 2;
         }
+        if (numResProduced > 8) numResProduced = 8;
+        
         for (int i=0; i<numResProduced; i++) rkeys.Add(pair.Key.str());
 
         bool thisWasPestAttack = (colonyEvent == PEST) && (k.str() == lotKey);

@@ -70,6 +70,15 @@ record CurrentGameState (
   Game g
 ) : Msg;
 
+record ShortageMsg (
+  string msg
+) : Msg;
+
+record MulesBuilt (
+  int num,
+  int price
+) : Msg;
+
 record PlayerRejoined (
   Player p
 ) : Msg;
@@ -126,4 +135,8 @@ record ColonyEvent (
 
 record Production (
   string[] lotKeys
+) : Msg;
+
+record EndMsg (
+  string msg
 ) : Msg;

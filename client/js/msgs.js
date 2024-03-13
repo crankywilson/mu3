@@ -232,6 +232,12 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   }
 }
 
+export function MulesBuilt(/**@type {t.MulesBuilt}*/ msg)
+{
+  ui.mulecount.innerText = msg.num.toString();
+  ui.mulecost.innerText = msg.price.toString();
+}
+
 export function MuleObtained(/**@type {t.MuleObtained}*/ msg)
 {
   g.doLandMark = false;
@@ -870,6 +876,16 @@ export function LotAuction(/**@type {t.LotAuction}*/ l)
   g.landlotOverlay.position.z = l.n * -4;
   g.landlotOverlay.visible = true;
   hide(ui.aucdone);
+}
+
+export function ShortageMsg(/**@type {t.ShortageMsg}*/ m)
+{
+  ui.msg.innerText += ' ' + m.msg;
+}
+
+export function EndMsg(/**@type {t.EndMsg}*/ m)
+{
+  ui.msg.innerText = m.msg;
 }
 
 

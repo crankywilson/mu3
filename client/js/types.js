@@ -20,6 +20,15 @@
  @property {Game} g
  @property {string} _mt
 
+@typedef ShortageMsg
+ @property {string} msg
+ @property {string} _mt
+
+@typedef MulesBuilt
+ @property {number} num
+ @property {number} price
+ @property {string} _mt
+
 @typedef PlayerRejoined
  @property {Player} p
  @property {string} _mt
@@ -64,6 +73,10 @@
 
 @typedef Production
  @property {string[]} lotKeys
+ @property {string} _mt
+
+@typedef EndMsg
+ @property {string} msg
  @property {string} _mt
 
 @typedef StartTimer
@@ -176,6 +189,7 @@
  @property {string} _mt
 
 @typedef Cantina
+ @property {number} pctTimeLeft
  @property {string} _mt
 
 @typedef CantinaResult
@@ -413,6 +427,7 @@
  'PROD'|
  'AUCTIONPREP'|
  'AUCTION'|
+ 'END'|
  '?')} GameState
 
 @typedef {Object.<string, LandLot>} LandLotDict
@@ -429,6 +444,7 @@ export let GAMESTATE = {
  PROD: "PROD",
  AUCTIONPREP: "AUCTIONPREP",
  AUCTION: "AUCTION",
+ END: "END",
  UNKNOWN: "?"
 }
 /**@returns {Continue}*/ export function Continue(
@@ -532,7 +548,9 @@ export let GAMESTATE = {
 };}
 
 /**@returns {Cantina}*/ export function Cantina(
-) { return { _mt: 'Cantina'};}
+ /**@type {number}*/ pctTimeLeft,
+) { return { _mt: 'Cantina' , pctTimeLeft: pctTimeLeft
+};}
 
 /**@returns {Assay}*/ export function Assay(
  /**@type {number}*/ e,

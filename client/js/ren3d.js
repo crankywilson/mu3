@@ -86,7 +86,10 @@ function nowInBottomBuilding()
 {
   if (currentOp == "Cantina")
   {
-    send(t.Cantina());
+    let now = Date.now();
+    let msRemaining = g.developStopTime - now;
+    let total = g.developStopTime - g.developStartTime;
+    send(t.Cantina(msRemaining/total));
     g.developStopTime = 0;
     g.developStartTime = 0;
     ui.time(g.myColor).style.visibility = "hidden";

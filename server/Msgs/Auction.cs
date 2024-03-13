@@ -150,6 +150,8 @@ record TradeConfirmed (
     t.buyer.res[g.auctionType] += 1;
     t.seller.res[g.auctionType] -= 1;
     
+    g.tradePrices[g.auctionType].Add(t.price);
+    
     g.send(new UnitsTraded(t.unitsTraded, new Res(t.buyer, g), new Res(t.seller, g)));
 
     string? sellerResetStr = null;

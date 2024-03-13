@@ -253,12 +253,14 @@ record MuleRemovedFromScene (
 }
 
 record Cantina (
+  double pctTimeLeft
 ) : Msg
 {
   public override void OnRecv(Player p, Game g)
   {
-    p.money += 100;
-    g.send(new CantinaResult(p.color, 100, p.money));
+    int winnings = (int)Math.Max(25, 200 * pctTimeLeft);
+    p.money += winnings;
+    g.send(new CantinaResult(p.color, winnings, p.money));
     new Continue().OnRecv(p,g);
   }
 }
