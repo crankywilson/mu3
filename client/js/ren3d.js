@@ -194,6 +194,8 @@ export async function switchCamView(/** @type {boolean?}*/ showSettlement=null)
   await g.init3DComplete;
 
   ui.msg.innerText = "";
+  if (!g.doAssayMark && !g.doLandMark)
+    ui.msgblink.innerText = "";
 
   if (showSettlement == null)
     camTargetIsSettlement = !camTargetIsSettlement;
@@ -618,8 +620,8 @@ export function settlementMouseMove(/**@type {number}*/x, /**@type {number}*/y)
     mat.color.set(0xcccccc);
     ui.msg.innerText = mat.name;
     ui.msg.style.backgroundColor = "rgba(255,255,255,.4)";
-    if (intersects[0].object.position.z > 0 && !g.doAssayMark && !g.doLandMark)
-      ui.msgblink.innerText = "";
+    //if (intersects[0].object.position.z > 0 && !g.doAssayMark && !g.doLandMark)
+    //  ui.msgblink.innerText = "";
     return mat.name;
   }
   else {
