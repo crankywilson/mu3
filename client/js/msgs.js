@@ -55,7 +55,7 @@ function showScores(/**@type {t.Player[]}*/ players, /**@type {number}*/ month)
     ui.plbox(p.color).style.left = lp + '%';
 
     let rank = (p.score == lastScore) ? lastRank : p.rank;
-    if (g.state == "SCORE")
+    if (g.state == "SCORE" || g.state == "END")
       setPlboxSpanText(p.color, BOTTOMSPAN, "Score: " + p.score + 
         "  (#" + rank + ")");
 
