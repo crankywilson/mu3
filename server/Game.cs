@@ -932,7 +932,7 @@ class Game
     }
 
     if (colonyEvent == FIRE)
-      colony.res = new[] {0,0,0,0}; 
+      colony.res = [0,0,0,0,0]; 
 
     var keyArray = rkeys.ToArray();
     rand.Shuffle(keyArray);

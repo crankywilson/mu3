@@ -1,5 +1,6 @@
 import { Vector3, Object3D, Camera, 
          AnimationMixer, MeshLambertMaterial } from "../three/Three.js";
+import { randInt } from "../three/math/MathUtils.js";
 import { g, send, LandLotStr, getE, getN } from "./game.js";
 import * as t from './types.js';
 /** @type {import('../three/Three.js')} */ //@ts-ignore
@@ -52,6 +53,7 @@ let poleMat = null;
 let poleMatWater = null;
 /** @type {Object.<string, Object3D>} */
 let riverHacks = {};
+
 
 const NSide = 1;
 const SSide = 2;
@@ -277,6 +279,7 @@ function rotateCameraX()
     g.camera.rotation.x = crxset;
     ui.sett.style.visibility = "visible";
     g.landlotOverlay.visible = false;
+    ui.wumpus.style.visibility = "hidden";
   }
   else 
   {
@@ -351,10 +354,12 @@ export async function SetupMounds()
       sphere.position.set(d[0],0,d[2]);
       sphere.scale.set(d[3], d[4], d[5]);
       sphere.rotation.y = d[1];
+      g.mounds.push(sphere);
       d.splice(0,6);
     }
   }
   g.mgPlaced = true;
+
 }
 
 export async function SyncLandGeom()
@@ -570,6 +575,8 @@ function render()
     g.setProdReady();
     g.shouldCallProdReady = false;
   }
+
+  handleWumpus(!moveCamComplete);
 
   rotateCameraX();
   animFlags(delta);
@@ -1417,3 +1424,76 @@ export async function Production(/**@type {t.Production}*/msg, /**@type {t.Colon
   ui.msgblink.innerText = 'Click anywhere to continue.';
   g.didProd = true;
 }
+
+
+function screenXY(/** @type {Vector3} */ obj){
+
+  var vector = obj.clone();
+  var windowWidth = window.innerWidth;
+
+  var widthHalf = (windowWidth/2);
+  var heightHalf = (window.innerHeight/2);
+
+  vector.project(g.camera);
+
+  vector.x = ( vector.x * widthHalf ) + widthHalf;
+  vector.y = - ( vector.y * heightHalf ) + heightHalf;
+  vector.z = 0;
+
+  return vector;
+
+}
+
+export function moveWumpusToMound(/** @type {Number} */ i)
+{
+  let v = screenXY(g.mounds[i].position);
+  ui.wumpus.style.left = (v.x - 10) + "px";
+  ui.wumpus.style.top = (v.y - 10) + "px";
+}
+
+function handleWumpus(/** @type {Boolean} */cameraMoving)
+{
+  if (g.state != "IMPROVE" || cameraMoving || g.camera.position.z != cpfar.z)
+  {
+    ui.wumpus.style.visibility = "hidden";
+    return;
+  }
+
+  if (g.wumpusCaught) return;
+  
+  if (g.nextWumpusHideTime > -1)
+  {
+    let now = Date.now();
+    if (g.nextWumpusHideTime > now) return;
+    /* else it is time to hide */
+    ui.wumpus.style.visibility = "hidden";
+    g.nextWumpusHideTime = -1;
+    g.nextWumpusAppearTime = 1000 + Math.floor(Math.random() * 5000) + now;
+    if ((Math.random() * 3) > 2)
+      g.wumpusMound = -1;
+    return;
+  }
+
+  if (g.wumpusMound < 0)
+  {
+    g.wumpusMound = Math.floor(Math.random() * g.mounds.length);
+    let m = g.mounds[g.wumpusMound];
+    let p = screenXY(m.position);
+    ui.wumpus.style.left = (p.x - 10) + "px";
+    ui.wumpus.style.top = (p.y - 10) + "px";
+  }
+
+  if (g.nextWumpusAppearTime > -1)
+  {
+    let now = Date.now();
+    if (g.nextWumpusAppearTime > now) return;
+    /* else it is time to show */
+    ui.wumpus.style.visibility = "visible";
+    g.nextWumpusAppearTime = -1;
+    g.nextWumpusHideTime = 300 + Math.floor(Math.random() * 1000) + now;
+    return;
+  }
+
+  g.nextWumpusAppearTime = 1000 + Math.floor(Math.random() * 5000) + Date.now();
+}
+

@@ -214,6 +214,11 @@
  @property {number} n
  @property {string} _mt
 
+@typedef WumpusCaught
+ @property {string} pc
+ @property {number} money
+ @property {string} _mt
+
 @typedef PreAuctionStat
  @property {string} pc
  @property {number} start
@@ -564,6 +569,13 @@ export let GAMESTATE = {
  /**@type {number}*/ n,
 ) { return { _mt: 'AuctionLot' , e: e
  , n: n
+};}
+
+/**@returns {WumpusCaught}*/ export function WumpusCaught(
+ /**@type {string}*/ pc,
+ /**@type {number}*/ money,
+) { return { _mt: 'WumpusCaught' , pc: pc
+ , money: money
 };}
 
 /**@returns {BuySell}*/ export function BuySell(

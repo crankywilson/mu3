@@ -299,4 +299,18 @@ record AuctionLot (
   }
 }
 
+record WumpusCaught (
+  PlayerColor pc,
+  int money
+) : Msg
+{
+  public override void OnRecv(Player p, Game g)
+  {
+    if (g.month < 5) p.money += 100;
+    else if (g.month < 9) p.money += 200;
+    else p.money += 300;
+    g.send(new WumpusCaught(p.color, p.money));
+  }
+}
+
 

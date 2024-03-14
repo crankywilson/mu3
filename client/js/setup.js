@@ -1,7 +1,7 @@
 
 import { g, ui, mark3DInitialized, send,
          mouseMove, mouseClick, LandLotStr,
-         beginSliding, stopSliding, slide
+         beginSliding, stopSliding, slide, WumpusClicked
        } from "./game.js";
 import * as t from "./types.js";
 import { initWS } from "./websock.js";
@@ -524,6 +524,7 @@ function setup()
   window.addEventListener('contextmenu', (e) => {e.preventDefault();}, false);
   ui.boardview.onpointermove = mouseMove;
   ui.boardview.onpointerdown = mouseClick;
+  ui.wumpus.onclick = WumpusClicked;
 
   setup3d();
   setupPending();

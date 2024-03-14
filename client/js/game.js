@@ -224,6 +224,13 @@ export let g =
   target: 0,
   curbid: 0,
   auctionRes: "",
+
+  /** @type {Object3D[]} */
+  mounds: [],
+  wumpusCaught: false,
+  nextWumpusAppearTime: -1,
+  nextWumpusHideTime: -1,
+  wumpusMound: -1  // compare mound[wumpusMound].position to player position if clicked on
 };
 
 export function send(/**@type {t.Msg}*/ msg)
@@ -251,6 +258,7 @@ export let ui =
   sett: div('sett'),
   mulecount: e('mulecount'),
   mulecost: e('mulecost'),
+  wumpus: e('wumpus'),
   aucbg: div('aucbg'),
   auc: div('auc'),
   aname: e('aname'),
@@ -728,4 +736,13 @@ export function slide(/**@type {PointerEvent}*/e)
   }
 }
 
-
+export function WumpusClicked()
+{
+  if (g.myModel().position.distanceTo(g.mounds[g.wumpusMound].position) < 2)
+  {
+    g.wumpusCaught = true;
+    ui.wumpus.style.visibility = "hidden";
+    send(t.WumpusCaught(g.myColor, -1));
+    ui.msg.innerText = 'You caught a wumpus!'; 
+  }
+}

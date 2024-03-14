@@ -192,6 +192,11 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
     let my = g.me();
     if (my.x > -2 && my.x < 2 && my.z > -2 && my.z < 2)
       r.switchCamView(true);
+
+    g.wumpusCaught = false;
+    g.nextWumpusAppearTime = -1;
+    g.nextWumpusHideTime = -1;
+    g.wumpusMound = -1; 
   }
 
   if (g.state == "PLAYEREVENT" || g.state == "PROD")
@@ -876,6 +881,11 @@ export function LotAuction(/**@type {t.LotAuction}*/ l)
   g.landlotOverlay.position.z = l.n * -4;
   g.landlotOverlay.visible = true;
   hide(ui.aucdone);
+}
+
+export function WumpusCaught(/**@type {t.WumpusCaught} */m)
+{
+  setPlboxSpanText(m.pc, MONEYSPAN, m.money);
 }
 
 export function ShortageMsg(/**@type {t.ShortageMsg}*/ m)
