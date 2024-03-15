@@ -24,7 +24,7 @@ partial
 class Game
 {
   [JsonInclude] public LandLotDict     landlots  = new();
-  [JsonInclude] public int             month     = 12;
+  [JsonInclude] public int             month     = 1;
   [JsonInclude] public string          name      = "(Unnamed)";
   [JsonInclude] public List<Player>    players   = new List<Player>();
   [JsonInclude] public Player          colony    = new Player();
