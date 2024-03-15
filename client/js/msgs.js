@@ -155,6 +155,9 @@ export function StartTimer(/**@type {t.StartTimer}*/ msg)
 
 export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
 {
+  g.state = msg.gs;
+  if (g.state == "END") return;
+
   for (let p in g.players)  // this include non-playing players, but it doesn't matter
   {
     let spans = ui.plbox(p).getElementsByTagName('span');
@@ -170,7 +173,7 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
       !ui.msgblink.innerText.includes("time"))
     ui.msgblink.innerText = "";
   g.waitingForServerResponse = false;
-  g.state = msg.gs;
+  
 
   for (let pi in g.players)
   {
@@ -210,6 +213,12 @@ export function UpdateGameState(/**@type {t.UpdateGameState}*/ msg)
   {
     ui.msg.innerText = "Development for month #" + month + " to begin...";
     ui.msgblink.innerText = 'Click anywhere to continue.';
+
+    // hack fix for early exit of land auction
+    let mat = g.landlotOverlay.material;
+    // @ts-ignore
+    mat.opacity =.5;
+    g.landlotOverlay.visible = false;
   }
 
   if (g.state.indexOf("AUCTION") >= 0)
@@ -880,7 +889,7 @@ export function LotAuction(/**@type {t.LotAuction}*/ l)
   g.landlotOverlay.position.x = l.e * 4;
   g.landlotOverlay.position.z = l.n * -4;
   g.landlotOverlay.visible = true;
-  hide(ui.aucdone);
+  //hide(ui.aucdone);
 }
 
 export function WumpusCaught(/**@type {t.WumpusCaught} */m)
@@ -896,6 +905,7 @@ export function ShortageMsg(/**@type {t.ShortageMsg}*/ m)
 export function EndMsg(/**@type {t.EndMsg}*/ m)
 {
   ui.msg.innerText = m.msg;
+  ui.msgblink.innerText = "Total Colony Score: " + m.colonyScore;
 }
 
 

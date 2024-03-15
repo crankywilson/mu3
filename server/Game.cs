@@ -24,7 +24,7 @@ partial
 class Game
 {
   [JsonInclude] public LandLotDict     landlots  = new();
-  [JsonInclude] public int             month     = 1;
+  [JsonInclude] public int             month     = 12;
   [JsonInclude] public string          name      = "(Unnamed)";
   [JsonInclude] public List<Player>    players   = new List<Player>();
   [JsonInclude] public Player          colony    = new Player();
@@ -432,13 +432,11 @@ class Game
     month++;
 
     UpdateScores();
-    if (month < 13)
-      UpdateGameState(GameState.SCORE);
+    UpdateGameState(GameState.SCORE);
     send(new CurrentGameState(this));
 
     if (month > 12)
     {
-      UpdateGameState(GameState.END);
       int colonyScore = 0;
       foreach (Player p in players)
       {
@@ -449,7 +447,8 @@ class Game
       foreach (int k in et.Keys)
         if (colonyScore >= k) scoreKey = k;
 
-      send(new EndMsg(et[scoreKey]));
+      send(new EndMsg(et[scoreKey], colonyScore));
+      UpdateGameState(GameState.END);
     }
     else
     {
@@ -475,6 +474,15 @@ class Game
 
   public void StartNextAuctionPrep()
   {
+    if (auctionType /* previous auction */ == ENERGY)
+    {
+      foreach (Player p in players)
+      {
+        if (p == colony) continue;
+        p.energyShort = (p.res[ENERGY] < AmtEnergyNeeded(p));
+      }
+    }
+
     if (auctionType == CRYSTITE)
     {
       auctionType = NONE;
@@ -803,6 +811,7 @@ class Game
     const int ASTEROID = 5;
     const int MULERAD = 6;
     const int PIRATES = 7;
+    const int SHIPRETURN = 8;
 
     List<LandLotID> lotsWithoutEnergy = new();
     int amtFoodNeeded = AmountFoodNeeded(month);
@@ -817,20 +826,20 @@ class Game
       p.spoiled[FOOD] = p.res[FOOD] / 2;
       p.res[FOOD] -= p.spoiled[FOOD];
 
-      List<LandLotID> nonEnergyLots = new();
-      int amtEnergyNeeded = 0;
-      foreach (var ll in landlots)
-      {
-        if (ll.Value.owner != p) continue;
-        if (ll.Value.res > -1 && ll.Value.res != ENERGY)
-        {
-          amtEnergyNeeded++;
-          if (p.energyShort) nonEnergyLots.Add(ll.Key);
-        }
-      }
+      int amtEnergyNeeded = AmtEnergyNeeded(p);
 
       if (p.energyShort)
       {
+        List<LandLotID> nonEnergyLots = new();
+        
+        foreach (var ll in landlots)
+        {
+          if (ll.Value.owner == p &&
+              ll.Value.res > -1 && 
+              ll.Value.res != ENERGY)
+                nonEnergyLots.Add(ll.Key);
+        }
+
         int shortage = amtEnergyNeeded - p.res[ENERGY];
         while (shortage > 0 && nonEnergyLots.Count > 0)
         {
@@ -857,7 +866,9 @@ class Game
     }
 
     colonyEvent = PopRandom(possibleColonyEvents);
-  
+    if (month >= 12)
+      colonyEvent = SHIPRETURN;
+
     string fullMsg = "";
     string? lotKey = null;
     //int rainRow = -3;
@@ -988,7 +999,8 @@ class Game
 /*4*/"A fire at the settlement destroys all colony-held goods!",             // 10% 2 times max
 /*5*/"An asteroid smashes into lot ?٬ making a new crystite deposit!",       // 10% 2 times max
 /*6*/"Space radiation destroys the MULE at lot ?!",                          // 10% 2 times max
-/*7*/"Space pirates steal all crystite!"};                                   // 10% 2 times max
+/*7*/"Space pirates steal all crystite!",                                    // 10% 2 times max
+/*8*/"A federation ship has returned to review the colony's performance"};
 
   Dictionary<int,string> et = new() {
   {0,      "Overall٬ the colony failed...dismally. The Federation debtors' prison is your new home!"},

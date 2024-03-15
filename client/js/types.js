@@ -77,6 +77,7 @@
 
 @typedef EndMsg
  @property {string} msg
+ @property {number} colonyScore
  @property {string} _mt
 
 @typedef StartTimer

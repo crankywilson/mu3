@@ -25,6 +25,10 @@ record Continue (
     g.send(new ShowWaiting(p.color));
     if (g.AllActivePlayersInSet(g.continueRecvd))
     {
+      // hack fix for land auction
+      if (g.state == GameState.AUCTION && g.auctionType == 4 /* LAND */)
+        g.state = GameState.LANDAUCTION;
+      
       g.continueRecvd.Clear();
       switch (g.state)
       {
@@ -52,7 +56,8 @@ record Continue (
           g.UpdateGameState(GameState.PROD); g.DoProduction(); break;
         case GameState.PROD:
         case GameState.AUCTION:
-          g.StartNextAuctionPrep(); break;
+          g.StartNextAuctionPrep(); 
+          break;
         case GameState.AUCTIONPREP:
           g.StartAuction(); break;
           
@@ -138,5 +143,6 @@ record Production (
 ) : Msg;
 
 record EndMsg (
-  string msg
+  string msg,
+  int colonyScore
 ) : Msg;

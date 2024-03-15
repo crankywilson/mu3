@@ -57,7 +57,7 @@ class Player
   public int[] spoiled     = new[]{ 0, 0, 0, 0 };
   public int[] produced    = new[]{ 0, 0, 0, 0 };
   
-  public bool  energyShort = false; // I think this should be calculated before dev
+  public bool  energyShort = false; // we'll set this after the acution
 
   public WebSocket? ws = null;
 
