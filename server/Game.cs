@@ -125,7 +125,7 @@ class Game
           longMsg = longMsg.Replace("?", m.ToString());
           break;
         case 4:
-          m = (rand.Next(1)+1)*25*p.res[FOOD];
+          m = (rand.Next(1)+1)*25*NumLots(p, FOOD);
           if (m <= 0) { p.plEvent = -1; continue; }
           shortMsg = $"+(₿) {m}";
           p.money += m;
@@ -201,10 +201,7 @@ class Game
         case 15: {
           m = ((int)(month/3)+1)*25;
           longMsg = longMsg.Replace("1?", m.ToString());
-          int n = 0;
-          foreach (var kv in landlots)
-            if (kv.Value.owner == p && kv.Value.res >= SMITHORE) n++;
-          m *= n;
+          m *= (NumLots(p, SMITHORE) + NumLots(p, CRYSTITE));
           if (m == 0 || m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
           shortMsg = $"-(₿) {m}";
@@ -213,10 +210,7 @@ class Game
         case 16: {
           m = ((int)(month/3)+1)*25;
           longMsg = longMsg.Replace("1?", m.ToString());
-          int n = 0;
-          foreach (var kv in landlots)
-            if (kv.Value.owner == p && kv.Value.res == ENERGY) n++;
-          m *= n;
+          m *= NumLots(p, ENERGY);
           if (m == 0 || m >= p.money) { p.plEvent = -1; continue; }
           p.money -= m;
           shortMsg = $"-(₿) {m}";
@@ -952,6 +946,14 @@ class Game
 
     send(new ColonyEvent(fullMsg, colonyEvent, lotKey, beforeProd));
     send(new Production(keyArray));
+  }
+
+  int NumLots(Player p, int r)
+  {
+    int n = 0;
+    foreach (var l in landlots.Values)
+      if (l.owner == p && l.res == r) n++;
+    return n;
   }
 
   public void send(Msg m)
