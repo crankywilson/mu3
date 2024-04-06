@@ -313,7 +313,7 @@ class Game
     {
       if (p.res[FOOD] >= fullFood) pct = 100;
       else pct = 100 * (p.res[FOOD] + 1) / (fullFood + 1);
-      send(new StartTimer(pct, 45000));
+      p.send(new StartTimer(pct, 45000));
     }
   }
 
