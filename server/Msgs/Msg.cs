@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 
-record Msg (
+public record Msg (
   string _mt
 ) 
 {

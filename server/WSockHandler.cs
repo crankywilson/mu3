@@ -5,7 +5,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 
-record struct ReceivedMsg(Player p, Msg msg);
+public record struct ReceivedMsg(Player p, Msg msg);
 
 static class WSockHandler
 {

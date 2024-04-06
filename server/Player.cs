@@ -5,10 +5,10 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]  // use string for JSON Serialization
-enum PlayerColor { R, Y, G, B, NONE, COLONY }  // COLONY is a hack for the asteroid event
-enum ResourceType { FOOD, ENERGY, SMITHORE, CRYSTITE }
+public enum PlayerColor { R, Y, G, B, NONE, COLONY }  // COLONY is a hack for the asteroid event
+public enum ResourceType { FOOD, ENERGY, SMITHORE, CRYSTITE }
 
-class Dest
+public class Dest
 {
   [JsonInclude] public double x = 0.0;
   [JsonInclude] public double z = 0.0;
@@ -16,7 +16,7 @@ class Dest
   public Dest(double x, double z, double spd) { this.x=x; this.z=z; this.spd=spd; }
 }
 
-class MuleData
+public class MuleData
 {
   [JsonInclude] public int     resOutfit = -1;
   [JsonInclude] public double  x         = 0.0;
@@ -29,7 +29,7 @@ class MuleData
 #pragma warning disable CS0660
 #pragma warning disable CS0661
 
-class Player
+public class Player
 {
   [JsonInclude] public string       name    = "";
   [JsonInclude] public string       ip      = "?";

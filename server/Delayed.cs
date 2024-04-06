@@ -1,4 +1,4 @@
-﻿class DelayedEvent
+﻿public class DelayedEvent
 {
   protected Task? t;
   protected CancellationTokenSource? cts;

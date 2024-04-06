@@ -14,6 +14,9 @@ WSockHandler.preGameQ = preGameQ;
 WSockHandler.httpListener = listener;
 _ = Task.Run(WSockHandler.AcceptConnections);
 
+
+DDebug.Start();
+
 Console.WriteLine("listening on " + listener.Prefixes.ElementAt(0));
 while (listener.IsListening)
 {

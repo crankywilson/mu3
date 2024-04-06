@@ -203,7 +203,7 @@ static class AuctionConstants {
   public const int SELL = 9999;
 };
 
-record ActiveTrade
+public record ActiveTrade
 (
   int tradeID,
   Player buyer,

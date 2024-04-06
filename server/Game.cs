@@ -6,7 +6,7 @@ using System.Threading.Channels;
 
 
 [JsonConverter(typeof(JsonStringEnumConverter))]  // use string for JSON Serialization
-enum GameState {  
+public enum GameState {  
   /*GS*/ WAITINGFORALLJOIN      ,
   /*GS*/ SCORE                  ,
   /*GS*/ LANDGRANT              ,
@@ -20,7 +20,7 @@ enum GameState {
   /*GS*/ END
 }
 
-partial
+public partial
 class Game
 {
   [JsonInclude] public LandLotDict     landlots  = new();

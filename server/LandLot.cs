@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 [JsonConverter(typeof(LandLotIDJsonConverter))]
-record struct LandLotID(int e, int n)
+public record struct LandLotID(int e, int n)
 {
  public string str()
  {
@@ -43,7 +43,7 @@ class LandLotIDJsonConverter : JsonConverter<LandLotID>
    { return LandLotID.FromString(reader.GetString()??"0000"); }
 }
 
-class LandLot
+public class LandLot
 {
   [JsonInclude] public PlayerColor? owner     = null;
   [JsonInclude] public int          mNum      = 0;        // number of mounds
@@ -52,7 +52,7 @@ class LandLot
   [JsonInclude] public int          res       = -1;       // resource being produced
 }
 
-class LandLotDict : Dictionary<LandLotID, LandLot>
+public class LandLotDict : Dictionary<LandLotID, LandLot>
 {
     new public LandLot this[LandLotID key]
     {
